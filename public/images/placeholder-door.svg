@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+  <rect width="600" height="450" fill="#f2e8db"/>
+  <rect x="220" y="60" width="160" height="330" rx="6" fill="#bd8a54"/>
+  <circle cx="355" cy="230" r="6" fill="#4a3020"/>
+  <text x="300" y="420" font-family="sans-serif" font-size="18" fill="#875a30" text-anchor="middle">Sakkab Doors</text>
+</svg>

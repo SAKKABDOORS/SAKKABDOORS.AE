@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Catalog",
+    "about": "About",
+    "contact": "Contact",
+    "careers": "Careers",
+    "cart": "Cart",
+    "whatsapp": "WhatsApp",
+    "contact_us_btn": "Contact Us"
+  },
+  "hero": {
+    "title": "SAKKAB",
+    "subtitle": "Pioneers in Real Estate Development and Innovative Solutions in UAE and Syria",
+    "cta_products": "Browse Catalog",
+    "cta_contact": "Contact Us"
+  },
+  "stats": {
+    "heading": "Why SAKKAB Group?",
+    "eyebrow": "Experience",
+    "years_value": "15",
+    "years_label": "Years Experience",
+    "projects_value": "500",
+    "projects_label": "Projects Completed",
+    "customers_value": "1000",
+    "customers_label": "Customers Satisfied"
+  },
+  "services": {
+    "eyebrow": "Our Services",
+    "heading": "We Do More Than Doors",
+    "aluminum": "Aluminum",
+    "doors": "Doors",
+    "real_estate": "Real Estate",
+    "wpc": "WPC"
+  },
+  "spotlight": {
+    "tagline": "Sakkab's high performance doors",
+    "shop_now": "Shop Now",
+    "details": "Details"
+  },
+  "quality": {
+    "eyebrow": "Real Estate, Aluminum, Doors",
+    "q1_title": "World-Class Quality",
+    "q1_body": "International standards in execution",
+    "q2_title": "Comprehensive Warranty",
+    "q2_body": "Warranty on all products and services",
+    "q3_title": "Continuous Innovation",
+    "q3_body": "Latest technologies and solutions"
+  },
+  "cta": {
+    "title": "Ready to Turn Your Vision into Reality?",
+    "subtitle": "Contact us now and start your project with SAKKAB Group",
+    "catalog": "Catalog",
+    "contact": "Contact Us"
+  },
+  "home": {
+    "featured": "Featured Products",
+    "categories": "Shop by Category",
+    "why_us": "Why Sakkab Doors?",
+    "why_1_title": "High Manufacturing Quality",
+    "why_1_body": "Genuine materials and precise finishing for doors that last for years.",
+    "why_2_title": "Fast Delivery & Installation",
+    "why_2_body": "A dedicated team delivering and installing across the UAE.",
+    "why_3_title": "Warranty & After-Sales Support",
+    "why_3_body": "Real product warranty with ongoing technical support after installation.",
+    "view_all": "View All Products"
+  },
+  "products": {
+    "title": "Catalog",
+    "eyebrow": "Browse The Collection",
+    "filter_category": "Category",
+    "filter_material": "Material",
+    "filter_price": "Price",
+    "all_categories": "All Categories",
+    "all_materials": "All Materials",
+    "sort": "Sort",
+    "sort_newest": "Newest",
+    "sort_price_asc": "Price: Low to High",
+    "sort_price_desc": "Price: High to Low",
+    "no_results": "No products match your search",
+    "material": {
+      "WPC": "WPC",
+      "UPVC": "UPVC",
+      "ALUMINUM": "Aluminum",
+      "STEEL": "Steel"
+    },
+    "in_stock": "In Stock",
+    "out_of_stock": "Out of Stock",
+    "view_details": "View Details",
+    "mode_retail": "Retail",
+    "mode_wholesale": "Wholesale",
+    "wholesale_price_note": "Price on request",
+    "request_quote": "Request a Quote",
+    "wholesale_quote_title": "Wholesale Quote Request",
+    "wholesale_quote_message": "Wholesale quote request\nProduct: {product}\nCompany name:\nQuantity needed:",
+    "wholesale_cancel": "Cancel"
+  },
+  "product": {
+    "price": "Price",
+    "material": "Material",
+    "category": "Category",
+    "quantity": "Quantity",
+    "order_now": "Order Now",
+    "ask_whatsapp": "Ask via WhatsApp",
+    "description": "Description",
+    "add_to_cart": "Add to Cart",
+    "added_to_cart": "Added ✓"
+  },
+  "realestate": {
+    "title": "Real Estate",
+    "eyebrow": "Explore Opportunities",
+    "filter_region": "Region",
+    "all_regions": "All Regions",
+    "no_results": "No properties match your search",
+    "region": "Region",
+    "price": "Price",
+    "description": "Description",
+    "ask_whatsapp": "Ask via WhatsApp",
+    "view_details": "View Details",
+    "call": "Call"
+  },
+  "careers": {
+    "eyebrow": "Join Us",
+    "title": "Careers",
+    "subtitle": "Looking for a new role at SAKKAB Group? Check our current openings and apply now",
+    "no_results": "No open positions right now — check back soon",
+    "location": "Location",
+    "apply_now": "Apply Now",
+    "cancel": "Cancel",
+    "apply_message": "Applying for"
+  },
+  "cart": {
+    "title": "Quote Cart",
+    "subtitle": "Add several products, then submit one quote request for all of them",
+    "empty": "Your cart is empty.",
+    "browse_catalog": "Browse Catalog",
+    "remove": "Remove",
+    "estimated_total": "Estimated Total"
+  },
+  "order_form": {
+    "title": "Send Your Order",
+    "subtitle": "Fill in the form and our team will reach out shortly",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "city": "City / Emirate",
+    "message": "Additional Details",
+    "submit": "Submit Order",
+    "submitting": "Submitting...",
+    "success": "Your order was received! We'll contact you shortly.",
+    "error": "Something went wrong sending your order. Please try again or reach us on WhatsApp."
+  },
+  "about": {
+    "title": "About Us",
+    "eyebrow": "SAKKAB Group",
+    "body": "SAKKAB Group is a pioneer in real estate development and innovative solutions across the UAE and Syria, specialized in manufacturing, supplying and installing WPC, UPVC and Aluminum doors to world-class quality standards. We serve individuals, contractors and commercial projects with high quality, comprehensive warranty and continuous innovation.",
+    "vision_eyebrow": "Our Vision",
+    "vision_body": "We aim to be the premier partner for developers and engineers, bringing world-class solutions to regional projects.",
+    "values_title": "Our Values",
+    "value_1": "Uncompromising Quality",
+    "value_2": "Innovation",
+    "value_3": "Sustainability",
+    "value_4": "Continuous Partnership & Trust"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "eyebrow": "We're Here to Help",
+    "address": "United Arab Emirates & Syria",
+    "phone": "Phone",
+    "email": "Email",
+    "form_title": "Leave a Message"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "quick_links": "Quick Links",
+    "contact_us": "Contact Us",
+    "locations_title": "Our Locations",
+    "location_ad": "UAE - Abu Dhabi",
+    "location_ad_address": "Mohammed Bin Zayed City, Popular 12",
+    "location_ain": "UAE - Al Ain",
+    "location_ain_address": "Al Noud Companies",
+    "location_sy": "Syria",
+    "location_sy_address": "Damascus - Sahnaya"
+  },
+  "chat": {
+    "button_label": "Ask Sakkab",
+    "panel_title": "Sakkab AI Assistant",
+    "panel_subtitle": "Answers your questions about our products and services",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "thinking": "Typing...",
+    "greeting": "Hi! I'm Sakkab's AI assistant — ask me about WPC, UPVC or Aluminum doors, or anything else.",
+    "disabled": "The AI assistant isn't enabled yet. Please reach us directly on WhatsApp.",
+    "error": "Something went wrong. Please try again or reach us on WhatsApp."
+  },
+  "admin": {
+    "login_title": "Admin Login",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "invalid_credentials": "Invalid credentials",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "orders": "Orders",
+    "ai": "AI Assistant",
+    "logout": "Logout",
+    "add_product": "Add Product",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "new_orders": "New Orders",
+    "total_products": "Total Products",
+    "no_orders": "No orders yet"
+  }
+}

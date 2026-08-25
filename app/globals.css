@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --font-sans / --font-arabic / --font-display-en are declared by
+   next/font/google (see lib/fonts.ts) via a className on <html> — not
+   redeclared here, so there's nothing in this file to fall out of sync
+   with the actual loaded fonts or to fight the cascade over. */
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-sage-50 text-ink-900 antialiased;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic);
+}
+
+[dir="ltr"] body {
+  font-family: var(--font-sans);
+}
+
+/* Consistent focus ring everywhere, including elements that don't already
+   define their own focus styles (links, cards, custom controls) — keeps
+   keyboard navigation feeling deliberate rather than accidental. */
+:focus-visible {
+  outline: 2px solid theme("colors.brand.400");
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background-color: theme("colors.brand.200");
+  color: theme("colors.brand.900");
+}
+
+/* Thin, brand-tinted scrollbar (Firefox + WebKit) instead of the default
+   system bar, so the chrome around the content feels considered too. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.brand.300") transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: theme("colors.brand.300");
+  border-radius: 9999px;
+  border: 2px solid theme("colors.brand.50");
+}
+
+.container-page {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Big-statement headline treatment (hero title, major section headings,
+   CTA) — Anton in LTR (no Arabic glyphs, so it can't be reused for RTL);
+   Cairo at its heaviest weight stands in for RTL instead of a second
+   display family. Tight tracking looks intentional on Anton's condensed
+   Latin caps but would break letter connections in Arabic script, so it's
+   reset to normal there along with the uppercase transform (a no-op on
+   Arabic glyphs, but explicit is clearer than relying on that). */
+.font-display {
+  font-family: var(--font-display-en);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+[dir="rtl"] .font-display {
+  font-family: var(--font-arabic);
+  font-weight: 900;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.3;
+}
+
+/* Slow, subtle background zoom for the hero photo — the same understated
+   cinematic cue used across premium hospitality/real-estate sites (Jumeirah,
+   Aldar, Emaar) to keep a static photo from feeling flat. 60s and a small
+   1.0->1.08 range so it's felt more than seen. */
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 60s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-zoom {
+    animation: none;
+  }
+}
+
+/* Full pill shape, uniform on every corner — every button in the product
+   shares this base — variants below only change fill/border/text. */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-bold transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none;
+}
+
+/* Primary — brand-900, the darkest green (SHOP NOW / contact us) */
+.btn-primary {
+  @apply btn bg-brand-900 text-white shadow-sm hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-md focus:ring-brand-400 active:translate-y-0 disabled:translate-y-0;
+}
+
+/* Secondary — light cream fill, dark green text (DETAILS / Catalog) */
+.btn-secondary {
+  @apply btn bg-sage-100 text-brand-900 hover:-translate-y-0.5 hover:bg-sage-200 hover:shadow-md focus:ring-brand-300 active:translate-y-0;
+}
+
+/* Outline button meant to sit on top of a dark/photo background (hero) —
+   brand-700 fill per the reference (not a translucent white outline). */
+.btn-outline-light {
+  @apply btn bg-brand-700 text-white shadow-sm hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-md focus:ring-white/70 focus:ring-offset-brand-900 active:translate-y-0;
+}
+
+/* Same ticket shape/system, smaller — category spotlight (Shop Now / Details) */
+.btn-pill-solid {
+  @apply btn bg-brand-900 px-6 py-2.5 text-white shadow-sm hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-md active:translate-y-0;
+}
+
+.btn-pill-outline {
+  @apply btn bg-sage-100 px-6 py-2.5 text-brand-900 hover:-translate-y-0.5 hover:bg-sage-200 active:translate-y-0;
+}
+
+.card {
+  @apply rounded-xl2 border border-brand-100 bg-white shadow-sm transition duration-200;
+}
+
+/* Same card, but for elements the user is meant to hover/click (product &
+   property cards, spotlight tiles) — a gentle lift instead of a flat swap
+   signals interactivity without feeling gimmicky. */
+.card-interactive {
+  @apply card hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg;
+}
+
+.input {
+  @apply w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-800/40 transition duration-150 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200;
+}
+
+.label {
+  @apply mb-1 block text-sm font-medium text-ink-800;
+}
+
+/* Small uppercase eyebrow tag used above section headings for a more
+   editorial, "designed" feel instead of a heading floating on its own. */
+.eyebrow {
+  @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-600;
+}
+
+/* Semantic status pills (order status, stock, etc.) — the brand/sage/sand
+   scales are all neutral/green-adjacent by design and have no room for a
+   legible danger/warning/success meaning, so these formalize the red/amber/
+   emerald shades already used ad hoc across the codebase (delete buttons,
+   stock badges) instead of inventing new off-palette colors. */
+.badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+}
+.badge-neutral {
+  @apply badge bg-brand-100 text-brand-700;
+}
+.badge-warning {
+  @apply badge bg-amber-100 text-amber-800;
+}
+.badge-success {
+  @apply badge bg-emerald-100 text-emerald-700;
+}
+.badge-danger {
+  @apply badge bg-red-100 text-red-700;
+}
