@@ -8,15 +8,29 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-// NOTE: temporarily using String instead of enum + removing @db.Text below
-// because SQLite (used only for local preview here) doesn't support Prisma
-// enums or MySQL native types. Production schema uses mysql + enum + @db.Text.
-// enum Material { WPC UPVC ALUMINUM STEEL }
-// enum OrderStatus { NEW CONTACTED CONFIRMED CANCELLED }
+enum Material {
+  WPC
+  UPVC
+  ALUMINUM
+  STEEL
+}
+
+enum OrderStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  CANCELLED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  MANAGER
+  EMPLOYEE
+}
 
 model Category {
   id            String    @id @default(cuid())
@@ -27,8 +41,8 @@ model Category {
   // doors blocks). Optional so extra categories can be added later without copy.
   taglineAr     String?
   taglineEn     String?
-  descriptionAr String?
-  descriptionEn String?
+  descriptionAr String?  @db.Text
+  descriptionEn String?  @db.Text
   heroImage     String?
   products      Product[]
   createdAt     DateTime  @default(now())
@@ -39,9 +53,9 @@ model Product {
   slug          String         @unique
   nameAr        String
   nameEn        String
-  descriptionAr String
-  descriptionEn String
-  material      String         @default("WPC")
+  descriptionAr String         @db.Text
+  descriptionEn String         @db.Text
+  material      Material       @default(WPC)
   price         Float
   currency      String         @default("AED")
   inStock       Boolean        @default(true)
@@ -77,8 +91,8 @@ model Order {
   phone        String
   email        String?
   city         String?
-  message      String?
-  status       String      @default("NEW")
+  message      String?     @db.Text
+  status       OrderStatus @default(NEW)
   emailedOk    Boolean     @default(false)
   items        OrderItem[]
   createdAt    DateTime    @default(now())
@@ -105,8 +119,8 @@ model Property {
   slug          String          @unique
   titleAr       String
   titleEn       String
-  descriptionAr String
-  descriptionEn String
+  descriptionAr String          @db.Text
+  descriptionEn String          @db.Text
   price         Float
   currency      String          @default("AED")
   regionAr      String
@@ -141,15 +155,12 @@ model Job {
   createdAt     DateTime @default(now())
 }
 
-// NOTE: role is a plain String in sqlite dev mode (see the Material/
-// OrderStatus toggle note above) — becomes `enum AdminRole { SUPER_ADMIN
-// MANAGER EMPLOYEE }` in the mysql production schema.
 model Admin {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String    @id @default(cuid())
+  username     String    @unique
   passwordHash String
-  role         String   @default("EMPLOYEE")
-  createdAt    DateTime @default(now())
+  role         AdminRole @default(EMPLOYEE)
+  createdAt    DateTime  @default(now())
 }
 
 // --- AI assistant ("train it") -------------------------------------------
@@ -160,7 +171,7 @@ model KnowledgeEntry {
   id        String   @id @default(cuid())
   category  String   @default("general") // general | faq | policy | product
   title     String
-  content   String
+  content   String   @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -170,8 +181,8 @@ model KnowledgeEntry {
 // what people actually ask and turn gaps into new KnowledgeEntry rows.
 model ChatLog {
   id        String   @id @default(cuid())
-  question  String
-  answer    String
+  question  String   @db.Text
+  answer    String   @db.Text
   locale    String   @default("ar")
   createdAt DateTime @default(now())
 }
@@ -184,6 +195,6 @@ model ChatLog {
 model SiteSetting {
   id        String   @id @default(cuid())
   key       String   @unique
-  value     String
+  value     String   @db.Text
   updatedAt DateTime @updatedAt
 }

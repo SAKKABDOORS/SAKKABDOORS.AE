@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -6,6 +7,21 @@ import ProductFilters from "@/components/ProductFilters";
 import ProductCatalogView from "@/components/ProductCatalogView";
 import Reveal from "@/components/motion/Reveal";
 import type { Material } from "@/lib/types";
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const dict = await getDictionary(locale);
+  const description =
+    locale === "ar"
+      ? "تصفح كتالوج أبواب سكاب — WPC، UPVC، وألمنيوم — بأعلى معايير الجودة والتصميم."
+      : "Browse the SAKKAB door catalog — WPC, UPVC, and Aluminum — engineered to the highest quality and design standards.";
+  return {
+    title: dict.products.title,
+    description,
+    alternates: { languages: { ar: "/ar/products", en: "/en/products" } },
+    openGraph: { title: dict.products.title, description }
+  };
+}
 
 export default async function ProductsPage({
   params,

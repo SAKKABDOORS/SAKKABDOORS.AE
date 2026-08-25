@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { Award, Handshake, Leaf, Sparkles } from "lucide-react";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import Reveal from "@/components/motion/Reveal";
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const dict = await getDictionary(locale);
+  return {
+    title: dict.about.title,
+    description: dict.about.body,
+    alternates: { languages: { ar: "/ar/about", en: "/en/about" } },
+    openGraph: { title: dict.about.title, description: dict.about.body }
+  };
+}
 
 export default async function AboutPage({
   params

@@ -22,7 +22,7 @@ export default async function HomePage({
   if (!isLocale(params.locale)) notFound();
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
-  const { hero, stats, services, quality, cta } = await getAllSiteSettings();
+  const { hero, stats, services, quality, cta, footer } = await getAllSiteSettings();
 
   const categories = await prisma.category.findMany({
     where: { slug: { in: SPOTLIGHT_ORDER } }
@@ -31,8 +31,35 @@ export default async function HomePage({
     categories.find((c) => c.slug === slug)
   ).filter((c): c is (typeof categories)[number] => Boolean(c));
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
+  // Organization structured data — helps Google surface a knowledge-panel-
+  // style entry (logo, contact points, branches) instead of a bare link.
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "SAKKAB",
+    url: siteUrl,
+    logo: `${siteUrl}/images/logo-mark.png`,
+    email: footer.email,
+    contactPoint: footer.locations.map((loc) => ({
+      "@type": "ContactPoint",
+      telephone: `+${loc.phone}`,
+      contactType: "sales",
+      areaServed: loc.name[locale]
+    })),
+    address: footer.locations.map((loc) => ({
+      "@type": "PostalAddress",
+      streetAddress: loc.address[locale],
+      addressLocality: loc.name[locale]
+    }))
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <Hero dict={dict} locale={locale} content={hero} />
       <StatsBar locale={locale} content={stats} />
       <ServicesGrid locale={locale} content={services} />

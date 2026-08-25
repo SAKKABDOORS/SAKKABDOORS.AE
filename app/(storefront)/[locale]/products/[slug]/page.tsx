@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getDictionary, type Dictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -10,6 +11,45 @@ import ProductGallery from "@/components/ProductGallery";
 import ProductFilters from "@/components/ProductFilters";
 import ProductCatalogView from "@/components/ProductCatalogView";
 import Reveal from "@/components/motion/Reveal";
+
+// Same slug-is-a-category-or-a-product branch as the page component below —
+// this route serves both, so its metadata has to check the same way.
+export async function generateMetadata({
+  params
+}: {
+  params: { locale: string; slug: string };
+}): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const path = `/products/${params.slug}`;
+
+  const category = await prisma.category.findUnique({ where: { slug: params.slug } });
+  if (category) {
+    const name = locale === "ar" ? category.nameAr : category.nameEn;
+    const description =
+      (locale === "ar" ? category.descriptionAr : category.descriptionEn) ??
+      (locale === "ar" ? category.taglineAr : category.taglineEn) ??
+      name;
+    return {
+      title: name,
+      description,
+      alternates: { languages: { ar: `/ar${path}`, en: `/en${path}` } },
+      openGraph: { title: name, description, images: category.heroImage ? [category.heroImage] : undefined }
+    };
+  }
+
+  const product = await prisma.product.findUnique({ where: { slug: params.slug }, include: { images: true } });
+  if (!product) return {};
+
+  const name = locale === "ar" ? product.nameAr : product.nameEn;
+  const description = locale === "ar" ? product.descriptionAr : product.descriptionEn;
+  const image = product.images[0]?.url;
+  return {
+    title: name,
+    description,
+    alternates: { languages: { ar: `/ar${path}`, en: `/en${path}` } },
+    openGraph: { title: name, description, images: image ? [image] : undefined }
+  };
+}
 
 // This single [slug] segment serves two purposes so /products/wpc-doors (a
 // category) and /products/wpc-classic-entry-door (a product) can both live

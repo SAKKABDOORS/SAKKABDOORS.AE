@@ -23,9 +23,35 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = isLocale(params.locale) ? params.locale : "ar";
   const dict = await getDictionary(locale);
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Sakkab Doors";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
+  const ogLocale = locale === "ar" ? "ar_AE" : "en_AE";
+  const altOgLocale = locale === "ar" ? "en_AE" : "ar_AE";
+
   return {
-    title: `${process.env.NEXT_PUBLIC_SITE_NAME ?? "Sakkab Doors"} | ${dict.hero.title}`,
-    description: dict.hero.subtitle
+    metadataBase: new URL(siteUrl),
+    // Individual pages set just their own short title (e.g. "الكتالوج") and
+    // this template appends the site name automatically — see products/page.tsx
+    // etc. for the pattern.
+    title: { default: `${siteName} | ${dict.hero.title}`, template: `%s | ${siteName}` },
+    description: dict.hero.subtitle,
+    alternates: {
+      languages: { ar: "/ar", en: "/en" }
+    },
+    openGraph: {
+      type: "website",
+      siteName,
+      title: dict.hero.title,
+      description: dict.hero.subtitle,
+      locale: ogLocale,
+      alternateLocale: altOgLocale,
+      url: `/${locale}`
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.hero.title,
+      description: dict.hero.subtitle
+    }
   };
 }
 

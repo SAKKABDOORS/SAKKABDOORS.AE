@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -5,6 +6,28 @@ import { notFound } from "next/navigation";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import OrderForm from "@/components/OrderForm";
 import ProductGallery from "@/components/ProductGallery";
+
+export async function generateMetadata({
+  params
+}: {
+  params: { locale: string; slug: string };
+}): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const property = await prisma.property.findUnique({ where: { slug: params.slug }, include: { images: true } });
+  if (!property) return {};
+
+  const title = locale === "ar" ? property.titleAr : property.titleEn;
+  const description = locale === "ar" ? property.descriptionAr : property.descriptionEn;
+  const image = property.images[0]?.url;
+  const path = `/realestate/${params.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { languages: { ar: `/ar${path}`, en: `/en${path}` } },
+    openGraph: { title, description, images: image ? [image] : undefined }
+  };
+}
 
 export default async function PropertyDetailPage({
   params

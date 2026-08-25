@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import CareersView from "@/components/CareersView";
 import Reveal from "@/components/motion/Reveal";
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const dict = await getDictionary(locale);
+  return {
+    title: dict.careers.title,
+    description: dict.careers.subtitle,
+    alternates: { languages: { ar: "/ar/careers", en: "/en/careers" } },
+    openGraph: { title: dict.careers.title, description: dict.careers.subtitle }
+  };
+}
 
 export default async function CareersPage({ params }: { params: { locale: string } }) {
   if (!isLocale(params.locale)) notFound();

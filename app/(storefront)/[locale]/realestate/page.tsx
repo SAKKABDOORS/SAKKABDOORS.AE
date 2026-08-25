@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -5,6 +6,21 @@ import { notFound } from "next/navigation";
 import RealEstateFilters from "@/components/RealEstateFilters";
 import PropertyCard from "@/components/PropertyCard";
 import Reveal from "@/components/motion/Reveal";
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const dict = await getDictionary(locale);
+  const description =
+    locale === "ar"
+      ? "استكشف فرص عقارية مختارة من مجموعة سكاب في الإمارات وسوريا — شقق وفلل وأراضٍ بمناطق متعددة."
+      : "Explore curated real estate opportunities from SAKKAB Group across the UAE and Syria — apartments, villas, and land across multiple regions.";
+  return {
+    title: dict.realestate.title,
+    description,
+    alternates: { languages: { ar: "/ar/realestate", en: "/en/realestate" } },
+    openGraph: { title: dict.realestate.title, description }
+  };
+}
 
 export default async function RealEstatePage({
   params,

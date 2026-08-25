@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { Material, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { SITE_SETTING_DEFAULTS } from "../lib/siteContent";
 
@@ -67,7 +67,7 @@ async function main() {
       descriptionAr: "باب WPC فاخر بتشطيب خشبي طبيعي المظهر، مقاوم تماماً للرطوبة والعوامل الجوية، مثالي للمداخل الرئيسية.",
       descriptionEn: "Premium WPC door with a natural wood-look finish, fully moisture and weather resistant — ideal for main entrances.",
       categoryId: wpc.id,
-      material: "WPC",
+      material: Material.WPC,
       price: 2400,
       featured: true,
       images: ["https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200"]
@@ -79,7 +79,7 @@ async function main() {
       descriptionAr: "تصميم عصري بخطوط نظيفة وطبقة حماية UV، يحافظ على لونه لسنوات طويلة تحت شمس الإمارات.",
       descriptionEn: "Modern clean-line design with UV-protective coating, keeping its color for years under UAE sun.",
       categoryId: wpc.id,
-      material: "WPC",
+      material: Material.WPC,
       price: 2750,
       featured: false,
       images: ["https://images.unsplash.com/photo-1567016432779-094069958ea5?w=1200"]
@@ -91,7 +91,7 @@ async function main() {
       descriptionAr: "عزل حراري وصوتي ممتاز، خفيف الوزن وسهل الصيانة، خيار اقتصادي وذكي للمنازل والمكاتب.",
       descriptionEn: "Excellent thermal and acoustic insulation, lightweight and low-maintenance — a smart, cost-effective choice for homes and offices.",
       categoryId: upvc.id,
-      material: "UPVC",
+      material: Material.UPVC,
       price: 1450,
       featured: true,
       images: ["https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200"]
@@ -103,7 +103,7 @@ async function main() {
       descriptionAr: "باب سحّاب أنيق يوفر مساحة أكبر ورؤية بانورامية، مقاوم للاستخدام اليومي المكثف.",
       descriptionEn: "Elegant sliding door that maximizes space and view, built to withstand heavy daily use.",
       categoryId: upvc.id,
-      material: "UPVC",
+      material: Material.UPVC,
       price: 1980,
       featured: false,
       images: ["https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?w=1200"]
@@ -115,7 +115,7 @@ async function main() {
       descriptionAr: "باب ألمنيوم ثقيل مقاوم للاختراق بمتعدد نقاط قفل، مناسب للمداخل الرئيسية والمشاريع التجارية.",
       descriptionEn: "Heavy-duty impact-resistant aluminum door with multi-point locking, ideal for main entrances and commercial projects.",
       categoryId: aluminum.id,
-      material: "ALUMINUM",
+      material: Material.ALUMINUM,
       price: 4200,
       featured: true,
       images: ["https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200"]
@@ -127,7 +127,7 @@ async function main() {
       descriptionAr: "تصميم معماري مميز بطلاء إلكتروستاتيك، يجمع بين القوة والهيبة الجمالية لواجهات العقارات الفاخرة.",
       descriptionEn: "Distinctive architectural design with electrostatic coating, combining strength with aesthetic prestige for premium property facades.",
       categoryId: aluminum.id,
-      material: "ALUMINUM",
+      material: Material.ALUMINUM,
       price: 5100,
       featured: false,
       images: ["https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=1200"]

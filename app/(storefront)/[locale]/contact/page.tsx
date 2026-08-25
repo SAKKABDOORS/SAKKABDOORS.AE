@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Mail, MapPin } from "lucide-react";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -5,6 +6,21 @@ import { notFound } from "next/navigation";
 import OrderForm from "@/components/OrderForm";
 import Reveal from "@/components/motion/Reveal";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
+
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : "ar";
+  const dict = await getDictionary(locale);
+  const description =
+    locale === "ar"
+      ? "تواصل مع مجموعة سكاب لأي استفسار عن الأبواب أو العقارات — عبر واتساب أو نموذج الطلب."
+      : "Get in touch with SAKKAB Group for any question about our doors or real estate — via WhatsApp or the inquiry form.";
+  return {
+    title: dict.contact.title,
+    description,
+    alternates: { languages: { ar: "/ar/contact", en: "/en/contact" } },
+    openGraph: { title: dict.contact.title, description }
+  };
+}
 
 export default async function ContactPage({
   params
