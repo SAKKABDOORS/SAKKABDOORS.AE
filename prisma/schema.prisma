@@ -1,14 +1,16 @@
 // Sakkab Doors – Prisma schema
-// Production target: MySQL/MariaDB (standard on cPanel shared hosting).
-// For local development without a MySQL server, you can temporarily switch
-// provider to "sqlite" and DATABASE_URL to "file:./dev.db" — see README.
+// Production target: PostgreSQL (Neon, via Vercel's marketplace integration
+// — the cPanel host has no Node.js/remote-MySQL support, so the app is
+// deployed on Vercel instead; see README).
+// For local development without a Postgres server, you can temporarily
+// switch provider to "sqlite" and DATABASE_URL to "file:./dev.db".
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
