@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminApi";
 
+export const dynamic = "force-dynamic";
+
 // Public: list properties (used by the /realestate storefront page's own
 // server-side Prisma query too, but exposed here the same way products are).
 export async function GET(request: NextRequest) {

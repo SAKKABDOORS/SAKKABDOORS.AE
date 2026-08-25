@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminApi";
 
+export const dynamic = "force-dynamic";
+
 // Public: list products (used by client-side widgets if needed; the
 // storefront pages themselves query Prisma directly on the server).
 export async function GET(request: NextRequest) {

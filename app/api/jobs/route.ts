@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminApi";
 
+export const dynamic = "force-dynamic";
+
 // Public: list job openings (used by the /careers storefront page's own
 // server-side Prisma query too, but exposed here the same way properties are).
 export async function GET() {
