@@ -16,6 +16,13 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
+// Every storefront page reads live data (products, prices, stock, site
+// content) via Prisma — none of it should be baked in at build time, both
+// because it'd go stale immediately and because the build environment has
+// no database connection to query in the first place. Setting this on the
+// layout cascades to every page under it.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params
 }: {

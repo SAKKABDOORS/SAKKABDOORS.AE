@@ -6,6 +6,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
 
 const STATIC_PATHS = ["", "/products", "/realestate", "/about", "/contact", "/careers"];
 
+// Queries Prisma for live product/property slugs — same reasoning as the
+// storefront layout's dynamic export: no DB connection exists at build
+// time, and the list would go stale immediately if cached anyway.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, products, properties] = await Promise.all([
     prisma.category.findMany({ select: { slug: true } }),
