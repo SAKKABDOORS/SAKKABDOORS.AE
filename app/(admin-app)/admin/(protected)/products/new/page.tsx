@@ -2,7 +2,7 @@ import ProductForm from "@/components/ProductForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function NewProductPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER", "EMPLOYEE"]);
+  await requirePageRole("products");
 
   return (
     <div>

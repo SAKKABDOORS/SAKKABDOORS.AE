@@ -4,7 +4,7 @@ import PropertyForm from "@/components/PropertyForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function EditPropertyPage({ params }: { params: { id: string } }) {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("properties");
 
   const property = await prisma.property.findUnique({
     where: { id: params.id },

@@ -4,7 +4,7 @@ import JobForm from "@/components/JobForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function EditJobPage({ params }: { params: { id: string } }) {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("jobs");
 
   const job = await prisma.job.findUnique({ where: { id: params.id } });
 

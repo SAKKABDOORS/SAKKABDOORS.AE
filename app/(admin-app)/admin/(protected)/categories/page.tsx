@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminCategoriesPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER", "EMPLOYEE"]);
+  await requirePageRole("categories");
 
   const categories = await prisma.category.findMany({
     include: { _count: { select: { products: true } } },

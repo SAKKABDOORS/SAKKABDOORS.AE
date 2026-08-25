@@ -4,7 +4,7 @@ import DeletePropertyButton from "@/components/DeletePropertyButton";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminPropertiesPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("properties");
 
   const properties = await prisma.property.findMany({
     include: { images: true },

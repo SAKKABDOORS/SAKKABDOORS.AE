@@ -4,7 +4,7 @@ import { getOrderStatusInfo } from "@/lib/orderStatus";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminDashboardPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("dashboard");
 
   const [productCount, newOrders, recentOrders] = await Promise.all([
     prisma.product.count(),

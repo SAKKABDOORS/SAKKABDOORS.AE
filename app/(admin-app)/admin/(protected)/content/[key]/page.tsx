@@ -19,7 +19,7 @@ function isSiteSettingKey(key: string): key is SiteSettingKey {
 }
 
 export default async function EditSiteSettingPage({ params }: { params: { key: string } }) {
-  await requirePageRole(["SUPER_ADMIN"]);
+  await requirePageRole("content");
   if (!isSiteSettingKey(params.key)) notFound();
 
   const value = await getSiteSetting(params.key);

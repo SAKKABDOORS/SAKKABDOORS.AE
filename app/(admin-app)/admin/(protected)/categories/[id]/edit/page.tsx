@@ -4,7 +4,7 @@ import CategoryForm from "@/components/CategoryForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function EditCategoryPage({ params }: { params: { id: string } }) {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER", "EMPLOYEE"]);
+  await requirePageRole("categories");
 
   const category = await prisma.category.findUnique({ where: { id: params.id } });
   if (!category) notFound();

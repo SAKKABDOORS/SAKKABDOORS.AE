@@ -4,7 +4,7 @@ import DeleteProductButton from "@/components/DeleteProductButton";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminProductsPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER", "EMPLOYEE"]);
+  await requirePageRole("products");
 
   const products = await prisma.product.findMany({
     include: { images: true, category: true },

@@ -12,27 +12,29 @@ import {
   Layers,
   LogOut,
   Palette,
+  Shield,
   Users,
   type LucideIcon
 } from "lucide-react";
-import { homeForRole, type AdminRole } from "@/lib/adminRoles";
+import { homeForRole, type AdminRole, type PageKey } from "@/lib/adminRoles";
 
-const NAV: { href: string; label: string; icon: LucideIcon; roles: AdminRole[] }[] = [
-  { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, roles: ["SUPER_ADMIN", "MANAGER"] },
-  { href: "/admin/products", label: "المنتجات", icon: DoorOpen, roles: ["SUPER_ADMIN", "MANAGER", "EMPLOYEE"] },
-  { href: "/admin/categories", label: "الفئات", icon: Layers, roles: ["SUPER_ADMIN", "MANAGER", "EMPLOYEE"] },
-  { href: "/admin/properties", label: "العقارات", icon: Building2, roles: ["SUPER_ADMIN", "MANAGER"] },
-  { href: "/admin/jobs", label: "الوظائف الشاغرة", icon: Briefcase, roles: ["SUPER_ADMIN", "MANAGER"] },
-  { href: "/admin/orders", label: "الطلبات", icon: ClipboardList, roles: ["SUPER_ADMIN", "MANAGER"] },
-  { href: "/admin/content", label: "محتوى الموقع", icon: Palette, roles: ["SUPER_ADMIN"] },
-  { href: "/admin/ai", label: "الذكاء الاصطناعي", icon: Bot, roles: ["SUPER_ADMIN", "MANAGER"] },
-  { href: "/admin/team", label: "حسابات الإدارة", icon: Users, roles: ["SUPER_ADMIN", "MANAGER"] }
+const NAV: { href: string; label: string; icon: LucideIcon; key: PageKey }[] = [
+  { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, key: "dashboard" },
+  { href: "/admin/products", label: "المنتجات", icon: DoorOpen, key: "products" },
+  { href: "/admin/categories", label: "الفئات", icon: Layers, key: "categories" },
+  { href: "/admin/properties", label: "العقارات", icon: Building2, key: "properties" },
+  { href: "/admin/jobs", label: "الوظائف الشاغرة", icon: Briefcase, key: "jobs" },
+  { href: "/admin/orders", label: "الطلبات", icon: ClipboardList, key: "orders" },
+  { href: "/admin/content", label: "محتوى الموقع", icon: Palette, key: "content" },
+  { href: "/admin/ai", label: "الذكاء الاصطناعي", icon: Bot, key: "ai" },
+  { href: "/admin/team", label: "حسابات الإدارة", icon: Users, key: "team" },
+  { href: "/admin/permissions", label: "الصلاحيات", icon: Shield, key: "permissions" }
 ];
 
-export default function AdminSidebar({ role }: { role: AdminRole }) {
+export default function AdminSidebar({ role, allowedPages }: { role: AdminRole; allowedPages: PageKey[] }) {
   const pathname = usePathname();
   const router = useRouter();
-  const visibleNav = NAV.filter((item) => item.roles.includes(role));
+  const visibleNav = NAV.filter((item) => allowedPages.includes(item.key));
   const homeHref = homeForRole(role);
 
   async function handleLogout() {

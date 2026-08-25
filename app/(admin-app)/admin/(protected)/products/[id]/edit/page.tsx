@@ -4,7 +4,7 @@ import ProductForm from "@/components/ProductForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function EditProductPage({ params }: { params: { id: string } }) {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER", "EMPLOYEE"]);
+  await requirePageRole("products");
 
   const product = await prisma.product.findUnique({
     where: { id: params.id },

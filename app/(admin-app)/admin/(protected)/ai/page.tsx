@@ -3,7 +3,7 @@ import KnowledgeManager from "@/components/KnowledgeManager";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminAiPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("ai");
 
   const [entries, chatLogs] = await Promise.all([
     prisma.knowledgeEntry.findMany({ orderBy: { updatedAt: "desc" } }),

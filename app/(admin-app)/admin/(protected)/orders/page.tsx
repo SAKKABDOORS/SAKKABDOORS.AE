@@ -3,7 +3,7 @@ import { getOrderStatusInfo } from "@/lib/orderStatus";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminOrdersPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("orders");
 
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },

@@ -3,7 +3,7 @@ import AdminUsersManager from "@/components/admin/AdminUsersManager";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminTeamPage() {
-  const session = await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  const session = await requirePageRole("team");
   const admins = await prisma.admin.findMany({
     select: { id: true, username: true, role: true, createdAt: true },
     orderBy: { createdAt: "asc" }

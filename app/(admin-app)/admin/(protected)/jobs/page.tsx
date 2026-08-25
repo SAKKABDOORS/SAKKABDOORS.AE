@@ -4,7 +4,7 @@ import DeleteJobButton from "@/components/DeleteJobButton";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function AdminJobsPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("jobs");
 
   const jobs = await prisma.job.findMany({ orderBy: { createdAt: "desc" } });
 

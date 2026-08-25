@@ -2,7 +2,7 @@ import PropertyForm from "@/components/PropertyForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function NewPropertyPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("properties");
 
   return (
     <div>

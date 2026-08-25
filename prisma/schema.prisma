@@ -165,6 +165,14 @@ model Admin {
   createdAt    DateTime  @default(now())
 }
 
+// SUPER_ADMIN-configurable page visibility for MANAGER/EMPLOYEE — see
+// lib/rolePermissions.ts. One row per non-owner role; a missing row means
+// "use the built-in defaults" rather than "no access".
+model RolePermission {
+  role  AdminRole @id
+  pages String    @db.Text
+}
+
 // --- AI assistant ("train it") -------------------------------------------
 // Everything the storefront chat widget is allowed to say is grounded in
 // these entries (plus the live product catalog) — the admin "trains" the

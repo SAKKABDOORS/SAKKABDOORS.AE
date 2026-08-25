@@ -2,7 +2,7 @@ import JobForm from "@/components/JobForm";
 import { requirePageRole } from "@/lib/requirePageRole";
 
 export default async function NewJobPage() {
-  await requirePageRole(["SUPER_ADMIN", "MANAGER"]);
+  await requirePageRole("jobs");
 
   return (
     <div>

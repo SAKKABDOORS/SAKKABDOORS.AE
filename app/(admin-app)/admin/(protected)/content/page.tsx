@@ -12,7 +12,7 @@ const SECTIONS: { key: string; label: string; description: string }[] = [
 ];
 
 export default async function AdminContentPage() {
-  await requirePageRole(["SUPER_ADMIN"]);
+  await requirePageRole("content");
 
   return (
     <div>
