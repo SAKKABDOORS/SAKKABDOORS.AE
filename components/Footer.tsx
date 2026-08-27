@@ -8,6 +8,7 @@ import { FacebookIcon, InstagramIcon, LinkedinIcon, WhatsAppIcon, YoutubeIcon } 
 
 const MailIcon = ICON_REGISTRY.mail;
 const PhoneIcon = ICON_REGISTRY.phone;
+const SupportIcon = ICON_REGISTRY.wrench;
 
 // Phone numbers stored in the CMS use a "00"-prefixed international format
 // for display (see FooterEditor) — WhatsApp's wa.me links need bare digits
@@ -119,6 +120,27 @@ export default function Footer({
           </ul>
         </div>
       </div>
+
+      {content.techSupport.phone && (
+        <div className="border-t border-white/10">
+          <div className="container-page flex items-center gap-2 py-3 text-xs text-brand-100/70">
+            <SupportIcon className="h-3.5 w-3.5 shrink-0" />
+            <span>{dict.footer.tech_support}:</span>
+            <a
+              href={buildWhatsAppLink(
+                locale === "ar" ? "مرحباً، عندي مشكلة تقنية بالموقع" : "Hello, I have a technical issue with the website",
+                toWhatsAppDigits(content.techSupport.phone)
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              dir="ltr"
+              className="font-medium hover:text-white"
+            >
+              +{content.techSupport.phone}
+            </a>
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-white/10 py-4 text-center text-xs text-brand-100/60">
         © {year} SAKKAB DOORS GROUP — {dict.footer.rights}

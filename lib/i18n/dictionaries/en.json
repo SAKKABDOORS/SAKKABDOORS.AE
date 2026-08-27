@@ -185,7 +185,8 @@
     "location_ain": "UAE - Al Ain",
     "location_ain_address": "Al Noud Companies",
     "location_sy": "Syria",
-    "location_sy_address": "Damascus - Sahnaya"
+    "location_sy_address": "Damascus - Sahnaya",
+    "tech_support": "Technical Support (website issue)"
   },
   "chat": {
     "button_label": "Ask Sakkab",

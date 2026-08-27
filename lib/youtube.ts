@@ -22,6 +22,12 @@ export function parseYouTubeId(url: string | null | undefined): string | null {
   }
 }
 
+// Normal, user-controlled embed (sound on, no autoplay/loop) — for a
+// regular gallery/content video, as opposed to a muted looping background.
+export function buildYouTubeEmbedUrl(videoId: string) {
+  return `https://www.youtube.com/embed/${videoId}`;
+}
+
 export function buildYouTubeBackgroundEmbedUrl(videoId: string) {
   const params = new URLSearchParams({
     autoplay: "1",

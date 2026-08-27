@@ -63,6 +63,14 @@ const socialLinksSchema = z
   })
   .default({ facebook: "", instagram: "", youtube: "", linkedin: "" });
 
+// A separate "something's broken with the site itself" contact — distinct
+// from the 3 sales branches above, so it's never confused with them. The
+// default (used whenever a stored footer row predates this field — i.e.
+// every row that already existed in the DB before this was added) is the
+// real number, not empty, so it appears without needing a one-off DB
+// write; the admin can still blank it from /admin/content to hide it.
+const techSupportSchema = z.object({ phone: z.string() }).default({ phone: "00963980966695" });
+
 export const footerContentSchema = z.object({
   email: z.string().email(),
   locations: z
@@ -75,7 +83,23 @@ export const footerContentSchema = z.object({
       })
     )
     .length(3),
-  social: socialLinksSchema
+  social: socialLinksSchema,
+  techSupport: techSupportSchema
+});
+
+// Free-form photo/video gallery for the About page — empty by default so
+// nothing shows until the admin adds something from /admin/content.
+// "video" items accept either a YouTube URL or a direct video file URL,
+// same convention as the hero background video.
+export const aboutMediaContentSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        type: z.enum(["image", "video"]),
+        url: z.string().min(1)
+      })
+    )
+    .max(12)
 });
 
 export const SITE_SETTING_SCHEMAS = {
@@ -85,7 +109,8 @@ export const SITE_SETTING_SCHEMAS = {
   services: servicesContentSchema,
   quality: qualityContentSchema,
   cta: ctaContentSchema,
-  footer: footerContentSchema
+  footer: footerContentSchema,
+  about_media: aboutMediaContentSchema
 } as const;
 
 export type SiteSettingKey = keyof typeof SITE_SETTING_SCHEMAS;
@@ -96,6 +121,7 @@ export type ServicesContent = z.infer<typeof servicesContentSchema>;
 export type QualityContent = z.infer<typeof qualityContentSchema>;
 export type CtaContent = z.infer<typeof ctaContentSchema>;
 export type FooterContent = z.infer<typeof footerContentSchema>;
+export type AboutMediaContent = z.infer<typeof aboutMediaContentSchema>;
 
 // The current static dictionaries are the seed/fallback values — a fresh or
 // not-yet-seeded DB (or one missing a specific key) still renders sane
@@ -108,6 +134,7 @@ export const SITE_SETTING_DEFAULTS: {
   quality: QualityContent;
   cta: CtaContent;
   footer: FooterContent;
+  about_media: AboutMediaContent;
 } = {
   branding: {
     logoUrl: "/images/logo-mark.png"
@@ -156,7 +183,11 @@ export const SITE_SETTING_DEFAULTS: {
       { icon: "map-pin", name: { ar: arDict.footer.location_ain, en: "UAE - Al Ain" }, address: { ar: arDict.footer.location_ain_address, en: "Al Noud Companies" }, phone: "00971508838054" },
       { icon: "map-pin", name: { ar: arDict.footer.location_sy, en: "Syria" }, address: { ar: arDict.footer.location_sy_address, en: "Damascus - Sahnaya" }, phone: "00963984733335" }
     ],
-    social: { facebook: "", instagram: "", youtube: "", linkedin: "" }
+    social: { facebook: "", instagram: "", youtube: "", linkedin: "" },
+    techSupport: { phone: "00963980966695" }
+  },
+  about_media: {
+    items: []
   }
 };
 

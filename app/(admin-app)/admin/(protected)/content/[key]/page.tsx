@@ -11,7 +11,8 @@ const LABELS: Record<SiteSettingKey, string> = {
   services: "شبكة الخدمات",
   quality: "قسم الثقة",
   cta: "قسم الدعوة لاتخاذ إجراء",
-  footer: "الفوتر"
+  footer: "الفوتر",
+  about_media: "صور وفيديوهات صفحة من نحن"
 };
 
 function isSiteSettingKey(key: string): key is SiteSettingKey {

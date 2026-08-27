@@ -8,7 +8,8 @@ const SECTIONS: { key: string; label: string; description: string }[] = [
   { key: "services", label: "شبكة الخدمات", description: "البطاقات الأربع (ألمنيوم/أبواب/عقارات/WPC)" },
   { key: "quality", label: "قسم الثقة", description: "الجودة، الضمان، الابتكار" },
   { key: "cta", label: "قسم الدعوة لاتخاذ إجراء", description: "قبل الفوتر مباشرة" },
-  { key: "footer", label: "الفوتر", description: "الفروع، الهاتف، الإيميل" }
+  { key: "footer", label: "الفوتر", description: "الفروع، الهاتف، الإيميل" },
+  { key: "about_media", label: "صور وفيديوهات صفحة من نحن", description: "معرض صور/فيديوهات إضافي بأسفل صفحة \"من نحن\"" }
 ];
 
 export default async function AdminContentPage() {

@@ -3,7 +3,9 @@ import { Award, Handshake, Leaf, Sparkles } from "lucide-react";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
+import { getSiteSetting } from "@/lib/siteContent";
 import Reveal from "@/components/motion/Reveal";
+import AboutMediaGallery from "@/components/AboutMediaGallery";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const locale = isLocale(params.locale) ? params.locale : "ar";
@@ -24,6 +26,7 @@ export default async function AboutPage({
   if (!isLocale(params.locale)) notFound();
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
+  const media = await getSiteSetting("about_media");
 
   const values = [
     { icon: Award, label: dict.about.value_1 },
@@ -58,6 +61,12 @@ export default async function AboutPage({
           ))}
         </div>
       </Reveal>
+
+      {media.items.length > 0 && (
+        <Reveal delay={0.2}>
+          <AboutMediaGallery items={media.items} />
+        </Reveal>
+      )}
     </div>
   );
 }

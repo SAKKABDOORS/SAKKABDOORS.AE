@@ -185,7 +185,8 @@
     "location_ain": "الإمارات - العين",
     "location_ain_address": "شركات النود",
     "location_sy": "سوريا",
-    "location_sy_address": "دمشق - صحنايا"
+    "location_sy_address": "دمشق - صحنايا",
+    "tech_support": "الدعم الفني (عطل بالموقع)"
   },
   "chat": {
     "button_label": "اسأل سكاب",
