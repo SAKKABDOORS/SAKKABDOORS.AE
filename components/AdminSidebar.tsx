@@ -8,6 +8,7 @@ import {
   Building2,
   ClipboardList,
   DoorOpen,
+  History,
   LayoutDashboard,
   Layers,
   LogOut,
@@ -27,6 +28,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; key: PageKey }[] = [
   { href: "/admin/orders", label: "الطلبات", icon: ClipboardList, key: "orders" },
   { href: "/admin/content", label: "محتوى الموقع", icon: Palette, key: "content" },
   { href: "/admin/ai", label: "الذكاء الاصطناعي", icon: Bot, key: "ai" },
+  { href: "/admin/chats", label: "مؤخراً", icon: History, key: "chats" },
   { href: "/admin/team", label: "حسابات الإدارة", icon: Users, key: "team" },
   { href: "/admin/permissions", label: "الصلاحيات", icon: Shield, key: "permissions" }
 ];
