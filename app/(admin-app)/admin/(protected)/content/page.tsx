@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { requirePageRole } from "@/lib/requirePageRole";
 
-const SECTIONS: { key: string; label: string; description: string }[] = [
+const SECTIONS: { key: string; label: string; description: string; href?: string }[] = [
   { key: "branding", label: "الشعار (اللوغو)", description: "شعار الموقع الظاهر في شريط التنقل" },
   { key: "hero", label: "القسم الرئيسي (أعلى الصفحة الرئيسية)", description: "العنوان، الوصف الفرعي، صورة أو فيديو الخلفية" },
   { key: "stats", label: "شريط الإحصائيات", description: "سنوات الخبرة، المشاريع، العملاء" },
   { key: "services", label: "شبكة الخدمات", description: "البطاقات الأربع (ألمنيوم/أبواب/عقارات/WPC)" },
+  {
+    key: "categories",
+    label: "أقسام الأبواب الثلاثة (WPC / COMPOSITE / ألمنيوم)",
+    description: "العناوين والوصف وصورة كل قسم — نفس الأقسام الظاهرة تحت بعضها بالصفحة الرئيسية",
+    href: "/admin/categories"
+  },
   { key: "quality", label: "قسم الثقة", description: "الجودة، الضمان، الابتكار" },
   { key: "cta", label: "قسم الدعوة لاتخاذ إجراء", description: "قبل الفوتر مباشرة" },
   { key: "footer", label: "الفوتر", description: "الفروع، الهاتف، الإيميل" },
@@ -25,7 +31,7 @@ export default async function AdminContentPage() {
         {SECTIONS.map((s) => (
           <Link
             key={s.key}
-            href={`/admin/content/${s.key}`}
+            href={s.href ?? `/admin/content/${s.key}`}
             className="card block p-5 transition hover:shadow-md"
           >
             <div className="font-bold text-ink-900">{s.label}</div>
