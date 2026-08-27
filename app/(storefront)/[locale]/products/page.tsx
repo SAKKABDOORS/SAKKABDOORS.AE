@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   const dict = await getDictionary(locale);
   const description =
     locale === "ar"
-      ? "تصفح كتالوج أبواب سكاب — WPC، UPVC، وألمنيوم — بأعلى معايير الجودة والتصميم."
-      : "Browse the SAKKAB door catalog — WPC, UPVC, and Aluminum — engineered to the highest quality and design standards.";
+      ? "تصفح كتالوج أبواب سكاب — WPC، COMPOSITE، وألمنيوم — بأعلى معايير الجودة والتصميم."
+      : "Browse the SAKKAB door catalog — WPC, COMPOSITE, and Aluminum — engineered to the highest quality and design standards.";
   return {
     title: dict.products.title,
     description,

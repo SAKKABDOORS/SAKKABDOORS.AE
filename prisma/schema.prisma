@@ -16,6 +16,11 @@ datasource db {
 
 enum Material {
   WPC
+  // Displayed everywhere in the UI as "COMPOSITE" (see the material label
+  // maps in ProductForm.tsx, ProductFilters.tsx, CatalogDocument.tsx, and
+  // dict.products.material.UPVC) — kept as UPVC here so existing Product
+  // rows, the "upvc-doors" category slug, and ?material=UPVC URLs/filters
+  // don't need a data migration for what is, for now, a rename in name only.
   UPVC
   ALUMINUM
   STEEL
@@ -34,12 +39,17 @@ enum AdminRole {
   EMPLOYEE
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
 model Category {
   id            String    @id @default(cuid())
   slug          String    @unique
   nameAr        String
   nameEn        String
-  // Marketing copy for the homepage "spotlight" section (WPC / UPVC / Aluminum
+  // Marketing copy for the homepage "spotlight" section (WPC / COMPOSITE (UPVC) / Aluminum
   // doors blocks). Optional so extra categories can be added later without copy.
   taglineAr     String?
   taglineEn     String?
@@ -73,11 +83,16 @@ model Product {
 }
 
 model ProductImage {
-  id        String  @id @default(cuid())
+  id        String    @id @default(cuid())
   url       String
-  alt       String  @default("")
-  position  Int     @default(0)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // For type VIDEO, url is a YouTube link or a direct video file URL —
+  // same convention as the hero background video and the about-page
+  // media gallery — rather than an uploaded file (avoids the ~4.5MB
+  // request-body limit on Vercel's serverless functions).
+  type      MediaType @default(IMAGE)
+  alt       String    @default("")
+  position  Int       @default(0)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 
   @@index([productId])

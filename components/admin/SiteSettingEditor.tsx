@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import IconPicker from "./IconPicker";
 import ImageUploadField from "./ImageUploadField";
-import MultiImageUploadField from "./MultiImageUploadField";
+import MediaGalleryField from "./MediaGalleryField";
 import type {
   AboutMediaContent,
   BrandingContent,
@@ -187,6 +187,11 @@ function BrandingEditor({ value, onChange }: { value: BrandingContent; onChange:
         label="شعار الموقع (اللوغو)"
         value={value.logoUrl}
         onChange={(url) => onChange({ ...value, logoUrl: url })}
+      />
+      <ImageUploadField
+        label="صورة شعارات مجموعة سكاب (بالصفحة الرئيسية)"
+        value={value.groupImage}
+        onChange={(url) => onChange({ ...value, groupImage: url })}
       />
     </div>
   );
@@ -386,11 +391,13 @@ function CtaEditor({ value, onChange }: { value: CtaContent; onChange: (v: CtaCo
   );
 }
 
-const SOCIAL_LABELS: Record<"facebook" | "instagram" | "youtube" | "linkedin", string> = {
+const SOCIAL_LABELS: Record<"facebook" | "instagram" | "youtube" | "linkedin" | "tiktok" | "twitter", string> = {
   facebook: "فيسبوك",
   instagram: "إنستغرام",
   youtube: "يوتيوب",
-  linkedin: "لينكد إن"
+  linkedin: "لينكد إن",
+  tiktok: "تيك توك",
+  twitter: "X (تويتر)"
 };
 
 function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v: FooterContent) => void }) {
@@ -403,7 +410,7 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
 
       <div className="space-y-3 rounded-lg border border-brand-100 p-4">
         <div className="text-sm font-semibold text-ink-800/70">روابط التواصل الاجتماعي (اتركها فاضية لإخفاء الأيقونة)</div>
-        {(["facebook", "instagram", "youtube", "linkedin"] as const).map((key) => (
+        {(["facebook", "instagram", "youtube", "linkedin", "tiktok", "twitter"] as const).map((key) => (
           <div key={key}>
             <label className="label">{SOCIAL_LABELS[key]}</label>
             <input
@@ -491,80 +498,12 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
 }
 
 function AboutMediaEditor({ value, onChange }: { value: AboutMediaContent; onChange: (v: AboutMediaContent) => void }) {
-  const [draftVideoUrl, setDraftVideoUrl] = useState("");
-  const images = value.items.filter((item) => item.type === "image").map((item) => item.url);
-  const videos = value.items.filter((item) => item.type === "video").map((item) => item.url);
-
-  function setImages(urls: string[]) {
-    onChange({
-      items: [
-        ...urls.map((url) => ({ type: "image" as const, url })),
-        ...videos.map((url) => ({ type: "video" as const, url }))
-      ]
-    });
-  }
-
-  function setVideos(urls: string[]) {
-    onChange({
-      items: [
-        ...images.map((url) => ({ type: "image" as const, url })),
-        ...urls.map((url) => ({ type: "video" as const, url }))
-      ]
-    });
-  }
-
-  function addVideo() {
-    const url = draftVideoUrl.trim();
-    if (!url) return;
-    setVideos([...videos, url]);
-    setDraftVideoUrl("");
-  }
-
   return (
-    <div className="space-y-6">
-      <MultiImageUploadField label="الصور" values={images} onChange={setImages} />
-
-      <div>
-        <div className="mb-2 text-sm font-semibold text-ink-800/70">
-          الفيديوهات (رابط يوتيوب أو رابط MP4 مباشر)
-        </div>
-
-        {videos.length > 0 && (
-          <ul className="mb-3 space-y-2">
-            {videos.map((url, i) => (
-              <li key={i} className="flex items-center gap-2 rounded-lg border border-brand-100 px-3 py-2 text-sm">
-                <span className="flex-1 truncate text-ink-800/80" dir="ltr">{url}</span>
-                <button
-                  type="button"
-                  onClick={() => setVideos(videos.filter((_, j) => j !== i))}
-                  className="shrink-0 text-xs font-semibold text-red-600 hover:text-red-700"
-                >
-                  حذف
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="flex gap-2">
-          <input
-            className="input"
-            dir="ltr"
-            placeholder="https://youtube.com/watch?v=... أو https://.../video.mp4"
-            value={draftVideoUrl}
-            onChange={(e) => setDraftVideoUrl(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addVideo();
-              }
-            }}
-          />
-          <button type="button" onClick={addVideo} className="btn-secondary shrink-0">
-            إضافة
-          </button>
-        </div>
-      </div>
-    </div>
+    <MediaGalleryField
+      imagesLabel="الصور"
+      videosLabel="الفيديوهات (رابط يوتيوب أو رابط MP4 مباشر)"
+      items={value.items}
+      onChange={(items) => onChange({ items })}
+    />
   );
 }

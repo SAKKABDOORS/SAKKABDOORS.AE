@@ -22,7 +22,7 @@ export default async function HomePage({
   if (!isLocale(params.locale)) notFound();
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
-  const { hero, stats, services, quality, cta, footer } = await getAllSiteSettings();
+  const { branding, hero, stats, services, quality, cta, footer } = await getAllSiteSettings();
 
   const categories = await prisma.category.findMany({
     where: { slug: { in: SPOTLIGHT_ORDER } }
@@ -75,7 +75,7 @@ export default async function HomePage({
       ))}
 
       <BrandStatement locale={locale} />
-      <SakkabGroupBrand locale={locale} />
+      <SakkabGroupBrand locale={locale} image={branding.groupImage} />
       <QualityFeatures locale={locale} content={quality} />
       <CTASection dict={dict} locale={locale} content={cta} />
     </div>

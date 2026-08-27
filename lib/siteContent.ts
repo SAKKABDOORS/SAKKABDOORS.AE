@@ -6,7 +6,10 @@ import enDict from "./i18n/dictionaries/en.json";
 const bilingualText = z.object({ ar: z.string().min(1), en: z.string().min(1) });
 
 export const brandingContentSchema = z.object({
-  logoUrl: z.string().min(1)
+  logoUrl: z.string().min(1),
+  // SAKKAB Group logos image on the homepage — was a hardcoded file path,
+  // now admin-editable like every other homepage image.
+  groupImage: z.string().min(1).default("/images/sakkab-group-brand.jpg")
 });
 
 export const heroContentSchema = z.object({
@@ -59,9 +62,14 @@ const socialLinksSchema = z
     facebook: z.string(),
     instagram: z.string(),
     youtube: z.string(),
-    linkedin: z.string()
+    linkedin: z.string(),
+    // .default() on these two individually (not just on the object as a
+    // whole) so footer rows saved before TikTok/X existed still parse
+    // instead of silently reverting the whole footer to defaults.
+    tiktok: z.string().default(""),
+    twitter: z.string().default("")
   })
-  .default({ facebook: "", instagram: "", youtube: "", linkedin: "" });
+  .default({ facebook: "", instagram: "", youtube: "", linkedin: "", tiktok: "", twitter: "" });
 
 // A separate "something's broken with the site itself" contact — distinct
 // from the 3 sales branches above, so it's never confused with them. The
@@ -137,7 +145,8 @@ export const SITE_SETTING_DEFAULTS: {
   about_media: AboutMediaContent;
 } = {
   branding: {
-    logoUrl: "/images/logo-mark.png"
+    logoUrl: "/images/logo-mark.png",
+    groupImage: "/images/sakkab-group-brand.jpg"
   },
   hero: {
     ar: { title: arDict.hero.title, subtitle: arDict.hero.subtitle },
@@ -183,7 +192,7 @@ export const SITE_SETTING_DEFAULTS: {
       { icon: "map-pin", name: { ar: arDict.footer.location_ain, en: "UAE - Al Ain" }, address: { ar: arDict.footer.location_ain_address, en: "Al Noud Companies" }, phone: "00971508838054" },
       { icon: "map-pin", name: { ar: arDict.footer.location_sy, en: "Syria" }, address: { ar: arDict.footer.location_sy_address, en: "Damascus - Sahnaya" }, phone: "00963984733335" }
     ],
-    social: { facebook: "", instagram: "", youtube: "", linkedin: "" },
+    social: { facebook: "", instagram: "", youtube: "", linkedin: "", tiktok: "", twitter: "" },
     techSupport: { phone: "00963980966695" }
   },
   about_media: {

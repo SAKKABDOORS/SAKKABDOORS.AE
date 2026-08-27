@@ -23,7 +23,7 @@ async function buildSystemPrompt(locale: string) {
   ]);
 
   const siteFacts = [
-    "SAKKAB Group — real estate development, aluminum works, and doors (WPC, UPVC, Aluminum).",
+    "SAKKAB Group — real estate development, aluminum works, and doors (WPC, COMPOSITE, Aluminum).",
     `Locations: ${footer.locations.map((loc) => `${loc.name.en} (${loc.address.en})`).join(", ")}.`,
     `Contact: ${footer.email}, ${footer.locations.map((loc) => `+${loc.phone}`).join(", ")}.`
   ].join("\n");
@@ -46,7 +46,7 @@ async function buildSystemPrompt(locale: string) {
       ? "Reply in colloquial, friendly Arabic unless the visitor writes in English."
       : "Reply in English unless the visitor writes in Arabic — then switch to Arabic.";
 
-  return `You are the SAKKAB Doors website assistant. You help visitors with questions about SAKKAB's products (WPC, UPVC and Aluminum doors) and services.
+  return `You are the SAKKAB Doors website assistant. You help visitors with questions about SAKKAB's products (WPC, COMPOSITE and Aluminum doors) and services.
 
 Rules:
 - Only answer using the SITE FACTS, KNOWLEDGE BASE and PRODUCT CATALOG below. If you don't know something, say so honestly and suggest contacting the team on WhatsApp instead of guessing.

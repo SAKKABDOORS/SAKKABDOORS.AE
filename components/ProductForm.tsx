@@ -3,14 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Category, Material, ProductWithRelations } from "@/lib/types";
-import MultiImageUploadField from "./admin/MultiImageUploadField";
+import MediaGalleryField, { type MediaItem } from "./admin/MediaGalleryField";
 
 const MATERIALS: Material[] = ["WPC", "UPVC", "ALUMINUM", "STEEL"];
+// Display label only — the stored/submitted value stays the real enum
+// value ("UPVC") so existing products, filters, and URLs keep working.
+const MATERIAL_LABELS: Record<Material, string> = {
+  WPC: "WPC",
+  UPVC: "COMPOSITE",
+  ALUMINUM: "ألمنيوم",
+  STEEL: "حديد"
+};
 
 export default function ProductForm({ product }: { product?: ProductWithRelations }) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [images, setImages] = useState<string[]>(product?.images.map((i) => i.url) ?? []);
+  const [images, setImages] = useState<MediaItem[]>(
+    product?.images.map((i) => ({ url: i.url, type: i.type === "VIDEO" ? "video" : "image" })) ?? []
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +50,7 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
       currency: String(form.get("currency") || "AED"),
       inStock: form.get("inStock") === "on",
       featured: form.get("featured") === "on",
-      images
+      images: images.map((img) => ({ url: img.url, type: img.type === "video" ? "VIDEO" : "IMAGE" }))
     };
 
     const url = product ? `/api/products/${product.id}` : "/api/products";
@@ -106,7 +116,7 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
           <label className="label">الخامة</label>
           <select className="input" name="material" defaultValue={product?.material ?? "WPC"}>
             {MATERIALS.map((m) => (
-              <option key={m} value={m}>{m}</option>
+              <option key={m} value={m}>{MATERIAL_LABELS[m]}</option>
             ))}
           </select>
         </div>
@@ -121,7 +131,12 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
         <input className="input" type="number" step="0.01" name="price" defaultValue={product?.price} required />
       </div>
 
-      <MultiImageUploadField label="صور المنتج" values={images} onChange={setImages} />
+      <MediaGalleryField
+        imagesLabel="صور المنتج"
+        videosLabel="فيديوهات المنتج (رابط يوتيوب أو رابط MP4 مباشر)"
+        items={images}
+        onChange={setImages}
+      />
 
       <div className="flex gap-6">
         <label className="flex items-center gap-2 text-sm">

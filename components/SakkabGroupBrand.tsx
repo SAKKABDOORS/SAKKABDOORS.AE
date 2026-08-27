@@ -13,7 +13,7 @@ const COPY: Record<Locale, { eyebrow: string; body: string }> = {
   }
 };
 
-export default function SakkabGroupBrand({ locale }: { locale: Locale }) {
+export default function SakkabGroupBrand({ locale, image }: { locale: Locale; image: string }) {
   const copy = COPY[locale];
 
   return (
@@ -28,7 +28,7 @@ export default function SakkabGroupBrand({ locale }: { locale: Locale }) {
           <div>
             <div className="relative mx-auto aspect-video w-full max-w-md">
               <Image
-                src="/images/sakkab-group-brand.jpg"
+                src={image}
                 alt="SAKKAB Aluminum · SAKKAB Doors · SAKKAB Real Estate · SAKKAB Group"
                 fill
                 className="object-contain"

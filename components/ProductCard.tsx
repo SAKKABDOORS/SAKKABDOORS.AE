@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
-import type { ProductWithRelations } from "@/lib/types";
+import { firstProductImageUrl, type ProductWithRelations } from "@/lib/types";
 import AddToCartButton from "./cart/AddToCartButton";
 
 export default function ProductCard({
@@ -23,7 +23,7 @@ export default function ProductCard({
 }) {
   const name = locale === "ar" ? product.nameAr : product.nameEn;
   const categoryName = locale === "ar" ? product.category.nameAr : product.category.nameEn;
-  const image = product.images[0]?.url ?? "/images/placeholder-door.svg";
+  const image = firstProductImageUrl(product.images) ?? "/images/placeholder-door.svg";
 
   return (
     <div className="card-interactive group flex flex-col overflow-hidden">

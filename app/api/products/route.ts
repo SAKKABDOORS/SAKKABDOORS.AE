@@ -36,7 +36,9 @@ const productSchema = z.object({
   currency: z.string().min(1).max(10).default("AED"),
   inStock: z.boolean().default(true),
   featured: z.boolean().default(false),
-  images: z.array(z.string().url()).default([])
+  images: z
+    .array(z.object({ url: z.string().url(), type: z.enum(["IMAGE", "VIDEO"]).default("IMAGE") }))
+    .default([])
 });
 
 // Admin-only: create a product.
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
     data: {
       ...rest,
       images: {
-        create: images.map((url, i) => ({ url, position: i }))
+        create: images.map((img, i) => ({ url: img.url, type: img.type, position: i }))
       }
     },
     include: { images: true, category: true }

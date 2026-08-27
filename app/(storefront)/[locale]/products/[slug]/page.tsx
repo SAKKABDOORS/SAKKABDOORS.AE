@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getDictionary, type Dictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
-import type { Category, Material } from "@/lib/types";
+import { firstProductImageUrl, type Category, type Material } from "@/lib/types";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import OrderForm from "@/components/OrderForm";
 import AddToCartButton from "@/components/cart/AddToCartButton";
@@ -42,7 +42,7 @@ export async function generateMetadata({
 
   const name = locale === "ar" ? product.nameAr : product.nameEn;
   const description = locale === "ar" ? product.descriptionAr : product.descriptionEn;
-  const image = product.images[0]?.url;
+  const image = firstProductImageUrl(product.images);
   return {
     title: name,
     description,
@@ -90,7 +90,7 @@ export default async function ProductOrCategoryPage({
   const name = locale === "ar" ? product.nameAr : product.nameEn;
   const description = locale === "ar" ? product.descriptionAr : product.descriptionEn;
   const categoryName = locale === "ar" ? product.category.nameAr : product.category.nameEn;
-  const image = product.images[0]?.url ?? "/images/placeholder-door.svg";
+  const image = firstProductImageUrl(product.images) ?? "/images/placeholder-door.svg";
   const whatsappHref = buildWhatsAppLink(
     locale === "ar"
       ? `مرحباً، أرغب بالاستفسار عن: ${name}`
@@ -101,7 +101,11 @@ export default async function ProductOrCategoryPage({
     <div className="container-page py-10">
       <div className="grid gap-10 lg:grid-cols-2">
         <ProductGallery
-          images={product.images.map((img) => ({ url: img.url, alt: img.alt || name }))}
+          images={product.images.map((img) => ({
+            url: img.url,
+            alt: img.alt || name,
+            type: img.type === "VIDEO" ? "video" : "image"
+          }))}
           fallbackAlt={name}
         />
 

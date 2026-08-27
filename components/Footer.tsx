@@ -4,10 +4,17 @@ import type { Dictionary } from "@/lib/i18n/getDictionary";
 import type { FooterContent } from "@/lib/siteContent";
 import { resolveIcon, ICON_REGISTRY } from "@/lib/icons/registry";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
-import { FacebookIcon, InstagramIcon, LinkedinIcon, WhatsAppIcon, YoutubeIcon } from "@/components/icons/SocialIcons";
+import {
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  TikTokIcon,
+  WhatsAppIcon,
+  XIcon,
+  YoutubeIcon
+} from "@/components/icons/SocialIcons";
 
 const MailIcon = ICON_REGISTRY.mail;
-const PhoneIcon = ICON_REGISTRY.phone;
 const SupportIcon = ICON_REGISTRY.wrench;
 
 // Phone numbers stored in the CMS use a "00"-prefixed international format
@@ -21,7 +28,9 @@ const SOCIAL_LINKS: { key: keyof FooterContent["social"]; Icon: typeof FacebookI
   { key: "facebook", Icon: FacebookIcon },
   { key: "instagram", Icon: InstagramIcon },
   { key: "youtube", Icon: YoutubeIcon },
-  { key: "linkedin", Icon: LinkedinIcon }
+  { key: "linkedin", Icon: LinkedinIcon },
+  { key: "tiktok", Icon: TikTokIcon },
+  { key: "twitter", Icon: XIcon }
 ];
 
 export default function Footer({
@@ -98,9 +107,7 @@ export default function Footer({
                     </div>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <PhoneIcon className="h-3.5 w-3.5 shrink-0" />
-                    {/* Looks like a phone number, opens WhatsApp instead of
-                        the dialer — per owner request. */}
+                    <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
                     <a
                       href={buildWhatsAppLink(
                         locale === "ar" ? "مرحباً، عندي استفسار" : "Hello, I have a question",

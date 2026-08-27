@@ -22,14 +22,14 @@ async function main() {
     },
     {
       slug: "upvc-doors",
-      nameAr: "أبواب UPVC",
-      nameEn: "UPVC Doors",
+      nameAr: "أبواب COMPOSITE",
+      nameEn: "COMPOSITE Doors",
       taglineAr: "أبواب سكاب عالية الأداء",
       taglineEn: "Sakkab's high performance doors",
       descriptionAr:
-        "تجمع أبواب UPVC العصرية لدينا بين خفة الوزن والمرونة والعزل الحراري الاستثنائي، وتقدّم أداءً ذكياً واقتصادياً مع مقاومة عالية للاستخدام اليومي والعوامل الجوية.",
+        "تجمع أبواب COMPOSITE العصرية لدينا بين خفة الوزن والمرونة والعزل الحراري الاستثنائي، وتقدّم أداءً ذكياً واقتصادياً مع مقاومة عالية للاستخدام اليومي والعوامل الجوية.",
       descriptionEn:
-        "Combining lightweight versatility with exceptional insulation, our modern UPVC doors deliver smart, cost-effective performance while maintaining high resistance to daily wear and weather elements.",
+        "Combining lightweight versatility with exceptional insulation, our modern COMPOSITE doors deliver smart, cost-effective performance while maintaining high resistance to daily wear and weather elements.",
       heroImage: "https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?w=1200"
     },
     {
@@ -86,8 +86,8 @@ async function main() {
     },
     {
       slug: "upvc-insulated-door",
-      nameAr: "باب UPVC معزول حرارياً",
-      nameEn: "UPVC Insulated Door",
+      nameAr: "باب COMPOSITE معزول حرارياً",
+      nameEn: "COMPOSITE Insulated Door",
       descriptionAr: "عزل حراري وصوتي ممتاز، خفيف الوزن وسهل الصيانة، خيار اقتصادي وذكي للمنازل والمكاتب.",
       descriptionEn: "Excellent thermal and acoustic insulation, lightweight and low-maintenance — a smart, cost-effective choice for homes and offices.",
       categoryId: upvc.id,
@@ -98,8 +98,8 @@ async function main() {
     },
     {
       slug: "upvc-sliding-door",
-      nameAr: "باب UPVC سحّاب",
-      nameEn: "UPVC Sliding Door",
+      nameAr: "باب COMPOSITE سحّاب",
+      nameEn: "COMPOSITE Sliding Door",
       descriptionAr: "باب سحّاب أنيق يوفر مساحة أكبر ورؤية بانورامية، مقاوم للاستخدام اليومي المكثف.",
       descriptionEn: "Elegant sliding door that maximizes space and view, built to withstand heavy daily use.",
       categoryId: upvc.id,
@@ -169,7 +169,7 @@ async function main() {
       category: "faq",
       title: "الضمان",
       content:
-        "كل منتجات سكاب مغطاة بضمان شامل يبدأ من تاريخ التركيب (المدة تختلف حسب نوع الباب: WPC، UPVC، أو ألمنيوم)، ويغطي عيوب الصناعة والتركيب."
+        "كل منتجات سكاب مغطاة بضمان شامل يبدأ من تاريخ التركيب (المدة تختلف حسب نوع الباب: WPC، COMPOSITE، أو ألمنيوم)، ويغطي عيوب الصناعة والتركيب."
     },
     {
       category: "policy",
@@ -179,9 +179,9 @@ async function main() {
     },
     {
       category: "product",
-      title: "الفرق بين WPC و UPVC والألمنيوم",
+      title: "الفرق بين WPC و COMPOSITE والألمنيوم",
       content:
-        "أبواب WPC: مقاومة عالية جداً للرطوبة بمظهر خشبي طبيعي، مناسبة للمداخل والمناطق الرطبة. أبواب UPVC: خفيفة، عازلة حرارياً وصوتياً، اقتصادية. أبواب الألمنيوم: أعلى درجات الأمان والمتانة، مناسبة للمداخل الرئيسية والمشاريع التجارية والفلل الفاخرة."
+        "أبواب WPC: مقاومة عالية جداً للرطوبة بمظهر خشبي طبيعي، مناسبة للمداخل والمناطق الرطبة. أبواب COMPOSITE: خفيفة، عازلة حرارياً وصوتياً، اقتصادية. أبواب الألمنيوم: أعلى درجات الأمان والمتانة، مناسبة للمداخل الرئيسية والمشاريع التجارية والفلل الفاخرة."
     }
   ];
 

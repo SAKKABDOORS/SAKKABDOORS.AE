@@ -28,7 +28,9 @@ const updateSchema = z.object({
   currency: z.string().min(1).max(10).optional(),
   inStock: z.boolean().optional(),
   featured: z.boolean().optional(),
-  images: z.array(z.string().url()).optional()
+  images: z
+    .array(z.object({ url: z.string().url(), type: z.enum(["IMAGE", "VIDEO"]).default("IMAGE") }))
+    .optional()
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -55,7 +57,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     data: {
       ...rest,
       ...(images
-        ? { images: { create: images.map((url, i) => ({ url, position: i })) } }
+        ? { images: { create: images.map((img, i) => ({ url: img.url, type: img.type, position: i })) } }
         : {})
     },
     include: { images: true, category: true }

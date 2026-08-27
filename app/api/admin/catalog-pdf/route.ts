@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminApi";
 import { renderCatalogPdf, type CatalogPdfCategory } from "@/lib/pdf/CatalogDocument";
+import { firstProductImageUrl } from "@/lib/types";
 
 // A broken/unreachable product image must never fail the whole export — each
 // image URL gets a short reachability check first; unreachable ones fall
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     where: categorySlug ? { slug: categorySlug } : undefined,
     include: {
       products: {
-        include: { images: { orderBy: { position: "asc" }, take: 1 } },
+        include: { images: { orderBy: { position: "asc" } } },
         orderBy: { createdAt: "desc" }
       }
     },
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
         nameEn: c.nameEn,
         products: await Promise.all(
           c.products.map(async (p) => {
-            const url = p.images[0]?.url ?? null;
+            const url = firstProductImageUrl(p.images) ?? null;
             const reachable = url ? await isImageReachable(url) : false;
             return {
               nameAr: p.nameAr,

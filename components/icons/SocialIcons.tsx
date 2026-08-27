@@ -38,6 +38,22 @@ export function LinkedinIcon({ className }: IconProps) {
   );
 }
 
+export function TikTokIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M16.6 5.82c-.98-.86-1.58-2.09-1.66-3.46h-3.02v13.6c0 1.5-1.22 2.72-2.72 2.72a2.72 2.72 0 0 1-1.36-5.08 2.7 2.7 0 0 1 1.36-.36c.24 0 .48.03.7.09v-3.1a5.8 5.8 0 0 0-.7-.04A5.78 5.78 0 0 0 3.44 16 5.78 5.78 0 0 0 9.2 21.78 5.78 5.78 0 0 0 15 16V9.2a8.2 8.2 0 0 0 4.6 1.4V7.58c-1.05 0-2.02-.34-2.99-1.06a6.4 6.4 0 0 1-.01-.7z" />
+    </svg>
+  );
+}
+
+export function XIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M18.24 2.75h3.05l-6.66 7.61 7.84 10.9h-6.13l-4.8-6.33-5.49 6.33H2.99l7.12-8.14L2.6 2.75h6.28l4.34 5.79zM17.15 19.5h1.69L7.05 4.6H5.24z" />
+    </svg>
+  );
+}
+
 export function WhatsAppIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">

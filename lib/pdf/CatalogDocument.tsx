@@ -24,7 +24,7 @@ const COLORS = {
 
 const MATERIAL_LABELS_AR: Record<string, string> = {
   WPC: "WPC",
-  UPVC: "UPVC",
+  UPVC: "COMPOSITE",
   ALUMINUM: "ألمنيوم",
   STEEL: "حديد"
 };
