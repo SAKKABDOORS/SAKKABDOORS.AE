@@ -5,7 +5,7 @@
   "description": "Sakkab Doors – موقع شركة سكاب للأبواب (متجر إلكتروني ثنائي اللغة)",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma db push --accept-data-loss --skip-generate && tsx prisma/rename-upvc-to-composite.ts && next build",
+    "build": "next build",
     "start": "next start",
     "start:cpanel": "NODE_ENV=production node server.js",
     "lint": "next lint",
