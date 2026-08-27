@@ -77,7 +77,9 @@ const socialLinksSchema = z
 // every row that already existed in the DB before this was added) is the
 // real number, not empty, so it appears without needing a one-off DB
 // write; the admin can still blank it from /admin/content to hide it.
-const techSupportSchema = z.object({ phone: z.string() }).default({ phone: "00963980966695" });
+const techSupportSchema = z
+  .object({ name: z.string().default("علاء الحسن"), phone: z.string() })
+  .default({ name: "علاء الحسن", phone: "00963980966695" });
 
 export const footerContentSchema = z.object({
   email: z.string().email(),
@@ -193,7 +195,7 @@ export const SITE_SETTING_DEFAULTS: {
       { icon: "map-pin", name: { ar: arDict.footer.location_sy, en: "Syria" }, address: { ar: arDict.footer.location_sy_address, en: "Damascus - Sahnaya" }, phone: "00963984733335" }
     ],
     social: { facebook: "", instagram: "", youtube: "", linkedin: "", tiktok: "", twitter: "" },
-    techSupport: { phone: "00963980966695" }
+    techSupport: { name: "علاء الحسن", phone: "00963980966695" }
   },
   about_media: {
     items: []

@@ -425,14 +425,22 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
       </div>
 
       <div className="space-y-3 rounded-lg border border-brand-100 p-4">
-        <div className="text-sm font-semibold text-ink-800/70">رقم الدعم الفني (عطل بالموقع — منفصل عن فروع المبيعات، اتركه فاضي لإخفائه)</div>
+        <div className="text-sm font-semibold text-ink-800/70">الدعم الفني (عطل بالموقع — منفصل عن فروع المبيعات، اترك الرقم فاضي لإخفائه)</div>
+        <div>
+          <label className="label">الاسم</label>
+          <input
+            className="input"
+            value={value.techSupport.name}
+            onChange={(e) => onChange({ ...value, techSupport: { ...value.techSupport, name: e.target.value } })}
+          />
+        </div>
         <div>
           <label className="label">رقم الهاتف (بدون +)</label>
           <input
             className="input"
             dir="ltr"
             value={value.techSupport.phone}
-            onChange={(e) => onChange({ ...value, techSupport: { phone: e.target.value } })}
+            onChange={(e) => onChange({ ...value, techSupport: { ...value.techSupport, phone: e.target.value } })}
           />
         </div>
       </div>

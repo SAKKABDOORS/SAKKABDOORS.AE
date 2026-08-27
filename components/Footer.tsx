@@ -132,7 +132,10 @@ export default function Footer({
         <div className="border-t border-white/10">
           <div className="container-page flex items-center gap-2 py-3 text-xs text-brand-100/70">
             <SupportIcon className="h-3.5 w-3.5 shrink-0" />
-            <span>{dict.footer.tech_support}:</span>
+            <span>
+              {dict.footer.tech_support}
+              {content.techSupport.name ? ` — ${content.techSupport.name}` : ""}:
+            </span>
             <a
               href={buildWhatsAppLink(
                 locale === "ar" ? "مرحباً، عندي مشكلة تقنية بالموقع" : "Hello, I have a technical issue with the website",
