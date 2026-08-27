@@ -4,6 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Category } from "@/lib/types";
 import ImageUploadField from "./admin/ImageUploadField";
+import { describeApiError } from "@/lib/adminFormError";
+
+const FIELD_LABELS: Record<string, string> = {
+  nameAr: "الاسم (عربي)",
+  nameEn: "Name (English)",
+  taglineAr: "الشعار الفرعي (عربي)",
+  taglineEn: "Tagline (English)",
+  descriptionAr: "الوصف (عربي)",
+  descriptionEn: "Description (English)",
+  heroImage: "الصورة الرئيسية"
+};
 
 export default function CategoryForm({ category }: { category: Category }) {
   const router = useRouter();
@@ -36,7 +47,9 @@ export default function CategoryForm({ category }: { category: Category }) {
     setLoading(false);
 
     if (!res.ok) {
-      setError("تعذر حفظ الفئة. تحقق من الحقول وحاول مرة أخرى.");
+      const data = await res.json().catch(() => null);
+      const specific = describeApiError(data, FIELD_LABELS);
+      setError(specific ?? "تعذر حفظ الفئة. تحقق من الحقول وحاول مرة أخرى.");
       return;
     }
 

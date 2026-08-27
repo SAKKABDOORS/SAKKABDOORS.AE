@@ -30,7 +30,7 @@ const propertySchema = z.object({
   currency: z.string().min(1).max(10).default("AED"),
   regionAr: z.string().min(1),
   regionEn: z.string().min(1),
-  images: z.array(z.string().url()).default([])
+  images: z.array(z.string().url("يجب أن يكون رابط كامل (https://...) — لا يقبل مسار نسبي مثل /images/...")).default([])
 });
 
 // Admin-only: create a property listing.

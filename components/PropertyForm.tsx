@@ -4,6 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PropertyWithRelations } from "@/lib/types";
 import MultiImageUploadField from "./admin/MultiImageUploadField";
+import { describeApiError } from "@/lib/adminFormError";
+
+const FIELD_LABELS: Record<string, string> = {
+  slug: "الرابط المختصر",
+  titleAr: "العنوان (عربي)",
+  titleEn: "Title (English)",
+  descriptionAr: "الوصف (عربي)",
+  descriptionEn: "Description (English)",
+  regionAr: "المنطقة (عربي)",
+  regionEn: "Region (English)",
+  price: "السعر",
+  currency: "العملة",
+  images: "صور العقار"
+};
 
 export default function PropertyForm({ property }: { property?: PropertyWithRelations }) {
   const router = useRouter();
@@ -43,7 +57,9 @@ export default function PropertyForm({ property }: { property?: PropertyWithRela
     setLoading(false);
 
     if (!res.ok) {
-      setError("تعذر حفظ العقار. تحقق من الحقول وحاول مرة أخرى.");
+      const data = await res.json().catch(() => null);
+      const specific = describeApiError(data, FIELD_LABELS);
+      setError(specific ?? "تعذر حفظ العقار. تحقق من الحقول وحاول مرة أخرى.");
       return;
     }
 

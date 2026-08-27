@@ -26,7 +26,7 @@ const updateSchema = z.object({
   currency: z.string().min(1).max(10).optional(),
   regionAr: z.string().min(1).optional(),
   regionEn: z.string().min(1).optional(),
-  images: z.array(z.string().url()).optional()
+  images: z.array(z.string().url("يجب أن يكون رابط كامل (https://...) — لا يقبل مسار نسبي مثل /images/...")).optional()
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {

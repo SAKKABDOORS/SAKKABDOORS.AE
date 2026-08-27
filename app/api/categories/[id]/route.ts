@@ -10,7 +10,11 @@ const categoryUpdateSchema = z.object({
   taglineEn: z.string().optional(),
   descriptionAr: z.string().optional(),
   descriptionEn: z.string().optional(),
-  heroImage: z.string().url().optional().or(z.literal(""))
+  heroImage: z
+    .string()
+    .url("يجب أن يكون رابط كامل (https://...) — لا يقبل مسار نسبي مثل /images/...")
+    .optional()
+    .or(z.literal(""))
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {

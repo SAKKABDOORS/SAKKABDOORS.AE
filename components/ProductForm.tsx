@@ -4,6 +4,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Category, Material, ProductWithRelations } from "@/lib/types";
 import MediaGalleryField, { type MediaItem } from "./admin/MediaGalleryField";
+import { describeApiError } from "@/lib/adminFormError";
+
+const FIELD_LABELS: Record<string, string> = {
+  slug: "الرابط المختصر",
+  nameAr: "الاسم (عربي)",
+  nameEn: "Name (English)",
+  descriptionAr: "الوصف (عربي)",
+  descriptionEn: "Description (English)",
+  categoryId: "الفئة",
+  material: "الخامة",
+  price: "السعر",
+  currency: "العملة",
+  images: "صور/فيديوهات المنتج"
+};
 
 const MATERIALS: Material[] = ["WPC", "UPVC", "ALUMINUM", "STEEL"];
 // Display label only — the stored/submitted value stays the real enum
@@ -65,7 +79,9 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
     setLoading(false);
 
     if (!res.ok) {
-      setError("تعذر حفظ المنتج. تحقق من الحقول وحاول مرة أخرى.");
+      const data = await res.json().catch(() => null);
+      const specific = describeApiError(data, FIELD_LABELS);
+      setError(specific ?? "تعذر حفظ المنتج. تحقق من الحقول وحاول مرة أخرى.");
       return;
     }
 

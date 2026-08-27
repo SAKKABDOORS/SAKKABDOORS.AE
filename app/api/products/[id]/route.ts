@@ -29,7 +29,12 @@ const updateSchema = z.object({
   inStock: z.boolean().optional(),
   featured: z.boolean().optional(),
   images: z
-    .array(z.object({ url: z.string().url(), type: z.enum(["IMAGE", "VIDEO"]).default("IMAGE") }))
+    .array(
+      z.object({
+        url: z.string().url("يجب أن يكون رابط كامل (https://...) — لا يقبل مسار نسبي مثل /images/..."),
+        type: z.enum(["IMAGE", "VIDEO"]).default("IMAGE")
+      })
+    )
     .optional()
 });
 
