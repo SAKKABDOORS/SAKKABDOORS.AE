@@ -5,7 +5,7 @@ export default function AboutMediaGallery({ items }: { items: AboutMediaContent[
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div className="mt-10 flex flex-wrap gap-6">
       {items.map((item, i) => {
         const caption = (item.title || item.description) && (
           <div className="mt-2">
@@ -14,9 +14,14 @@ export default function AboutMediaGallery({ items }: { items: AboutMediaContent[
           </div>
         );
 
+        // Regular items (photos, regular-shaped videos) sit 2 per row;
+        // Shorts are narrower (9:16) so 3 fit per row instead.
+        const shorts = item.type === "video" && isYouTubeShorts(item.url);
+        const basis = shorts ? "basis-full sm:basis-[calc(33.333%-16px)]" : "basis-full sm:basis-[calc(50%-12px)]";
+
         if (item.type === "image") {
           return (
-            <div key={i}>
+            <div key={i} className={basis}>
               <div className="overflow-hidden rounded-xl2 bg-brand-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.url} alt={item.title} className="aspect-video w-full object-cover" />
@@ -27,17 +32,9 @@ export default function AboutMediaGallery({ items }: { items: AboutMediaContent[
         }
 
         const youtubeId = parseYouTubeId(item.url);
-        // Shorts are vertical (9:16) — a taller, narrower box instead of
-        // the standard 16:9 one so it isn't letterboxed. Capped to a
-        // phone-ish width so it doesn't stretch full-column-width tall.
-        const shorts = isYouTubeShorts(item.url);
         return (
-          <div key={i}>
-            <div
-              className={`overflow-hidden rounded-xl2 bg-brand-900 ${
-                shorts ? "mx-auto aspect-[9/16] max-w-[280px]" : "aspect-video"
-              }`}
-            >
+          <div key={i} className={basis}>
+            <div className={`overflow-hidden rounded-xl2 bg-brand-900 ${shorts ? "aspect-[9/16]" : "aspect-video"}`}>
               {youtubeId ? (
                 <iframe
                   src={buildYouTubeEmbedUrl(youtubeId)}
