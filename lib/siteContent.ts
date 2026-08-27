@@ -106,7 +106,9 @@ export const aboutMediaContentSchema = z.object({
     .array(
       z.object({
         type: z.enum(["image", "video"]),
-        url: z.string().min(1)
+        url: z.string().min(1),
+        title: z.string().default(""),
+        description: z.string().default("")
       })
     )
     .max(12)

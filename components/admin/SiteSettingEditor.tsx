@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import IconPicker from "./IconPicker";
 import ImageUploadField from "./ImageUploadField";
-import MediaGalleryField from "./MediaGalleryField";
+import AboutMediaEditor from "./AboutMediaEditor";
 import type {
   AboutMediaContent,
   BrandingContent,
@@ -502,16 +502,5 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
         </div>
       ))}
     </div>
-  );
-}
-
-function AboutMediaEditor({ value, onChange }: { value: AboutMediaContent; onChange: (v: AboutMediaContent) => void }) {
-  return (
-    <MediaGalleryField
-      imagesLabel="الصور"
-      videosLabel="الفيديوهات (رابط يوتيوب أو رابط MP4 مباشر)"
-      items={value.items}
-      onChange={(items) => onChange({ items })}
-    />
   );
 }
