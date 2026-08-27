@@ -52,6 +52,7 @@ Rules:
 - Only answer using the SITE FACTS, KNOWLEDGE BASE and PRODUCT CATALOG below. If you don't know something, say so honestly and suggest contacting the team on WhatsApp instead of guessing.
 - Never invent prices, warranty terms, or delivery times that aren't listed below.
 - Keep answers short and friendly (2-4 sentences), like a helpful sales assistant.
+- Plain text only — no markdown (no **bold**, no bullet lists, no headings). This is rendered as-is in a chat bubble.
 - ${languageInstruction}
 
 SITE FACTS:
@@ -91,6 +92,38 @@ async function callAnthropic(system: string, history: ChatMessage[]) {
   return (data.content?.[0]?.text as string) ?? "";
 }
 
+async function callGemini(system: string, history: ChatMessage[]) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+
+  const model = process.env.AI_MODEL || "gemini-3.6-flash";
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: history.map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }]
+        })),
+        // Gemini's "thinking" tokens count against maxOutputTokens too, so
+        // this needs real headroom above the ~400 the other providers use
+        // or replies get cut off mid-sentence before any visible text comes out.
+        generationConfig: { maxOutputTokens: 1024 }
+      })
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Gemini API error: ${res.status} ${await res.text()}`);
+  }
+
+  const data = await res.json();
+  return (data.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? "";
+}
+
 async function callOpenAI(system: string, history: ChatMessage[]) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
@@ -116,9 +149,11 @@ async function callOpenAI(system: string, history: ChatMessage[]) {
   return (data.choices?.[0]?.message?.content as string) ?? "";
 }
 
+const PROVIDERS = ["anthropic", "openai", "gemini"] as const;
+
 export async function isAiEnabled() {
   const provider = process.env.AI_PROVIDER;
-  return provider === "anthropic" || provider === "openai";
+  return (PROVIDERS as readonly string[]).includes(provider ?? "");
 }
 
 /**
@@ -128,8 +163,8 @@ export async function isAiEnabled() {
  */
 export async function askAssistant(message: string, history: ChatMessage[], locale: string) {
   const provider = process.env.AI_PROVIDER;
-  if (provider !== "anthropic" && provider !== "openai") {
-    throw new Error("AI_PROVIDER is not configured (set it to 'anthropic' or 'openai' in .env)");
+  if (!(PROVIDERS as readonly string[]).includes(provider ?? "")) {
+    throw new Error("AI_PROVIDER is not configured (set it to 'anthropic', 'openai', or 'gemini' in .env)");
   }
 
   const system = await buildSystemPrompt(locale);
@@ -138,7 +173,9 @@ export async function askAssistant(message: string, history: ChatMessage[], loca
   const reply =
     provider === "anthropic"
       ? await callAnthropic(system, fullHistory)
-      : await callOpenAI(system, fullHistory);
+      : provider === "gemini"
+        ? await callGemini(system, fullHistory)
+        : await callOpenAI(system, fullHistory);
 
   return reply.trim();
 }

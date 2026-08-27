@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import KnowledgeManager from "@/components/KnowledgeManager";
 import { requirePageRole } from "@/lib/requirePageRole";
+import { isAiEnabled } from "@/lib/ai";
 
 export default async function AdminAiPage() {
   await requirePageRole("ai");
@@ -15,7 +16,7 @@ export default async function AdminAiPage() {
     updatedAt: e.updatedAt.toISOString()
   }));
 
-  const aiEnabled = process.env.AI_PROVIDER === "anthropic" || process.env.AI_PROVIDER === "openai";
+  const aiEnabled = await isAiEnabled();
 
   return (
     <div>
@@ -28,7 +29,7 @@ export default async function AdminAiPage() {
       {!aiEnabled && (
         <div className="mb-6 rounded-xl2 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           ⚠️ المساعد الذكي غير مفعّل حالياً. لتفعيله، املأ قيمة <code>AI_PROVIDER</code> ومفتاح الـ API المناسب
-          (<code>ANTHROPIC_API_KEY</code> أو <code>OPENAI_API_KEY</code>) بملف <code>.env</code> على السيرفر.
+          (<code>ANTHROPIC_API_KEY</code> أو <code>OPENAI_API_KEY</code> أو <code>GEMINI_API_KEY</code>) بملف <code>.env</code> على السيرفر.
         </div>
       )}
 
