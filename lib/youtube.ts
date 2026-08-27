@@ -22,6 +22,17 @@ export function parseYouTubeId(url: string | null | undefined): string | null {
   }
 }
 
+// Shorts are vertical (9:16) — callers use this to pick a taller video
+// box instead of the standard 16:9 one, so the video isn't letterboxed.
+export function isYouTubeShorts(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    return new URL(url).pathname.startsWith("/shorts/");
+  } catch {
+    return false;
+  }
+}
+
 // Normal, user-controlled embed (sound on, no autoplay/loop) — for a
 // regular gallery/content video, as opposed to a muted looping background.
 export function buildYouTubeEmbedUrl(videoId: string) {

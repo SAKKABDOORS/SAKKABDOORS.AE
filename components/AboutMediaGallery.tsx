@@ -1,5 +1,5 @@
 import type { AboutMediaContent } from "@/lib/siteContent";
-import { buildYouTubeEmbedUrl, parseYouTubeId } from "@/lib/youtube";
+import { buildYouTubeEmbedUrl, isYouTubeShorts, parseYouTubeId } from "@/lib/youtube";
 
 export default function AboutMediaGallery({ items }: { items: AboutMediaContent["items"] }) {
   if (items.length === 0) return null;
@@ -27,19 +27,27 @@ export default function AboutMediaGallery({ items }: { items: AboutMediaContent[
         }
 
         const youtubeId = parseYouTubeId(item.url);
+        // Shorts are vertical (9:16) — a taller, narrower box instead of
+        // the standard 16:9 one so it isn't letterboxed. Capped to a
+        // phone-ish width so it doesn't stretch full-column-width tall.
+        const shorts = isYouTubeShorts(item.url);
         return (
           <div key={i}>
-            <div className="overflow-hidden rounded-xl2 bg-brand-900">
+            <div
+              className={`overflow-hidden rounded-xl2 bg-brand-900 ${
+                shorts ? "mx-auto aspect-[9/16] max-w-[280px]" : "aspect-video"
+              }`}
+            >
               {youtubeId ? (
                 <iframe
                   src={buildYouTubeEmbedUrl(youtubeId)}
                   title={item.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="aspect-video w-full border-0"
+                  className="h-full w-full border-0"
                 />
               ) : (
-                <video src={item.url} controls playsInline className="aspect-video w-full object-cover" />
+                <video src={item.url} controls playsInline className="h-full w-full object-cover" />
               )}
             </div>
             {caption}

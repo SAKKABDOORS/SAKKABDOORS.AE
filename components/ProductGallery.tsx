@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Play } from "lucide-react";
-import { buildYouTubeEmbedUrl, parseYouTubeId } from "@/lib/youtube";
+import { buildYouTubeEmbedUrl, isYouTubeShorts, parseYouTubeId } from "@/lib/youtube";
 
 type GalleryImage = { url: string; alt: string; type?: "image" | "video" };
 
@@ -17,10 +17,14 @@ export default function ProductGallery({
   const [active, setActive] = useState(0);
   const current = shown[Math.min(active, shown.length - 1)];
   const youtubeId = current.type === "video" ? parseYouTubeId(current.url) : null;
+  // Shorts are vertical (9:16) — use a taller box instead of the standard
+  // square/4:3 one so it isn't letterboxed.
+  const shorts = current.type === "video" && isYouTubeShorts(current.url);
+  const boxAspect = shorts ? "mx-auto aspect-[9/16] max-w-[280px]" : "aspect-square sm:aspect-[4/3]";
 
   return (
     <div>
-      <div className="overflow-hidden rounded-xl2 bg-brand-100">
+      <div className={`overflow-hidden rounded-xl2 bg-brand-100 ${current.type === "video" ? boxAspect : ""}`}>
         {current.type === "video" ? (
           youtubeId ? (
             <iframe
@@ -28,10 +32,10 @@ export default function ProductGallery({
               title=""
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="aspect-square w-full border-0 sm:aspect-[4/3]"
+              className="h-full w-full border-0"
             />
           ) : (
-            <video src={current.url} controls playsInline className="aspect-square w-full object-cover sm:aspect-[4/3]" />
+            <video src={current.url} controls playsInline className="h-full w-full object-cover" />
           )
         ) : (
           <img src={current.url} alt={current.alt || fallbackAlt} className="h-full w-full object-cover" />
