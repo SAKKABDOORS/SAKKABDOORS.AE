@@ -42,7 +42,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "file_too_large" }, { status: 400 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  // The Blob store can authenticate either via a static BLOB_READ_WRITE_TOKEN
+  // or, with newer stores created from the dashboard, via OIDC using
+  // BLOB_STORE_ID + the ambient VERCEL_OIDC_TOKEN — either is fine.
+  if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
     return NextResponse.json({ error: "storage_not_configured" }, { status: 500 });
   }
 
