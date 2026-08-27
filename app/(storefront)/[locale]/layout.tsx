@@ -30,10 +30,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = isLocale(params.locale) ? params.locale : "ar";
   const dict = await getDictionary(locale);
+  const hero = await getSiteSetting("hero");
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Sakkab Doors";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
   const ogLocale = locale === "ar" ? "ar_AE" : "en_AE";
   const altOgLocale = locale === "ar" ? "en_AE" : "ar_AE";
+  // Site-wide fallback social-share image (real photography, not just the
+  // logo) — pages with their own product/category/property photo (see
+  // products/[slug], realestate/[slug]) override this with theirs.
+  const defaultOgImage = hero.backgroundImage;
 
   return {
     metadataBase: new URL(siteUrl),
@@ -52,12 +57,14 @@ export async function generateMetadata({
       description: dict.hero.subtitle,
       locale: ogLocale,
       alternateLocale: altOgLocale,
-      url: `/${locale}`
+      url: `/${locale}`,
+      images: defaultOgImage ? [defaultOgImage] : undefined
     },
     twitter: {
       card: "summary_large_image",
       title: dict.hero.title,
-      description: dict.hero.subtitle
+      description: dict.hero.subtitle,
+      images: defaultOgImage ? [defaultOgImage] : undefined
     }
   };
 }

@@ -1,28 +1,32 @@
 import { prisma } from "@/lib/prisma";
+import { getSiteSetting } from "@/lib/siteContent";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
-const SITE_FACTS = `
-SAKKAB Group — real estate development, aluminum works, and doors (WPC, UPVC, Aluminum).
-Locations: UAE - Abu Dhabi (Mohammed Bin Zayed City, Popular 12), UAE - Al Ain (Al Noud Companies), Syria (Damascus - Sahnaya).
-Contact: info@sakkabdoors.ae, +971508838615, +971508838054, +963984733335.
-`.trim();
-
 /**
- * Everything the assistant is allowed to know: fixed site facts + whatever
- * the admin has added in /admin/ai (the "training" data) + a capped slice
- * of the live product catalog. This is the whole grounding mechanism —
- * there's no fine-tuning, the admin just edits KnowledgeEntry rows.
+ * Everything the assistant is allowed to know: live site facts (branches,
+ * phone numbers, email — read from the same SiteSetting the admin edits in
+ * /admin/content, so this can never drift out of sync the way a hardcoded
+ * copy would) + whatever the admin has added in /admin/ai (the "training"
+ * data) + a capped slice of the live product catalog. There's no
+ * fine-tuning, the admin just edits KnowledgeEntry rows and site content.
  */
 async function buildSystemPrompt(locale: string) {
-  const [entries, products] = await Promise.all([
+  const [entries, products, footer] = await Promise.all([
     prisma.knowledgeEntry.findMany({ where: { isActive: true }, orderBy: { updatedAt: "desc" }, take: 30 }),
     prisma.product.findMany({
       include: { category: true },
       orderBy: { createdAt: "desc" },
       take: 40
-    })
+    }),
+    getSiteSetting("footer")
   ]);
+
+  const siteFacts = [
+    "SAKKAB Group — real estate development, aluminum works, and doors (WPC, UPVC, Aluminum).",
+    `Locations: ${footer.locations.map((loc) => `${loc.name.en} (${loc.address.en})`).join(", ")}.`,
+    `Contact: ${footer.email}, ${footer.locations.map((loc) => `+${loc.phone}`).join(", ")}.`
+  ].join("\n");
 
   const knowledgeText = entries.length
     ? entries.map((e) => `- [${e.category}] ${e.title}: ${e.content}`).join("\n")
@@ -51,7 +55,7 @@ Rules:
 - ${languageInstruction}
 
 SITE FACTS:
-${SITE_FACTS}
+${siteFacts}
 
 KNOWLEDGE BASE (maintained by the SAKKAB team):
 ${knowledgeText}
