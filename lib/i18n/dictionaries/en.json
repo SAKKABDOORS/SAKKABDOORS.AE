@@ -127,7 +127,12 @@
     "location": "Location",
     "apply_now": "Apply Now",
     "cancel": "Cancel",
-    "apply_message": "Applying for"
+    "apply_message": "Applying for",
+    "years_experience": "Years of Experience",
+    "reason_joining": "Reason for Applying",
+    "previous_workplaces": "Previous Workplaces",
+    "certificates": "Certificates & Qualifications",
+    "extra_message": "Additional Details (optional)"
   },
   "cart": {
     "title": "Quote Cart",

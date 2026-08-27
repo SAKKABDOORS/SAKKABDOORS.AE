@@ -25,6 +25,7 @@ export default async function AdminOrdersPage() {
                 <th className="p-3 text-start font-semibold">العميل</th>
                 <th className="p-3 text-start font-semibold">الهاتف / الإيميل</th>
                 <th className="p-3 text-start font-semibold">المنتجات</th>
+                <th className="p-3 text-start font-semibold">التفاصيل</th>
                 <th className="p-3 text-start font-semibold">الحالة</th>
                 <th className="p-3 text-start font-semibold">إيميل</th>
               </tr>
@@ -51,6 +52,13 @@ export default async function AdminOrdersPage() {
                           </li>
                         ))}
                       </ul>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {o.message ? (
+                      <div className="max-w-xs whitespace-pre-line text-xs text-ink-800/70">{o.message}</div>
+                    ) : (
+                      <span className="text-ink-800/40">—</span>
                     )}
                   </td>
                   <td className="p-3">

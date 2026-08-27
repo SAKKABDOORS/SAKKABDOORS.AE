@@ -5,7 +5,7 @@ import { Briefcase, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import type { Job } from "@/lib/types";
-import OrderForm from "./OrderForm";
+import JobApplyForm from "./JobApplyForm";
 import Reveal from "./motion/Reveal";
 
 export default function CareersView({
@@ -84,11 +84,9 @@ export default function CareersView({
               {dict.careers.cancel}
             </button>
           </div>
-          <OrderForm
+          <JobApplyForm
             dict={dict}
-            initialMessage={`${dict.careers.apply_message}: ${
-              locale === "ar" ? selectedJob.titleAr : selectedJob.titleEn
-            }`}
+            jobTitle={locale === "ar" ? selectedJob.titleAr : selectedJob.titleEn}
             onSuccess={() => setSelectedJob(null)}
           />
         </div>

@@ -127,7 +127,12 @@
     "location": "الموقع",
     "apply_now": "تقدم الآن",
     "cancel": "إلغاء",
-    "apply_message": "أتقدم لوظيفة"
+    "apply_message": "أتقدم لوظيفة",
+    "years_experience": "سنوات الخبرة",
+    "reason_joining": "سبب التقديم على هذه الوظيفة",
+    "previous_workplaces": "أماكن العمل السابقة",
+    "certificates": "الشهادات والمؤهلات",
+    "extra_message": "تفاصيل إضافية (اختياري)"
   },
   "cart": {
     "title": "سلة طلب عرض السعر",

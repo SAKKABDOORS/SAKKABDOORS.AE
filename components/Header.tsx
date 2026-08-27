@@ -105,13 +105,16 @@ export default function Header({
         </div>
       </div>
 
-      {/* Mobile nav — animated dropdown instead of the previous scrollable strip */}
+      {/* Mobile nav — animated dropdown instead of the previous scrollable strip.
+          max-height (not grid-template-rows fr-units, which older Android
+          WebViews — e.g. in-app browsers opened from WhatsApp/Instagram —
+          can fail to animate) so the menu reliably opens everywhere. */}
       <nav
-        className={`grid overflow-hidden border-t border-white/10 bg-brand-800 transition-[grid-template-rows] duration-200 md:hidden ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr] border-t-0"
+        className={`overflow-hidden border-t border-white/10 bg-brand-800 transition-[max-height] duration-300 md:hidden ${
+          open ? "max-h-screen" : "max-h-0 border-t-0"
         }`}
       >
-        <div className="container-page min-h-0 space-y-1 py-3">
+        <div className="container-page space-y-1 py-3">
           {links.map((link, i) => (
             <Fragment key={link.href}>
               <Link

@@ -6,7 +6,10 @@ import { sendNewOrderEmail } from "@/lib/mailer";
 const orderSchema = z.object({
   customerName: z.string().min(2).max(120),
   phone: z.string().min(6).max(30),
-  email: z.string().email(),
+  // Optional — the job-application form (CareersView -> JobApplyForm) never
+  // collects an email, only phone. z.literal("") covers OrderForm, which
+  // still sends "" instead of omitting the key when its own field is empty.
+  email: z.union([z.string().email(), z.literal("")]).optional(),
   city: z.string().max(80).optional(),
   message: z.string().max(2000).optional(),
   items: z
@@ -46,7 +49,7 @@ export async function POST(request: NextRequest) {
     data: {
       customerName: data.customerName,
       phone: data.phone,
-      email: data.email,
+      email: data.email || undefined,
       city: data.city,
       message: data.message,
       items: { create: validItems.map((i) => ({ productId: i.productId, quantity: i.quantity })) }

@@ -61,7 +61,7 @@ export async function sendNewOrderEmail(order: NewOrderEmailInput) {
         <tr><td><strong>الهاتف:</strong></td><td>${escapeHtml(order.phone)}</td></tr>
         ${order.email ? `<tr><td><strong>البريد الإلكتروني:</strong></td><td>${escapeHtml(order.email)}</td></tr>` : ""}
         ${order.city ? `<tr><td><strong>المدينة:</strong></td><td>${escapeHtml(order.city)}</td></tr>` : ""}
-        ${order.message ? `<tr><td valign="top"><strong>الرسالة:</strong></td><td>${escapeHtml(order.message)}</td></tr>` : ""}
+        ${order.message ? `<tr><td valign="top"><strong>الرسالة:</strong></td><td style="white-space:pre-line;">${escapeHtml(order.message)}</td></tr>` : ""}
       </table>
       ${
         order.items.length
