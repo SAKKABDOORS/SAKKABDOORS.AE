@@ -53,10 +53,10 @@ export default function CategorySpotlight({
         </Reveal>
 
         <Reveal delay={0.1} className={reverse ? "lg:order-1" : "lg:order-2"}>
-          {/* Un-framed, slightly tilted product shot with a soft floating
-              shadow per the brand reference — no card/crop around the photo
-              itself, unlike the grid thumbnails elsewhere on the site. */}
-          <div className="relative mx-auto aspect-[4/3] w-full max-w-md rotate-[8deg] drop-shadow-[0_25px_35px_rgba(25,49,35,0.35)] transition-transform duration-300 hover:rotate-[5deg]">
+          {/* Un-framed product shot with a soft floating shadow — no
+              card/crop around the photo itself, unlike the grid thumbnails
+              elsewhere on the site. */}
+          <div className="relative mx-auto aspect-[4/3] w-full max-w-md drop-shadow-[0_25px_35px_rgba(25,49,35,0.35)]">
             <img src={image} alt={name} className="h-full w-full object-contain" />
           </div>
         </Reveal>
