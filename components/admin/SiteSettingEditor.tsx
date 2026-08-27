@@ -382,6 +382,13 @@ function CtaEditor({ value, onChange }: { value: CtaContent; onChange: (v: CtaCo
   );
 }
 
+const SOCIAL_LABELS: Record<"facebook" | "instagram" | "youtube" | "linkedin", string> = {
+  facebook: "فيسبوك",
+  instagram: "إنستغرام",
+  youtube: "يوتيوب",
+  linkedin: "لينكد إن"
+};
+
 function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v: FooterContent) => void }) {
   return (
     <div className="space-y-6">
@@ -389,6 +396,23 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
         <label className="label">البريد الإلكتروني</label>
         <input className="input" value={value.email} onChange={(e) => onChange({ ...value, email: e.target.value })} />
       </div>
+
+      <div className="space-y-3 rounded-lg border border-brand-100 p-4">
+        <div className="text-sm font-semibold text-ink-800/70">روابط التواصل الاجتماعي (اتركها فاضية لإخفاء الأيقونة)</div>
+        {(["facebook", "instagram", "youtube", "linkedin"] as const).map((key) => (
+          <div key={key}>
+            <label className="label">{SOCIAL_LABELS[key]}</label>
+            <input
+              className="input"
+              dir="ltr"
+              placeholder="https://..."
+              value={value.social[key]}
+              onChange={(e) => onChange({ ...value, social: { ...value.social, [key]: e.target.value } })}
+            />
+          </div>
+        ))}
+      </div>
+
       {value.locations.map((loc, i) => (
         <div key={i} className="space-y-3 rounded-lg border border-brand-100 p-4">
           <div className="text-sm font-semibold text-ink-800/70">فرع {i + 1}</div>

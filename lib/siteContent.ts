@@ -51,6 +51,18 @@ export const ctaContentSchema = z.object({
   subtitle: bilingualText
 });
 
+// Empty string = hide that icon — the admin fills these in from
+// /admin/content once real page URLs are available, nothing shows a
+// dead/placeholder link in the meantime.
+const socialLinksSchema = z
+  .object({
+    facebook: z.string(),
+    instagram: z.string(),
+    youtube: z.string(),
+    linkedin: z.string()
+  })
+  .default({ facebook: "", instagram: "", youtube: "", linkedin: "" });
+
 export const footerContentSchema = z.object({
   email: z.string().email(),
   locations: z
@@ -62,7 +74,8 @@ export const footerContentSchema = z.object({
         phone: z.string().min(1)
       })
     )
-    .length(3)
+    .length(3),
+  social: socialLinksSchema
 });
 
 export const SITE_SETTING_SCHEMAS = {
@@ -142,7 +155,8 @@ export const SITE_SETTING_DEFAULTS: {
       { icon: "map-pin", name: { ar: arDict.footer.location_ad, en: "UAE - Abu Dhabi" }, address: { ar: arDict.footer.location_ad_address, en: "Mohammed Bin Zayed City, Popular 12" }, phone: "00971508838615" },
       { icon: "map-pin", name: { ar: arDict.footer.location_ain, en: "UAE - Al Ain" }, address: { ar: arDict.footer.location_ain_address, en: "Al Noud Companies" }, phone: "00971508838054" },
       { icon: "map-pin", name: { ar: arDict.footer.location_sy, en: "Syria" }, address: { ar: arDict.footer.location_sy_address, en: "Damascus - Sahnaya" }, phone: "00963984733335" }
-    ]
+    ],
+    social: { facebook: "", instagram: "", youtube: "", linkedin: "" }
   }
 };
 

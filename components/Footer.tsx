@@ -3,9 +3,25 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import type { FooterContent } from "@/lib/siteContent";
 import { resolveIcon, ICON_REGISTRY } from "@/lib/icons/registry";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { FacebookIcon, InstagramIcon, LinkedinIcon, WhatsAppIcon, YoutubeIcon } from "@/components/icons/SocialIcons";
 
 const MailIcon = ICON_REGISTRY.mail;
 const PhoneIcon = ICON_REGISTRY.phone;
+
+// Phone numbers stored in the CMS use a "00"-prefixed international format
+// for display (see FooterEditor) — WhatsApp's wa.me links need bare digits
+// (country code first, no "00"/"+"), same format as NEXT_PUBLIC_WHATSAPP_NUMBER.
+function toWhatsAppDigits(phone: string) {
+  return phone.replace(/^00/, "");
+}
+
+const SOCIAL_LINKS: { key: keyof FooterContent["social"]; Icon: typeof FacebookIcon }[] = [
+  { key: "facebook", Icon: FacebookIcon },
+  { key: "instagram", Icon: InstagramIcon },
+  { key: "youtube", Icon: YoutubeIcon },
+  { key: "linkedin", Icon: LinkedinIcon }
+];
 
 export default function Footer({
   dict,
@@ -27,6 +43,29 @@ export default function Footer({
           <div className="mt-4 flex items-center gap-2 text-sm text-brand-100/80">
             <MailIcon className="h-4 w-4 shrink-0" />
             <a href={`mailto:${content.email}`} className="hover:text-white">{content.email}</a>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            {SOCIAL_LINKS.filter(({ key }) => content.social[key]).map(({ key, Icon }) => (
+              <a
+                key={key}
+                href={content.social[key]}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={key}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-brand-50 transition hover:bg-white/20 hover:text-white"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
+            <a
+              href={buildWhatsAppLink(locale === "ar" ? "مرحباً، عندي استفسار" : "Hello, I have a question")}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="whatsapp"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-brand-50 transition hover:bg-white/20 hover:text-white"
+            >
+              <WhatsAppIcon className="h-4 w-4" />
+            </a>
           </div>
         </div>
 
@@ -59,7 +98,18 @@ export default function Footer({
                   </div>
                   <div className="mt-1 flex items-center gap-2">
                     <PhoneIcon className="h-3.5 w-3.5 shrink-0" />
-                    <a href={`tel:+${loc.phone}`} dir="ltr" className="hover:text-white">
+                    {/* Looks like a phone number, opens WhatsApp instead of
+                        the dialer — per owner request. */}
+                    <a
+                      href={buildWhatsAppLink(
+                        locale === "ar" ? "مرحباً، عندي استفسار" : "Hello, I have a question",
+                        toWhatsAppDigits(loc.phone)
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      dir="ltr"
+                      className="hover:text-white"
+                    >
                       +{loc.phone}
                     </a>
                   </div>
