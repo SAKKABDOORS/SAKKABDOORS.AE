@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { requireAdmin } from "@/lib/adminApi";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
 // SVG is deliberately excluded — it can carry embedded <script>, unlike
-// raster formats, and this file is served directly from /public.
+// raster formats, and this is served back to visitors' browsers directly.
 const ALLOWED_TYPES: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
@@ -15,12 +14,14 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/gif": "gif"
 };
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
-
-// Admin-only image upload (logo, hero background, etc.) — stores the file
-// on local disk under public/uploads and returns its public URL. The
-// filename is always server-generated (never the client-supplied name) to
-// rule out path traversal or extension-spoofing.
+// Admin-only image upload (logo, hero background, product/property photos,
+// etc.) — stored in Vercel Blob (BLOB_READ_WRITE_TOKEN, added automatically
+// once the Blob store is connected from the Vercel dashboard) and returns
+// its public URL. A local-disk write here would fail on Vercel: serverless
+// functions run on an ephemeral, read-only filesystem, so anything written
+// to public/ at runtime never persists or gets served. The filename is
+// always server-generated (never the client-supplied name) to rule out
+// path traversal or extension-spoofing.
 export async function POST(request: NextRequest) {
   const { response } = await requireAdmin();
   if (response) return response;
@@ -41,11 +42,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "file_too_large" }, { status: 400 });
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json({ error: "storage_not_configured" }, { status: 500 });
+  }
 
   const filename = `${randomUUID()}.${ext}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), bytes);
+  const blob = await put(filename, file, { access: "public", contentType: file.type });
 
-  return NextResponse.json({ url: `/uploads/${filename}` }, { status: 201 });
+  return NextResponse.json({ url: blob.url }, { status: 201 });
 }
