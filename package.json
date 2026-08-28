@@ -5,7 +5,7 @@
   "description": "Sakkab Doors – موقع شركة سكاب للأبواب (متجر إلكتروني ثنائي اللغة)",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx prisma/reset-darksham-password.ts && next build",
     "start": "next start",
     "start:cpanel": "NODE_ENV=production node server.js",
     "lint": "next lint",
