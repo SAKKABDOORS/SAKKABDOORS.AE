@@ -44,6 +44,15 @@ enum MediaType {
   VIDEO
 }
 
+// Sub-line within a material, only meaningful for Aluminum and WPC — null
+// for Composite/Steel. Drives the extra filter tabs on /aluminum and /wpc.
+enum ProductLine {
+  ALUMINUM_SLIM_SYSTEM
+  ALUMINUM_DOORS
+  WPC_EXTERNAL
+  WPC_CLOSETS
+}
+
 model Category {
   id            String    @id @default(cuid())
   slug          String    @unique
@@ -68,6 +77,7 @@ model Product {
   descriptionAr String         @db.Text
   descriptionEn String         @db.Text
   material      Material       @default(WPC)
+  productLine   ProductLine?
   price         Float
   currency      String         @default("AED")
   inStock       Boolean        @default(true)

@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
-import type { Category } from "@/lib/types";
+import type { Category, Material } from "@/lib/types";
+import { PRODUCT_LINE_LABELS, type ProductLine } from "@/lib/productLines";
 
 const MATERIALS = ["WPC", "UPVC", "ALUMINUM", "STEEL"] as const;
 
@@ -11,7 +12,9 @@ export default function ProductFilters({
   categories,
   locale,
   dict,
-  lockedCategory
+  lockedCategory,
+  lockedMaterial,
+  productLines
 }: {
   categories: Category[];
   locale: Locale;
@@ -21,6 +24,12 @@ export default function ProductFilters({
   // otherwise let a visitor navigate away via a `?category=` query param is
   // hidden instead of shown-but-conflicting.
   lockedCategory?: Category;
+  // Same idea, for the dedicated material sections (/wpc, /aluminum,
+  // /composite) — the material is fixed by which section you're on.
+  lockedMaterial?: Material;
+  // Only Aluminum/WPC have sub-lines (Slim System/Doors, External/Closets)
+  // — omitted (or empty) elsewhere, so no extra dropdown renders.
+  productLines?: ProductLine[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -56,21 +65,41 @@ export default function ProductFilters({
         </div>
       )}
 
-      <div className="flex-1">
-        <label className="label">{dict.products.filter_material}</label>
-        <select
-          className="input"
-          defaultValue={searchParams.get("material") ?? ""}
-          onChange={(e) => updateParam("material", e.target.value)}
-        >
-          <option value="">{dict.products.all_materials}</option>
-          {MATERIALS.map((m) => (
-            <option key={m} value={m}>
-              {dict.products.material[m]}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!lockedMaterial && (
+        <div className="flex-1">
+          <label className="label">{dict.products.filter_material}</label>
+          <select
+            className="input"
+            defaultValue={searchParams.get("material") ?? ""}
+            onChange={(e) => updateParam("material", e.target.value)}
+          >
+            <option value="">{dict.products.all_materials}</option>
+            {MATERIALS.map((m) => (
+              <option key={m} value={m}>
+                {dict.products.material[m]}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {productLines && productLines.length > 0 && (
+        <div className="flex-1">
+          <label className="label">{dict.products.filter_line}</label>
+          <select
+            className="input"
+            defaultValue={searchParams.get("line") ?? ""}
+            onChange={(e) => updateParam("line", e.target.value)}
+          >
+            <option value="">{dict.products.all_lines}</option>
+            {productLines.map((line) => (
+              <option key={line} value={line}>
+                {PRODUCT_LINE_LABELS[line][locale]}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="flex-1">
         <label className="label">{dict.products.sort}</label>

@@ -29,7 +29,7 @@
     "eyebrow": "Our Services",
     "heading": "We Do More Than Doors",
     "aluminum": "Aluminum",
-    "doors": "Doors",
+    "doors": "COMPOSITE",
     "real_estate": "Real Estate",
     "wpc": "WPC"
   },
@@ -68,8 +68,12 @@
   "products": {
     "title": "Catalog",
     "eyebrow": "Browse The Collection",
+    "choose_section": "Choose the section you'd like to browse",
+    "explore_section": "Explore",
     "filter_category": "Category",
     "filter_material": "Material",
+    "filter_line": "Line",
+    "all_lines": "All",
     "filter_price": "Price",
     "all_categories": "All Categories",
     "all_materials": "All Materials",

@@ -84,7 +84,7 @@ export default function Footer({
             {dict.footer.quick_links}
           </div>
           <ul className="space-y-2 text-sm text-brand-100/80">
-            <li><Link href={`/${locale}/products`} className="hover:text-white">{dict.nav.products}</Link></li>
+            <li><Link href={`/${locale}/catalog`} className="hover:text-white">{dict.nav.products}</Link></li>
             <li><Link href={`/${locale}/about`} className="hover:text-white">{dict.nav.about}</Link></li>
             <li><Link href={`/${locale}/contact`} className="hover:text-white">{dict.nav.contact}</Link></li>
           </ul>

@@ -21,7 +21,7 @@ export default function CTASection({
           <h2 className="font-display text-3xl text-ink-900 sm:text-5xl">{content.title[locale]}</h2>
           <p className="mx-auto mt-4 max-w-xl text-ink-800/80">{content.subtitle[locale]}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href={`/${locale}/products`} className="btn-secondary">
+            <Link href={`/${locale}/catalog`} className="btn-secondary">
               {dict.cta.catalog}
             </Link>
             <Link href={`/${locale}/contact`} className="btn-primary">

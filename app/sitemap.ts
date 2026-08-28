@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { locales } from "@/lib/i18n/config";
+import { categoryPath, productPath } from "@/lib/materialPaths";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
 
-const STATIC_PATHS = ["", "/products", "/realestate", "/about", "/contact", "/careers"];
+const STATIC_PATHS = ["", "/catalog", "/realestate", "/about", "/contact", "/careers"];
 
 // Queries Prisma for live product/property slugs — same reasoning as the
 // storefront layout's dynamic export: no DB connection exists at build
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, products, properties] = await Promise.all([
     prisma.category.findMany({ select: { slug: true } }),
-    prisma.product.findMany({ select: { slug: true, updatedAt: true } }),
+    prisma.product.findMany({ select: { slug: true, material: true, updatedAt: true } }),
     prisma.property.findMany({ select: { slug: true, updatedAt: true } })
   ]);
 
@@ -30,14 +31,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     for (const category of categories) {
       entries.push({
-        url: `${SITE_URL}/${locale}/products/${category.slug}`,
+        url: `${SITE_URL}/${locale}${categoryPath(category.slug)}`,
         changeFrequency: "weekly",
         priority: 0.8
       });
     }
     for (const product of products) {
       entries.push({
-        url: `${SITE_URL}/${locale}/products/${product.slug}`,
+        url: `${SITE_URL}/${locale}${productPath(product.material, product.slug)}`,
         lastModified: product.updatedAt,
         changeFrequency: "weekly",
         priority: 0.6

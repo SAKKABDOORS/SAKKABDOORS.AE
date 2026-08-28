@@ -28,7 +28,7 @@ export default function Header({
 
   const links = [
     { href: `/${locale}`, label: dict.nav.home },
-    { href: `/${locale}/products`, label: dict.nav.products },
+    { href: `/${locale}/catalog`, label: dict.nav.products },
     { href: `/${locale}/about`, label: dict.nav.about },
     { href: `/${locale}/careers`, label: dict.nav.careers }
   ];

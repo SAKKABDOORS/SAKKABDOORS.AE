@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import type { Category } from "@/lib/types";
+import { categoryPath } from "@/lib/materialPaths";
 import Reveal from "./motion/Reveal";
 
 export default function CategorySpotlight({
@@ -43,10 +44,10 @@ export default function CategorySpotlight({
             <p className="mt-4 max-w-lg text-ink-800/80">&ldquo;{description}&rdquo;</p>
           )}
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/${locale}/products/${category.slug}`} className="btn-pill-solid">
+            <Link href={`/${locale}${categoryPath(category.slug)}`} className="btn-pill-solid">
               {dict.spotlight.shop_now}
             </Link>
-            <Link href={`/${locale}/products/${category.slug}`} className="btn-pill-outline">
+            <Link href={`/${locale}${categoryPath(category.slug)}`} className="btn-pill-outline">
               {dict.spotlight.details}
             </Link>
           </div>

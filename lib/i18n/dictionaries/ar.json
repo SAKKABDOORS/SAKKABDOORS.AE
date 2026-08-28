@@ -29,7 +29,7 @@
     "eyebrow": "خدماتنا",
     "heading": "نقدم أكثر من الأبواب",
     "aluminum": "ألمنيوم",
-    "doors": "أبواب",
+    "doors": "COMPOSITE",
     "real_estate": "عقارات",
     "wpc": "WPC"
   },
@@ -68,8 +68,12 @@
   "products": {
     "title": "الكتالوج",
     "eyebrow": "تصفح المجموعة",
+    "choose_section": "اختر القسم يلي بدك تتصفحه",
+    "explore_section": "تصفح",
     "filter_category": "الفئة",
     "filter_material": "الخامة",
+    "filter_line": "الخط",
+    "all_lines": "الكل",
     "filter_price": "السعر",
     "all_categories": "كل الفئات",
     "all_materials": "كل الخامات",

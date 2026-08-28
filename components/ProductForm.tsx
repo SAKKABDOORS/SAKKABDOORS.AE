@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Category, Material, ProductWithRelations } from "@/lib/types";
 import MediaGalleryField, { type MediaItem } from "./admin/MediaGalleryField";
 import { describeApiError } from "@/lib/adminFormError";
+import { MATERIAL_PRODUCT_LINES, PRODUCT_LINE_LABELS, type ProductLine } from "@/lib/productLines";
 
 const FIELD_LABELS: Record<string, string> = {
   slug: "الرابط المختصر",
@@ -14,6 +15,7 @@ const FIELD_LABELS: Record<string, string> = {
   descriptionEn: "Description (English)",
   categoryId: "الفئة",
   material: "الخامة",
+  productLine: "خط الإنتاج",
   price: "السعر",
   currency: "العملة",
   images: "صور/فيديوهات المنتج"
@@ -35,8 +37,13 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
   const [images, setImages] = useState<MediaItem[]>(
     product?.images.map((i) => ({ url: i.url, type: i.type === "VIDEO" ? "video" : "image" })) ?? []
   );
+  const [material, setMaterial] = useState<Material>(product?.material ?? "WPC");
+  const [productLine, setProductLine] = useState<ProductLine | "">(
+    (product?.productLine as ProductLine | null) ?? ""
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const availableLines = MATERIAL_PRODUCT_LINES[material] ?? [];
 
   useEffect(() => {
     fetch("/api/categories")
@@ -59,7 +66,8 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
       descriptionAr: String(form.get("descriptionAr") || "").trim(),
       descriptionEn: String(form.get("descriptionEn") || "").trim(),
       categoryId: String(form.get("categoryId") || ""),
-      material: String(form.get("material") || "WPC"),
+      material,
+      productLine: availableLines.includes(productLine as ProductLine) ? productLine : null,
       price: Number(form.get("price") || 0),
       currency: String(form.get("currency") || "AED"),
       inStock: form.get("inStock") === "on",
@@ -130,7 +138,17 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
         </div>
         <div>
           <label className="label">الخامة</label>
-          <select className="input" name="material" defaultValue={product?.material ?? "WPC"}>
+          <select
+            className="input"
+            value={material}
+            onChange={(e) => {
+              const next = e.target.value as Material;
+              setMaterial(next);
+              if (!(MATERIAL_PRODUCT_LINES[next] ?? []).includes(productLine as ProductLine)) {
+                setProductLine("");
+              }
+            }}
+          >
             {MATERIALS.map((m) => (
               <option key={m} value={m}>{MATERIAL_LABELS[m]}</option>
             ))}
@@ -141,6 +159,22 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
           <input className="input" name="currency" defaultValue={product?.currency ?? "AED"} />
         </div>
       </div>
+
+      {availableLines.length > 0 && (
+        <div>
+          <label className="label">خط الإنتاج (اختياري)</label>
+          <select
+            className="input"
+            value={productLine}
+            onChange={(e) => setProductLine(e.target.value as ProductLine | "")}
+          >
+            <option value="">بدون تحديد</option>
+            {availableLines.map((line) => (
+              <option key={line} value={line}>{PRODUCT_LINE_LABELS[line].ar}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="label">السعر</label>

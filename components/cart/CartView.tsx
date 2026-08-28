@@ -23,7 +23,7 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
         <div className="card mx-auto max-w-md border-emerald-200 bg-emerald-50 p-8 text-emerald-800">
           {dict.order_form.success}
         </div>
-        <Link href={`/${locale}/products`} className="btn-primary mt-6 inline-flex">
+        <Link href={`/${locale}/catalog`} className="btn-primary mt-6 inline-flex">
           {dict.cart.browse_catalog}
         </Link>
       </div>
@@ -38,7 +38,7 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
         </div>
         <h1 className="mt-4 text-2xl font-bold text-ink-900">{dict.cart.title}</h1>
         <p className="mt-3 text-ink-800/70">{dict.cart.empty}</p>
-        <Link href={`/${locale}/products`} className="btn-primary mt-6 inline-flex">
+        <Link href={`/${locale}/catalog`} className="btn-primary mt-6 inline-flex">
           {dict.cart.browse_catalog}
         </Link>
       </div>

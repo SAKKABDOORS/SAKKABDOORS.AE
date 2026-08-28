@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import { firstProductImageUrl, type ProductWithRelations } from "@/lib/types";
+import { productPath } from "@/lib/materialPaths";
 import AddToCartButton from "./cart/AddToCartButton";
 
 export default function ProductCard({
@@ -27,7 +28,7 @@ export default function ProductCard({
 
   return (
     <div className="card-interactive group flex flex-col overflow-hidden">
-      <Link href={`/${locale}/products/${product.slug}`} className="flex flex-1 flex-col">
+      <Link href={`/${locale}${productPath(product.material, product.slug)}`} className="flex flex-1 flex-col">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-brand-100">
           <Image
             src={image}
