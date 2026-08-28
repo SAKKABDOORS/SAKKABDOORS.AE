@@ -38,12 +38,25 @@ export default function Hero({
           standard 16:9 "cover" math) + dark gradient overlay */}
       <div className="absolute inset-0">
         {youtubeId ? (
-          <iframe
-            src={buildYouTubeBackgroundEmbedUrl(youtubeId)}
-            title=""
-            allow="autoplay; encrypted-media"
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
-          />
+          <>
+            {/* Android Chrome is far stricter than desktop/iOS about
+                autoplaying a cross-origin YouTube iframe — when it's
+                blocked (or just slow to load), this photo underneath is
+                what actually shows instead of a blank area. */}
+            {content.backgroundImage && (
+              <img
+                src={content.backgroundImage}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
+            <iframe
+              src={buildYouTubeBackgroundEmbedUrl(youtubeId)}
+              title=""
+              allow="autoplay; encrypted-media"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
+            />
+          </>
         ) : isDirectVideo ? (
           <video
             src={content.backgroundVideo}
