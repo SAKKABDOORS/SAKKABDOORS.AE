@@ -8,10 +8,10 @@ export default function ServicesGrid({ locale, content }: { locale: Locale; cont
   return (
     <section className="bg-sage-300 py-16">
       <div className="container-page">
-        <div className="relative mb-10 text-center">
+        <div className="relative mb-10 overflow-hidden text-center">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 -top-4 select-none text-6xl font-extrabold uppercase tracking-widest text-white/40 sm:-top-6 sm:text-8xl"
+            className="pointer-events-none absolute inset-x-0 top-0 select-none text-3xl font-extrabold uppercase tracking-widest text-white/40 sm:-top-4 sm:text-6xl lg:-top-6 lg:text-8xl"
           >
             SERVICE
           </span>
