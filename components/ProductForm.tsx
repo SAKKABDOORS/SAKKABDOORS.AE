@@ -37,6 +37,7 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
   const [images, setImages] = useState<MediaItem[]>(
     product?.images.map((i) => ({ url: i.url, type: i.type === "VIDEO" ? "video" : "image" })) ?? []
   );
+  const [categoryId, setCategoryId] = useState<string>(product?.categoryId ?? "");
   const [material, setMaterial] = useState<Material>(product?.material ?? "WPC");
   const [productLine, setProductLine] = useState<ProductLine | "">(
     (product?.productLine as ProductLine | null) ?? ""
@@ -65,7 +66,7 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
       nameEn: String(form.get("nameEn") || "").trim(),
       descriptionAr: String(form.get("descriptionAr") || "").trim(),
       descriptionEn: String(form.get("descriptionEn") || "").trim(),
-      categoryId: String(form.get("categoryId") || ""),
+      categoryId,
       material,
       productLine: availableLines.includes(productLine as ProductLine) ? productLine : null,
       price: Number(form.get("price") || 0),
@@ -129,7 +130,12 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label className="label">الفئة</label>
-          <select className="input" name="categoryId" defaultValue={product?.categoryId} required>
+          <select
+            className="input"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            required
+          >
             <option value="" disabled>اختر فئة</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.nameAr}</option>
