@@ -3,6 +3,7 @@ import type { Material } from "@/lib/types";
 export const PRODUCT_LINES = [
   "ALUMINUM_SLIM_SYSTEM",
   "ALUMINUM_DOORS",
+  "ALUMINUM_ECOBOND",
   "WPC_EXTERNAL",
   "WPC_CLOSETS"
 ] as const;
@@ -16,6 +17,7 @@ export function isProductLine(value: string): value is ProductLine {
 export const PRODUCT_LINE_LABELS: Record<ProductLine, { ar: string; en: string }> = {
   ALUMINUM_SLIM_SYSTEM: { ar: "نظام سلم (Slim System)", en: "Slim System" },
   ALUMINUM_DOORS: { ar: "أبواب عادية", en: "Doors" },
+  ALUMINUM_ECOBOND: { ar: "إيكوبوند", en: "Ecobond" },
   WPC_EXTERNAL: { ar: "خارجي", en: "External" },
   WPC_CLOSETS: { ar: "خزائن (كلوزيت)", en: "Closets" }
 };
@@ -23,6 +25,6 @@ export const PRODUCT_LINE_LABELS: Record<ProductLine, { ar: string; en: string }
 // Which lines apply to which material — Composite/Steel have none, so the
 // line filter/field just doesn't render for them.
 export const MATERIAL_PRODUCT_LINES: Partial<Record<Material, ProductLine[]>> = {
-  ALUMINUM: ["ALUMINUM_SLIM_SYSTEM", "ALUMINUM_DOORS"],
+  ALUMINUM: ["ALUMINUM_SLIM_SYSTEM", "ALUMINUM_DOORS", "ALUMINUM_ECOBOND"],
   WPC: ["WPC_EXTERNAL", "WPC_CLOSETS"]
 };

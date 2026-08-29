@@ -24,7 +24,10 @@ const updateSchema = z.object({
   descriptionEn: z.string().min(1).optional(),
   categoryId: z.string().min(1).optional(),
   material: z.enum(["WPC", "UPVC", "ALUMINUM", "STEEL"]).optional(),
-  productLine: z.enum(["ALUMINUM_SLIM_SYSTEM", "ALUMINUM_DOORS", "WPC_EXTERNAL", "WPC_CLOSETS"]).nullable().optional(),
+  productLine: z
+    .enum(["ALUMINUM_SLIM_SYSTEM", "ALUMINUM_DOORS", "ALUMINUM_ECOBOND", "WPC_EXTERNAL", "WPC_CLOSETS"])
+    .nullable()
+    .optional(),
   price: z.number().positive().optional(),
   currency: z.string().min(1).max(10).optional(),
   inStock: z.boolean().optional(),
