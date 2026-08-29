@@ -24,8 +24,29 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(products);
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Generated from the English name — appends -2, -3, ... on collision so
+// admins never have to think about slugs (see the "slug" field this
+// replaced: it was blocking non-technical staff from adding products).
+async function uniqueSlug(base: string): Promise<string> {
+  const root = base || "product";
+  let candidate = root;
+  let n = 2;
+  while (await prisma.product.findUnique({ where: { slug: candidate }, select: { id: true } })) {
+    candidate = `${root}-${n}`;
+    n++;
+  }
+  return candidate;
+}
+
 const productSchema = z.object({
-  slug: z.string().min(2).max(120),
   nameAr: z.string().min(1),
   nameEn: z.string().min(1),
   descriptionAr: z.string().min(1),
@@ -65,10 +86,12 @@ export async function POST(request: NextRequest) {
   }
 
   const { images, ...rest } = parsed.data;
+  const slug = await uniqueSlug(slugify(rest.nameEn));
 
   const product = await prisma.product.create({
     data: {
       ...rest,
+      slug,
       images: {
         create: images.map((img, i) => ({ url: img.url, type: img.type, position: i }))
       }

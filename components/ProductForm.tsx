@@ -61,7 +61,6 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
     const form = new FormData(e.currentTarget);
 
     const payload = {
-      slug: String(form.get("slug") || "").trim(),
       nameAr: String(form.get("nameAr") || "").trim(),
       nameEn: String(form.get("nameEn") || "").trim(),
       descriptionAr: String(form.get("descriptionAr") || "").trim(),
@@ -109,11 +108,6 @@ export default function ProductForm({ product }: { product?: ProductWithRelation
           <label className="label">Name (English)</label>
           <input className="input" name="nameEn" defaultValue={product?.nameEn} required />
         </div>
-      </div>
-
-      <div>
-        <label className="label">الرابط المختصر (slug) — أحرف إنجليزية وشرطات فقط</label>
-        <input className="input" name="slug" defaultValue={product?.slug} pattern="[a-z0-9\-]+" required />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
