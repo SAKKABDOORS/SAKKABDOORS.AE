@@ -46,9 +46,7 @@ export default function ProductDetailView({
           <h1 className="mt-1 text-3xl font-bold text-ink-900">{name}</h1>
 
           <div className="mt-4 flex items-center gap-4">
-            <span className="text-2xl font-extrabold text-brand-700">
-              {product.price.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {product.currency}
-            </span>
+            <span className="text-2xl font-extrabold text-brand-700">{dict.products.ask_price}</span>
             <span
               className={`text-sm font-medium ${
                 product.inStock ? "text-emerald-600" : "text-red-500"

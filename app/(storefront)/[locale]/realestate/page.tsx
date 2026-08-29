@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import RealEstateFilters from "@/components/RealEstateFilters";
 import PropertyCard from "@/components/PropertyCard";
 import Reveal from "@/components/motion/Reveal";
+import { getSiteSetting } from "@/lib/siteContent";
+import { Download } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const locale = isLocale(params.locale) ? params.locale : "ar";
@@ -33,6 +35,7 @@ export default async function RealEstatePage({
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
 
+  const catalogs = await getSiteSetting("catalogs");
   const allProperties = await prisma.property.findMany({ select: { regionAr: true, regionEn: true } });
   const uniqueRegions = Array.from(new Map(allProperties.map((p) => [p.regionAr, p])).values());
   const regions = uniqueRegions.map((r) => ({ ar: r.regionAr, en: r.regionEn }));
@@ -63,6 +66,17 @@ export default async function RealEstatePage({
             <span className="eyebrow">{dict.realestate.eyebrow}</span>
             <h1 className="font-display mb-6 mt-2 text-2xl text-ink-900 sm:text-4xl">{dict.realestate.title}</h1>
             <RealEstateFilters regions={regions} locale={locale} dict={dict} />
+            {catalogs.realestate && (
+              <a
+                href={catalogs.realestate}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary mt-4 inline-flex"
+              >
+                <Download className="h-4 w-4" />
+                {dict.products.download_catalog}
+              </a>
+            )}
           </Reveal>
         </div>
       </div>

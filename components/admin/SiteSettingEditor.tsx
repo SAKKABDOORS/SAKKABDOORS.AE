@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import IconPicker from "./IconPicker";
 import ImageUploadField from "./ImageUploadField";
+import PdfUploadField from "./PdfUploadField";
 import AboutMediaEditor from "./AboutMediaEditor";
 import type {
   AboutMediaContent,
   BrandingContent,
+  CatalogsContent,
   CtaContent,
   FooterContent,
   HeroContent,
@@ -25,7 +27,8 @@ type AnyContent =
   | QualityContent
   | CtaContent
   | FooterContent
-  | AboutMediaContent;
+  | AboutMediaContent
+  | CatalogsContent;
 
 function BilingualInput({
   label,
@@ -98,6 +101,7 @@ export default function SiteSettingEditor({
       {settingKey === "cta" && <CtaEditor value={value as CtaContent} onChange={setValue} />}
       {settingKey === "footer" && <FooterEditor value={value as FooterContent} onChange={setValue} />}
       {settingKey === "about_media" && <AboutMediaEditor value={value as AboutMediaContent} onChange={setValue} />}
+      {settingKey === "catalogs" && <CatalogsEditor value={value as CatalogsContent} onChange={setValue} />}
 
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}
       {saved && <p className="text-sm font-medium text-emerald-600">تم الحفظ بنجاح.</p>}
@@ -500,6 +504,32 @@ function FooterEditor({ value, onChange }: { value: FooterContent; onChange: (v:
             />
           </div>
         </div>
+      ))}
+    </div>
+  );
+}
+
+const CATALOG_SECTION_LABELS: Record<keyof CatalogsContent, string> = {
+  wpc: "كتالوج WPC",
+  aluminum: "كتالوج الألمنيوم",
+  composite: "كتالوج COMPOSITE",
+  realestate: "كتالوج العقارات"
+};
+
+function CatalogsEditor({ value, onChange }: { value: CatalogsContent; onChange: (v: CatalogsContent) => void }) {
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-ink-800/60">
+        ملف PDF جاهز ترفعه انت (مش الكتالوج التلقائي المبني من المنتجات) — بيظهر كزر تحميل بصفحة القسم
+        المطابق للزوار. اتركه فاضي لإخفاء الزر. الحد الأقصى 4MB لكل ملف.
+      </p>
+      {(Object.keys(CATALOG_SECTION_LABELS) as (keyof CatalogsContent)[]).map((key) => (
+        <PdfUploadField
+          key={key}
+          label={CATALOG_SECTION_LABELS[key]}
+          value={value[key]}
+          onChange={(url) => onChange({ ...value, [key]: url })}
+        />
       ))}
     </div>
   );

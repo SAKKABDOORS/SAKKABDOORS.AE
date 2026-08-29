@@ -5,6 +5,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import MaterialCatalogView from "@/components/catalog/MaterialCatalogView";
 import { MATERIAL_PRODUCT_LINES } from "@/lib/productLines";
+import { getSiteSetting } from "@/lib/siteContent";
 
 const CATEGORY_SLUG = "aluminum-doors";
 
@@ -36,7 +37,10 @@ export default async function AluminumCatalogPage({
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
 
-  const category = await prisma.category.findUnique({ where: { slug: CATEGORY_SLUG } });
+  const [category, catalogs] = await Promise.all([
+    prisma.category.findUnique({ where: { slug: CATEGORY_SLUG } }),
+    getSiteSetting("catalogs")
+  ]);
   if (!category) notFound();
 
   return (
@@ -47,6 +51,7 @@ export default async function AluminumCatalogPage({
       dict={dict}
       searchParams={searchParams}
       productLines={MATERIAL_PRODUCT_LINES.ALUMINUM}
+      catalogPdfUrl={catalogs.aluminum || undefined}
     />
   );
 }

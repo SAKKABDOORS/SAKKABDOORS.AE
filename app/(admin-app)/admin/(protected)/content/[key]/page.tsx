@@ -12,7 +12,8 @@ const LABELS: Record<SiteSettingKey, string> = {
   quality: "قسم الثقة",
   cta: "قسم الدعوة لاتخاذ إجراء",
   footer: "الفوتر",
-  about_media: "صور وفيديوهات صفحة من نحن"
+  about_media: "صور وفيديوهات صفحة من نحن",
+  catalogs: "كتالوجات PDF"
 };
 
 function isSiteSettingKey(key: string): key is SiteSettingKey {

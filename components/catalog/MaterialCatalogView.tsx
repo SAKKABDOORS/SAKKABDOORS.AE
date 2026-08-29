@@ -6,6 +6,7 @@ import { isProductLine, type ProductLine } from "@/lib/productLines";
 import ProductFilters from "@/components/ProductFilters";
 import ProductCatalogView from "@/components/ProductCatalogView";
 import Reveal from "@/components/motion/Reveal";
+import { Download } from "lucide-react";
 
 // Shared by /wpc, /aluminum, /composite (and the legacy /products/[slug]
 // category branch) — one material's catalog, optionally with a
@@ -16,7 +17,8 @@ export default async function MaterialCatalogView({
   locale,
   dict,
   searchParams,
-  productLines
+  productLines,
+  catalogPdfUrl
 }: {
   category: Category;
   material: Material;
@@ -24,6 +26,9 @@ export default async function MaterialCatalogView({
   dict: Dictionary;
   searchParams: { sort?: string; line?: string };
   productLines?: ProductLine[];
+  // Admin-uploaded PDF for this section (not the auto-generated one) —
+  // hidden until one's uploaded from /admin/content -> "كتالوجات PDF".
+  catalogPdfUrl?: string;
 }) {
   const categories = await prisma.category.findMany({ orderBy: { nameEn: "asc" } });
 
@@ -90,6 +95,17 @@ export default async function MaterialCatalogView({
             lockedMaterial={material}
             productLines={productLines}
           />
+          {catalogPdfUrl && (
+            <a
+              href={catalogPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary mt-4 inline-flex"
+            >
+              <Download className="h-4 w-4" />
+              {dict.products.download_catalog}
+            </a>
+          )}
         </div>
 
         <div className={category.heroImage ? "mt-8" : undefined}>

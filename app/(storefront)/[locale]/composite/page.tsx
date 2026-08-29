@@ -4,6 +4,7 @@ import { getDictionary } from "@/lib/i18n/getDictionary";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import MaterialCatalogView from "@/components/catalog/MaterialCatalogView";
+import { getSiteSetting } from "@/lib/siteContent";
 
 const CATEGORY_SLUG = "upvc-doors";
 
@@ -35,7 +36,10 @@ export default async function CompositeCatalogPage({
   const locale = params.locale as Locale;
   const dict = await getDictionary(locale);
 
-  const category = await prisma.category.findUnique({ where: { slug: CATEGORY_SLUG } });
+  const [category, catalogs] = await Promise.all([
+    prisma.category.findUnique({ where: { slug: CATEGORY_SLUG } }),
+    getSiteSetting("catalogs")
+  ]);
   if (!category) notFound();
 
   return (
@@ -45,6 +49,7 @@ export default async function CompositeCatalogPage({
       locale={locale}
       dict={dict}
       searchParams={searchParams}
+      catalogPdfUrl={catalogs.composite || undefined}
     />
   );
 }

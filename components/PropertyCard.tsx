@@ -43,9 +43,7 @@ export default function PropertyCard({
           <span className="text-xs font-medium uppercase tracking-wide text-brand-500">{region}</span>
           <h3 className="font-semibold text-ink-900">{title}</h3>
         </Link>
-        <span className="pt-3 text-lg font-bold text-brand-700">
-          {property.price.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {property.currency}
-        </span>
+        <span className="pt-3 text-lg font-bold text-brand-700">{dict.realestate.ask_price}</span>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <a

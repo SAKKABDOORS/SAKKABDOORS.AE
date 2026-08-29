@@ -45,9 +45,6 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
     );
   }
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const currency = items[0]?.currency ?? "AED";
-
   return (
     <div className="container-page py-10">
       <h1 className="text-2xl font-bold text-ink-900">{dict.cart.title}</h1>
@@ -63,9 +60,7 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold text-ink-900">{item.name}</div>
-                  <div className="text-sm text-ink-800/60">
-                    {item.price.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {item.currency}
-                  </div>
+                  <div className="text-sm text-ink-800/60">{dict.products.ask_price}</div>
                 </div>
                 <div>
                   <label htmlFor={`qty-${item.productId}`} className="sr-only">
@@ -91,13 +86,6 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
               </div>
             </Reveal>
           ))}
-
-          <div className="card flex items-center justify-between p-4">
-            <span className="font-semibold text-ink-900">{dict.cart.estimated_total}</span>
-            <span className="text-lg font-bold text-brand-700">
-              {subtotal.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {currency}
-            </span>
-          </div>
         </div>
 
         <OrderForm

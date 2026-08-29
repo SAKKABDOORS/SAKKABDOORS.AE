@@ -114,6 +114,16 @@ export const aboutMediaContentSchema = z.object({
     .max(12)
 });
 
+// One PDF slot per catalog section — admin-uploaded (not auto-generated
+// from the live product data, unlike /api/admin/catalog-pdf), shown as a
+// "Download Catalog" button on that section's page only once uploaded.
+export const catalogsContentSchema = z.object({
+  wpc: z.string().default(""),
+  aluminum: z.string().default(""),
+  composite: z.string().default(""),
+  realestate: z.string().default("")
+});
+
 export const SITE_SETTING_SCHEMAS = {
   branding: brandingContentSchema,
   hero: heroContentSchema,
@@ -122,7 +132,8 @@ export const SITE_SETTING_SCHEMAS = {
   quality: qualityContentSchema,
   cta: ctaContentSchema,
   footer: footerContentSchema,
-  about_media: aboutMediaContentSchema
+  about_media: aboutMediaContentSchema,
+  catalogs: catalogsContentSchema
 } as const;
 
 export type SiteSettingKey = keyof typeof SITE_SETTING_SCHEMAS;
@@ -134,6 +145,7 @@ export type QualityContent = z.infer<typeof qualityContentSchema>;
 export type CtaContent = z.infer<typeof ctaContentSchema>;
 export type FooterContent = z.infer<typeof footerContentSchema>;
 export type AboutMediaContent = z.infer<typeof aboutMediaContentSchema>;
+export type CatalogsContent = z.infer<typeof catalogsContentSchema>;
 
 // The current static dictionaries are the seed/fallback values — a fresh or
 // not-yet-seeded DB (or one missing a specific key) still renders sane
@@ -147,6 +159,7 @@ export const SITE_SETTING_DEFAULTS: {
   cta: CtaContent;
   footer: FooterContent;
   about_media: AboutMediaContent;
+  catalogs: CatalogsContent;
 } = {
   branding: {
     logoUrl: "/images/logo-mark.png",
@@ -201,6 +214,12 @@ export const SITE_SETTING_DEFAULTS: {
   },
   about_media: {
     items: []
+  },
+  catalogs: {
+    wpc: "",
+    aluminum: "",
+    composite: "",
+    realestate: ""
   }
 };
 

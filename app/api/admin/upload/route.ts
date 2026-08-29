@@ -3,7 +3,11 @@ import { randomUUID } from "crypto";
 import { put } from "@vercel/blob";
 import { requireAdmin } from "@/lib/adminApi";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+// Vercel's serverless functions cap the request body at ~4.5MB regardless
+// of what's configured here — a PDF catalog needs to actually fit through
+// that, so this stays safely under it rather than at a round 5MB.
+const MAX_PDF_BYTES = 4 * 1024 * 1024; // 4MB
 
 // SVG is deliberately excluded — it can carry embedded <script>, unlike
 // raster formats, and this is served back to visitors' browsers directly.
@@ -11,7 +15,8 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
-  "image/gif": "gif"
+  "image/gif": "gif",
+  "application/pdf": "pdf"
 };
 
 // Admin-only image upload (logo, hero background, product/property photos,
@@ -38,7 +43,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unsupported_type" }, { status: 400 });
   }
 
-  if (file.size > MAX_BYTES) {
+  const maxBytes = file.type === "application/pdf" ? MAX_PDF_BYTES : MAX_IMAGE_BYTES;
+  if (file.size > maxBytes) {
     return NextResponse.json({ error: "file_too_large" }, { status: 400 });
   }
 

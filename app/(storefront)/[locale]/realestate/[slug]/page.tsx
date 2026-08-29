@@ -69,9 +69,7 @@ export default async function PropertyDetailPage({
           <h1 className="mt-1 text-3xl font-bold text-ink-900">{title}</h1>
 
           <div className="mt-4">
-            <span className="text-2xl font-extrabold text-brand-700">
-              {property.price.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {property.currency}
-            </span>
+            <span className="text-2xl font-extrabold text-brand-700">{dict.realestate.ask_price}</span>
           </div>
 
           <dl className="mt-6 text-sm">

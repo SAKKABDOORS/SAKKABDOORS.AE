@@ -15,7 +15,8 @@ const SECTIONS: { key: string; label: string; description: string; href?: string
   { key: "quality", label: "قسم الثقة", description: "الجودة، الضمان، الابتكار" },
   { key: "cta", label: "قسم الدعوة لاتخاذ إجراء", description: "قبل الفوتر مباشرة" },
   { key: "footer", label: "الفوتر", description: "الفروع، الهاتف، الإيميل" },
-  { key: "about_media", label: "صور وفيديوهات صفحة من نحن", description: "معرض صور/فيديوهات إضافي بأسفل صفحة \"من نحن\"" }
+  { key: "about_media", label: "صور وفيديوهات صفحة من نحن", description: "معرض صور/فيديوهات إضافي بأسفل صفحة \"من نحن\"" },
+  { key: "catalogs", label: "كتالوجات PDF", description: "ملف PDF جاهز لكل قسم (WPC، ألمنيوم، COMPOSITE، عقارات) يحمّله الزوار" }
 ];
 
 export default async function AdminContentPage() {

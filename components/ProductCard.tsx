@@ -49,13 +49,7 @@ export default function ProductCard({
           </span>
           <h3 className="font-semibold text-ink-900">{name}</h3>
           <div className="mt-auto flex items-center justify-between pt-3">
-            {wholesale ? (
-              <span className="text-sm font-semibold text-ink-800/70">{dict.products.wholesale_price_note}</span>
-            ) : (
-              <span className="text-lg font-bold text-brand-700">
-                {product.price.toLocaleString(locale === "ar" ? "ar-AE" : "en-AE")} {product.currency}
-              </span>
-            )}
+            <span className="text-sm font-semibold text-brand-700">{dict.products.ask_price}</span>
             <span
               className={`text-xs font-medium ${
                 product.inStock ? "text-emerald-600" : "text-red-500"
