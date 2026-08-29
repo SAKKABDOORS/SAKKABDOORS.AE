@@ -42,5 +42,3 @@ export async function getAdminSession() {
 export function clearAdminSession() {
   cookies().set(COOKIE_NAME, "", { path: "/", maxAge: 0 });
 }
-
-export const ADMIN_COOKIE_NAME = COOKIE_NAME;
