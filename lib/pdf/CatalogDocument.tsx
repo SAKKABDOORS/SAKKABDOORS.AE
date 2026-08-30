@@ -67,7 +67,17 @@ const styles = StyleSheet.create({
   collectionTag: { fontSize: 8, color: COLORS.ink800, letterSpacing: 0.5 },
   categoryTitle: { fontSize: 16, fontWeight: "bold", color: COLORS.brand700, textAlign: "right", marginBottom: 16 },
   productSlot: { flex: 1, marginBottom: 18 },
-  productImage: { width: "100%", height: 220, objectFit: "cover", borderRadius: 8, marginBottom: 10 },
+  // backgroundColor fills in behind transparent PNGs (product cutouts) so
+  // they render on white instead of the page's sand background showing
+  // through — a no-op for the more common opaque/full-bleed photos.
+  productImage: {
+    width: "100%",
+    height: 220,
+    objectFit: "cover",
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: COLORS.white
+  },
   productImagePlaceholder: {
     width: "100%",
     height: 220,
