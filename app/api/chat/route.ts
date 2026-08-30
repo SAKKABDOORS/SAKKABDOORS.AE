@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { askAssistant, isAiEnabled, ABUSE_FLAG, type ChatMessage } from "@/lib/ai";
+import { askAssistant, isAiEnabled, isMessageAbusive, type ChatMessage } from "@/lib/ai";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 
 // Vercel sets this; the first entry is the actual visitor (the rest, if any,
@@ -46,17 +46,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reply: dict.chat.blocked });
   }
 
+  if (await isMessageAbusive(message)) {
+    // ip is @unique — a second flagged message from the same visitor before
+    // this write lands would otherwise throw on the duplicate key.
+    await prisma.blockedVisitor
+      .create({ data: { ip, reason: message } })
+      .catch((err) => console.error("Failed to record blocked visitor:", err));
+    return NextResponse.json({ reply: dict.chat.blocked });
+  }
+
   try {
     const reply = await askAssistant(message, history as ChatMessage[], locale);
-
-    if (reply.includes(ABUSE_FLAG)) {
-      // ip is @unique — a second flagged message from the same visitor
-      // before this write lands would otherwise throw on the duplicate key.
-      await prisma.blockedVisitor
-        .create({ data: { ip, reason: message } })
-        .catch((err) => console.error("Failed to record blocked visitor:", err));
-      return NextResponse.json({ reply: dict.chat.blocked });
-    }
 
     // Fire-and-forget log write; a logging failure shouldn't break the chat.
     prisma.chatLog

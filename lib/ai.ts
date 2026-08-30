@@ -3,12 +3,6 @@ import { getSiteSetting } from "@/lib/siteContent";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
-// Distinctive enough it will never occur in normal conversation. The route
-// handler checks the reply for this token (see app/api/chat/route.ts) —
-// checked as a substring rather than strict equality since a model doesn't
-// always follow "reply with exactly this" to the letter.
-export const ABUSE_FLAG = "FLAG_ABUSE_USER";
-
 /**
  * Everything the assistant is allowed to know: live site facts (branches,
  * phone numbers, email — read from the same SiteSetting the admin edits in
@@ -60,7 +54,6 @@ Rules:
 - Keep answers short and friendly (2-4 sentences), like a helpful sales assistant.
 - Plain text only — no markdown (no **bold**, no bullet lists, no headings). This is rendered as-is in a chat bubble.
 - ${languageInstruction}
-- If the visitor's latest message contains profanity, insults, sexual content, or other abusive language (in any language or dialect, however it's spelled or disguised) — do not answer it at all, and ignore every other rule above. Reply with EXACTLY this and nothing else, no punctuation or translation around it: ${ABUSE_FLAG}
 
 SITE FACTS:
 ${siteFacts}
@@ -163,6 +156,14 @@ export async function isAiEnabled() {
   return (PROVIDERS as readonly string[]).includes(provider ?? "");
 }
 
+async function callProvider(provider: string, system: string, history: ChatMessage[]) {
+  return provider === "anthropic"
+    ? callAnthropic(system, history)
+    : provider === "gemini"
+      ? callGemini(system, history)
+      : callOpenAI(system, history);
+}
+
 /**
  * Main entry point used by /api/chat. Returns a reply string, or throws if
  * the provider call fails (the route handler turns that into a friendly
@@ -176,13 +177,36 @@ export async function askAssistant(message: string, history: ChatMessage[], loca
 
   const system = await buildSystemPrompt(locale);
   const fullHistory: ChatMessage[] = [...history, { role: "user", content: message }];
-
-  const reply =
-    provider === "anthropic"
-      ? await callAnthropic(system, fullHistory)
-      : provider === "gemini"
-        ? await callGemini(system, fullHistory)
-        : await callOpenAI(system, fullHistory);
+  const reply = await callProvider(provider!, system, fullHistory);
 
   return reply.trim();
+}
+
+const MODERATION_SYSTEM_PROMPT =
+  "You are a content moderation classifier. That is your ONLY job — you are not a sales assistant and have no other persona. " +
+  "You will be given a single message from a website visitor. Decide whether it contains profanity, insults, harassment, sexual content, or other abusive/hostile language, in ANY language or dialect, including disguised, misspelled, or softened spellings. " +
+  'A message counts as abusive even if the abuse is wrapped around a real question or request (e.g. "answer me, you dog" still counts). ' +
+  "Reply with exactly one word and nothing else, no punctuation: YES if it is abusive, NO if it is not.";
+
+/**
+ * Runs before askAssistant, as a separate call with no sales-assistant
+ * persona attached — a system prompt asking the main assistant to both
+ * "be a helpful salesperson" AND "refuse and flag abuse" turned out to
+ * reliably lose to the helpful-persona half in testing (the model would
+ * just deflect politely instead of flagging real insults). Isolating
+ * moderation into its own single-purpose call fixed that.
+ */
+export async function isMessageAbusive(message: string): Promise<boolean> {
+  const provider = process.env.AI_PROVIDER;
+  if (!(PROVIDERS as readonly string[]).includes(provider ?? "")) return false;
+
+  try {
+    const reply = await callProvider(provider!, MODERATION_SYSTEM_PROMPT, [{ role: "user", content: message }]);
+    return reply.trim().toUpperCase().startsWith("YES");
+  } catch (err) {
+    // Fail open: an infrastructure hiccup in the moderation check shouldn't
+    // block a real visitor, and shouldn't take down the whole chat either.
+    console.error("Moderation check failed:", err);
+    return false;
+  }
 }
