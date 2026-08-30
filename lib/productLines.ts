@@ -17,7 +17,7 @@ export function isProductLine(value: string): value is ProductLine {
 export const PRODUCT_LINE_LABELS: Record<ProductLine, { ar: string; en: string }> = {
   ALUMINUM_SLIM_SYSTEM: { ar: "نظام سلم (Slim System)", en: "Slim System" },
   ALUMINUM_DOORS: { ar: "أبواب عادية", en: "Doors" },
-  ALUMINUM_ECOBOND: { ar: "إيكوبوند", en: "Ecobond" },
+  ALUMINUM_ECOBOND: { ar: "اليكوبوند", en: "Ecobond" },
   WPC_EXTERNAL: { ar: "خارجي", en: "External" },
   WPC_CLOSETS: { ar: "خزائن (كلوزيت)", en: "Closets" }
 };

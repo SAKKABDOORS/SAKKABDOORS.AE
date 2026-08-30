@@ -12,13 +12,17 @@ export default function StatsBar({ locale, content }: { locale: Locale; content:
           {/* Oversized decorative watermark behind the heading, matching the
               brand reference — purely typographic texture, stays in Latin
               caps regardless of locale like a wordmark would. */}
-          {/* Purely decorative (aria-hidden) — hidden below sm instead of
-              scaled down: at phone widths, no size/offset kept it from
-              sitting right on top of the heading text instead of behind
-              it, so it's simplest and safest not to show it there at all. */}
+          {/* Purely decorative (aria-hidden). Sized with a px/vw clamp
+              instead of Tailwind's rem-based text-8xl: a fixed rem size
+              rendered fine at default zoom but could overflow this box
+              and clip mid-word on a device with OS-level text scaling
+              turned up (rem tracks the root font size, px/vw don't) —
+              this keeps it proportional to the viewport instead, and the
+              "em" top offset scales together with the clamped font-size. */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 -top-6 hidden select-none text-6xl font-extrabold uppercase tracking-widest text-white/40 sm:block sm:-top-8 sm:text-8xl"
+            className="pointer-events-none absolute inset-x-0 select-none font-extrabold uppercase tracking-widest text-white/40"
+            style={{ fontSize: "clamp(32px, 8vw, 96px)", top: "-0.3em" }}
           >
             EXPERIENCE
           </span>
