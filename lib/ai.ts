@@ -65,7 +65,7 @@ PRODUCT CATALOG (subset):
 ${productsText}`;
 }
 
-async function callAnthropic(system: string, history: ChatMessage[]) {
+async function callAnthropic(system: string, history: ChatMessage[], temperature?: number) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
 
@@ -80,6 +80,7 @@ async function callAnthropic(system: string, history: ChatMessage[]) {
       model: process.env.AI_MODEL || "claude-3-5-haiku-20241022",
       max_tokens: 400,
       system,
+      ...(temperature !== undefined ? { temperature } : {}),
       messages: history.map((m) => ({ role: m.role, content: m.content }))
     })
   });
@@ -92,7 +93,7 @@ async function callAnthropic(system: string, history: ChatMessage[]) {
   return (data.content?.[0]?.text as string) ?? "";
 }
 
-async function callGemini(system: string, history: ChatMessage[]) {
+async function callGemini(system: string, history: ChatMessage[], temperature?: number) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
@@ -108,10 +109,13 @@ async function callGemini(system: string, history: ChatMessage[]) {
           role: m.role === "assistant" ? "model" : "user",
           parts: [{ text: m.content }]
         })),
-        // Gemini's "thinking" tokens count against maxOutputTokens too, so
-        // this needs real headroom above the ~400 the other providers use
-        // or replies get cut off mid-sentence before any visible text comes out.
-        generationConfig: { maxOutputTokens: 1024 }
+        generationConfig: {
+          // Gemini's "thinking" tokens count against maxOutputTokens too, so
+          // this needs real headroom above the ~400 the other providers use
+          // or replies get cut off mid-sentence before any visible text comes out.
+          maxOutputTokens: 1024,
+          ...(temperature !== undefined ? { temperature } : {})
+        }
       })
     }
   );
@@ -124,7 +128,7 @@ async function callGemini(system: string, history: ChatMessage[]) {
   return (data.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? "";
 }
 
-async function callOpenAI(system: string, history: ChatMessage[]) {
+async function callOpenAI(system: string, history: ChatMessage[], temperature?: number) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
 
@@ -137,6 +141,7 @@ async function callOpenAI(system: string, history: ChatMessage[]) {
     body: JSON.stringify({
       model: process.env.AI_MODEL || "gpt-4o-mini",
       max_tokens: 400,
+      ...(temperature !== undefined ? { temperature } : {}),
       messages: [{ role: "system", content: system }, ...history]
     })
   });
@@ -156,12 +161,12 @@ export async function isAiEnabled() {
   return (PROVIDERS as readonly string[]).includes(provider ?? "");
 }
 
-async function callProvider(provider: string, system: string, history: ChatMessage[]) {
+async function callProvider(provider: string, system: string, history: ChatMessage[], temperature?: number) {
   return provider === "anthropic"
-    ? callAnthropic(system, history)
+    ? callAnthropic(system, history, temperature)
     : provider === "gemini"
-      ? callGemini(system, history)
-      : callOpenAI(system, history);
+      ? callGemini(system, history, temperature)
+      : callOpenAI(system, history, temperature);
 }
 
 /**
@@ -194,14 +199,17 @@ const MODERATION_SYSTEM_PROMPT =
  * "be a helpful salesperson" AND "refuse and flag abuse" turned out to
  * reliably lose to the helpful-persona half in testing (the model would
  * just deflect politely instead of flagging real insults). Isolating
- * moderation into its own single-purpose call fixed that.
+ * moderation into its own single-purpose call fixed that. temperature 0
+ * on top of that: the same borderline message could flip between YES/NO
+ * across otherwise-identical calls at the default temperature, which a
+ * classification task should not be sensitive to.
  */
 export async function isMessageAbusive(message: string): Promise<boolean> {
   const provider = process.env.AI_PROVIDER;
   if (!(PROVIDERS as readonly string[]).includes(provider ?? "")) return false;
 
   try {
-    const reply = await callProvider(provider!, MODERATION_SYSTEM_PROMPT, [{ role: "user", content: message }]);
+    const reply = await callProvider(provider!, MODERATION_SYSTEM_PROMPT, [{ role: "user", content: message }], 0);
     return reply.trim().toUpperCase().startsWith("YES");
   } catch (err) {
     // Fail open: an infrastructure hiccup in the moderation check shouldn't
