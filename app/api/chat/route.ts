@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { askAssistant, isAiEnabled, type ChatMessage } from "@/lib/ai";
+import { askAssistant, isAiEnabled, ABUSE_FLAG, type ChatMessage } from "@/lib/ai";
+import { getDictionary } from "@/lib/i18n/getDictionary";
+
+// Vercel sets this; the first entry is the actual visitor (the rest, if any,
+// are intermediate proxies). Anonymous storefront visitors have no session/
+// cookie to key off of, so IP is the only identity this can block by.
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  return forwarded?.split(",")[0]?.trim() || "unknown";
+}
 
 const chatSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -29,9 +38,25 @@ export async function POST(request: NextRequest) {
   }
 
   const { message, history, locale } = parsed.data;
+  const dict = await getDictionary(locale);
+  const ip = getClientIp(request);
+
+  const alreadyBlocked = await prisma.blockedVisitor.findUnique({ where: { ip } });
+  if (alreadyBlocked) {
+    return NextResponse.json({ reply: dict.chat.blocked });
+  }
 
   try {
     const reply = await askAssistant(message, history as ChatMessage[], locale);
+
+    if (reply.includes(ABUSE_FLAG)) {
+      // ip is @unique — a second flagged message from the same visitor
+      // before this write lands would otherwise throw on the duplicate key.
+      await prisma.blockedVisitor
+        .create({ data: { ip, reason: message } })
+        .catch((err) => console.error("Failed to record blocked visitor:", err));
+      return NextResponse.json({ reply: dict.chat.blocked });
+    }
 
     // Fire-and-forget log write; a logging failure shouldn't break the chat.
     prisma.chatLog

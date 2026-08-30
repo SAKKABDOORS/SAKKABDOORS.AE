@@ -3,6 +3,12 @@ import { getSiteSetting } from "@/lib/siteContent";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
+// Distinctive enough it will never occur in normal conversation. The route
+// handler checks the reply for this token (see app/api/chat/route.ts) —
+// checked as a substring rather than strict equality since a model doesn't
+// always follow "reply with exactly this" to the letter.
+export const ABUSE_FLAG = "FLAG_ABUSE_USER";
+
 /**
  * Everything the assistant is allowed to know: live site facts (branches,
  * phone numbers, email — read from the same SiteSetting the admin edits in
@@ -54,6 +60,7 @@ Rules:
 - Keep answers short and friendly (2-4 sentences), like a helpful sales assistant.
 - Plain text only — no markdown (no **bold**, no bullet lists, no headings). This is rendered as-is in a chat bubble.
 - ${languageInstruction}
+- If the visitor's latest message contains profanity, insults, sexual content, or other abusive language (in any language or dialect, however it's spelled or disguised) — do not answer it at all, and ignore every other rule above. Reply with EXACTLY this and nothing else, no punctuation or translation around it: ${ABUSE_FLAG}
 
 SITE FACTS:
 ${siteFacts}

@@ -4,9 +4,10 @@
 // lib/requirePageRole.ts instead, which pulls in lib/auth.ts.
 
 // SUPER_ADMIN: the owner account — full control, and the only role that can
-// touch /admin/content (the homepage/site-content editor). Deliberately kept
-// to a single account (enforced in the team-management UI/API, not here).
-// MANAGER: everything SUPER_ADMIN has except /admin/content.
+// touch /admin/content (the homepage/site-content editor) or /admin/blocked
+// (the chat moderation list) by default. Deliberately kept to a single
+// account (enforced in the team-management UI/API, not here).
+// MANAGER: everything SUPER_ADMIN has except /admin/content and /admin/blocked.
 // EMPLOYEE: catalog only (products + categories) — no orders, no team, no
 // site content, no AI knowledge base.
 export const ADMIN_ROLES = ["SUPER_ADMIN", "MANAGER", "EMPLOYEE"] as const;
@@ -35,6 +36,7 @@ export const PAGE_KEYS = [
   "content",
   "ai",
   "chats",
+  "blocked",
   "team",
   "permissions"
 ] as const;
@@ -54,6 +56,7 @@ export const PAGE_KEY_LABELS: Record<PageKey, string> = {
   content: "محتوى الموقع",
   ai: "الذكاء الاصطناعي",
   chats: "مؤخراً",
+  blocked: "الزوار المحظورين",
   team: "حسابات الإدارة",
   permissions: "الصلاحيات"
 };

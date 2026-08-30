@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Ban,
   Bot,
   Briefcase,
   Building2,
@@ -29,6 +30,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; key: PageKey }[] = [
   { href: "/admin/content", label: "محتوى الموقع", icon: Palette, key: "content" },
   { href: "/admin/ai", label: "الذكاء الاصطناعي", icon: Bot, key: "ai" },
   { href: "/admin/chats", label: "مؤخراً", icon: History, key: "chats" },
+  { href: "/admin/blocked", label: "الزوار المحظورين", icon: Ban, key: "blocked" },
   { href: "/admin/team", label: "حسابات الإدارة", icon: Users, key: "team" },
   { href: "/admin/permissions", label: "الصلاحيات", icon: Shield, key: "permissions" }
 ];

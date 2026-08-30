@@ -204,7 +204,8 @@
     "thinking": "Typing...",
     "greeting": "Hi! I'm Sakkab's AI assistant — ask me about WPC, COMPOSITE or Aluminum doors, or anything else.",
     "disabled": "The AI assistant isn't enabled yet. Please reach us directly on WhatsApp.",
-    "error": "Something went wrong. Please try again or reach us on WhatsApp."
+    "error": "Something went wrong. Please try again or reach us on WhatsApp.",
+    "blocked": "This chat has been disabled due to inappropriate language. Please reach us directly on WhatsApp if you need help."
   },
   "admin": {
     "login_title": "Admin Login",
