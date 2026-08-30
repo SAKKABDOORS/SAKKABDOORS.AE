@@ -65,8 +65,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (await isMessageAbusive(message)) {
-    // cookieId is @unique — a second flagged message from the same visitor
-    // before this write lands would otherwise throw on the duplicate key.
+    // Not deduped against an in-flight duplicate (e.g. two abusive messages
+    // fired in quick succession before the first insert lands) — worst case
+    // is two rows for the same visitor, which is harmless clutter, not a
+    // correctness bug, so it's not worth a unique constraint over.
     await prisma.blockedVisitor
       .create({ data: { ip, cookieId: visitorId, reason: message } })
       .catch((err) => console.error("Failed to record blocked visitor:", err));

@@ -247,9 +247,10 @@ model SiteSetting {
 model BlockedVisitor {
   id        String   @id @default(cuid())
   ip        String
-  cookieId  String?  @unique
+  cookieId  String?
   reason    String   @db.Text
   createdAt DateTime @default(now())
 
   @@index([ip])
+  @@index([cookieId])
 }
