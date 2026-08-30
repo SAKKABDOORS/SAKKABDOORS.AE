@@ -236,15 +236,20 @@ model SiteSetting {
 }
 
 // --- Chat moderation -------------------------------------------------------
-// A visitor's IP lands here the moment the AI assistant itself flags one of
-// their messages as abusive (see the FLAG_ABUSE_USER instruction in
-// lib/ai.ts) — every later /api/chat request from that IP gets a fixed
-// decline instead of reaching the AI. Removing a row (unblocking) is
-// restricted to the DARKSHAM account specifically, not just SUPER_ADMIN —
-// see app/api/admin/blocked/[id]/route.ts.
+// A row lands here the moment isMessageAbusive() (lib/ai.ts) flags one of a
+// visitor's messages — every later /api/chat request matching EITHER the ip
+// OR the cookieId gets a fixed decline instead of reaching the AI. Both are
+// captured together (not just ip) so switching a VPN on isn't enough on its
+// own to get a fresh start — the cookie persists across IP changes, and
+// only clears if the visitor clears cookies or switches browser/device.
+// Removing a row (unblocking) is restricted to the DARKSHAM account
+// specifically, not just SUPER_ADMIN — see app/api/admin/blocked/[id]/route.ts.
 model BlockedVisitor {
   id        String   @id @default(cuid())
-  ip        String   @unique
+  ip        String
+  cookieId  String?  @unique
   reason    String   @db.Text
   createdAt DateTime @default(now())
+
+  @@index([ip])
 }
