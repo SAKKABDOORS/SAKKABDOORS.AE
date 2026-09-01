@@ -50,6 +50,12 @@ enum MediaType {
 enum ProductLine {
   ALUMINUM_SLIM_SYSTEM
   ALUMINUM_DOORS
+  // Renamed to ALUMINUM_ALUCOBOND (correct brand name) — kept declared
+  // here, unused, rather than removed: dropping a value from a Postgres
+  // enum that might still be referenced is a data-loss-flagged `db push`
+  // operation, whereas adding one alongside it is always safe. Not
+  // included in lib/productLines.ts, so it's invisible to the app.
+  ALUMINUM_ECOBOND
   ALUMINUM_ALUCOBOND
   WPC_EXTERNAL
   WPC_CLOSETS
