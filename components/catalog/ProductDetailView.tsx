@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import { firstProductImageUrl, type ProductWithRelations } from "@/lib/types";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { productPath } from "@/lib/materialPaths";
 import OrderForm from "@/components/OrderForm";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import ProductGallery from "@/components/ProductGallery";
@@ -27,8 +28,31 @@ export default function ProductDetailView({
       : `Hello, I'd like to ask about: ${name}`
   );
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
+  const productUrl = `${siteUrl}/${locale}${productPath(product.material, product.slug)}`;
+  // Price intentionally omitted from Offer — SAKKAB doesn't list prices
+  // publicly (see dict.products.ask_price), so there's nothing honest to
+  // put in a price field. That just forfeits the price rich-snippet
+  // eligibility; the rest of the Product markup is still valid.
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name,
+    description,
+    image,
+    url: productUrl,
+    category: categoryName,
+    brand: { "@type": "Brand", name: "SAKKAB" },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  };
+
   return (
     <div className="container-page py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <div className="grid gap-10 lg:grid-cols-2">
         <ProductGallery
           images={product.images.map((img) => ({

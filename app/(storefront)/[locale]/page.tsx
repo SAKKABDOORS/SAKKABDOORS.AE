@@ -32,11 +32,12 @@ export default async function HomePage({
   ).filter((c): c is (typeof categories)[number] => Boolean(c));
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
-  // Organization structured data — helps Google surface a knowledge-panel-
-  // style entry (logo, contact points, branches) instead of a bare link.
+  // LocalBusiness (not the more generic Organization) — the branches are
+  // physical locations customers visit, so this is eligible for local-
+  // search treatment (map pack, knowledge panel) that Organization isn't.
   const organizationJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": "LocalBusiness",
     name: "SAKKAB",
     url: siteUrl,
     logo: `${siteUrl}/images/logo-mark.png`,

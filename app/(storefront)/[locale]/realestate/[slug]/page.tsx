@@ -56,8 +56,26 @@ export default async function PropertyDetailPage({
   const inquiryMessage =
     locale === "ar" ? `استفسار عن العقار: ${title}` : `Inquiry about: ${title}`;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sakkabdoors.ae";
+  const propertyUrl = `${siteUrl}/${locale}/realestate/${params.slug}`;
+  // Price omitted from Offer for the same reason as door products — see
+  // dict.realestate.ask_price. No dedicated real-estate rich-result type in
+  // Google's guidelines, so Product is the pragmatic, valid choice here.
+  const propertyJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: title,
+    description,
+    image: property.images[0]?.url,
+    url: propertyUrl,
+    category: region,
+    brand: { "@type": "Brand", name: "SAKKAB" },
+    offers: { "@type": "Offer", url: propertyUrl, availability: "https://schema.org/InStock" }
+  };
+
   return (
     <div className="container-page py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(propertyJsonLd) }} />
       <div className="grid gap-10 lg:grid-cols-2">
         <ProductGallery
           images={property.images.map((img) => ({ url: img.url, alt: img.alt || title }))}

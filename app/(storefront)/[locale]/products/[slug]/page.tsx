@@ -1,4 +1,4 @@
-import { redirect, notFound } from "next/navigation";
+import { permanentRedirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isLocale } from "@/lib/i18n/config";
 import { MATERIAL_PATHS, productPath } from "@/lib/materialPaths";
@@ -7,6 +7,8 @@ import { MATERIAL_PATHS, productPath } from "@/lib/materialPaths";
 // and a product detail page (/products/some-door-slug) — each material now
 // has its own top-level section (/wpc, /aluminum, /composite), so this
 // route just redirects old links to the new location instead of 404ing.
+// Permanent (308) so search engines transfer this URL's ranking signals to
+// the new one instead of continuing to index the old path.
 const CATEGORY_SLUG_TO_PATH: Record<string, string> = {
   "wpc-doors": MATERIAL_PATHS.WPC,
   "upvc-doors": MATERIAL_PATHS.UPVC,
@@ -22,11 +24,11 @@ export default async function LegacyProductOrCategoryRedirect({
 
   const newSectionPath = CATEGORY_SLUG_TO_PATH[params.slug];
   if (newSectionPath) {
-    redirect(`/${params.locale}/${newSectionPath}`);
+    permanentRedirect(`/${params.locale}/${newSectionPath}`);
   }
 
   const product = await prisma.product.findUnique({ where: { slug: params.slug } });
   if (!product) notFound();
 
-  redirect(`/${params.locale}${productPath(product.material, product.slug)}`);
+  permanentRedirect(`/${params.locale}${productPath(product.material, product.slug)}`);
 }
