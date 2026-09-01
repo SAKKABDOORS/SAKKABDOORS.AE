@@ -43,8 +43,8 @@ async function buildSystemPrompt(locale: string) {
 
   const languageInstruction =
     locale === "ar"
-      ? "Reply in colloquial, friendly Arabic unless the visitor writes in English."
-      : "Reply in English unless the visitor writes in Arabic — then switch to Arabic.";
+      ? "Reply in formal Modern Standard Arabic (فصحى) — no dialect/colloquial words or grammar — unless the visitor writes in English."
+      : "Reply in English unless the visitor writes in Arabic — then switch to formal Modern Standard Arabic (فصحى), not dialect.";
 
   return `You are the SAKKAB Doors website assistant. You help visitors with questions about SAKKAB's products (WPC, COMPOSITE and Aluminum doors) and services.
 
