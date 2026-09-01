@@ -8,9 +8,9 @@ import ProductCatalogView from "@/components/ProductCatalogView";
 import Reveal from "@/components/motion/Reveal";
 import { Download } from "lucide-react";
 
-// Shared by /wpc, /aluminum, /composite (and the legacy /products/[slug]
-// category branch) — one material's catalog, optionally with a
-// sub-line filter (Slim System/Doors, External/Closets).
+// Shared by /catalog/[material] and /catalog/[material]/[slug]'s sub-line
+// branch — one material's catalog, optionally with a sub-line filter
+// (Doors, Slim System, Alucobond, Closets, Interior/Exterior Decor...).
 export default async function MaterialCatalogView({
   category,
   material,
@@ -18,7 +18,8 @@ export default async function MaterialCatalogView({
   dict,
   searchParams,
   productLines,
-  catalogPdfUrl
+  catalogPdfUrl,
+  lineBasePath
 }: {
   category: Category;
   material: Material;
@@ -29,12 +30,16 @@ export default async function MaterialCatalogView({
   // Admin-uploaded PDF for this section (not the auto-generated one) —
   // hidden until one's uploaded from /admin/content -> "كتالوجات PDF".
   catalogPdfUrl?: string;
+  // /catalog/[material] — when set, the sub-line filter navigates to a real
+  // clean URL (e.g. /catalog/wpc/doors) instead of a ?line= query param.
+  lineBasePath?: string;
 }) {
   const categories = await prisma.category.findMany({ orderBy: { nameEn: "asc" } });
 
+  const currentLine = searchParams.line && isProductLine(searchParams.line) ? searchParams.line : undefined;
   const where: Record<string, unknown> = { categoryId: category.id };
-  if (searchParams.line && isProductLine(searchParams.line)) {
-    where.productLine = searchParams.line;
+  if (currentLine) {
+    where.productLine = currentLine;
   }
 
   const orderBy =
@@ -94,6 +99,8 @@ export default async function MaterialCatalogView({
             lockedCategory={category}
             lockedMaterial={material}
             productLines={productLines}
+            lineBasePath={lineBasePath}
+            currentLine={currentLine}
           />
           {catalogPdfUrl && (
             <a

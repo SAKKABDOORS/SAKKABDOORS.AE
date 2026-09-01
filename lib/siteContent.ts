@@ -184,10 +184,10 @@ export const SITE_SETTING_DEFAULTS: {
     eyebrow: { ar: arDict.services.eyebrow, en: enDict.services.eyebrow },
     heading: { ar: arDict.services.heading, en: enDict.services.heading },
     items: [
-      { key: "aluminum", image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600", label: { ar: arDict.services.aluminum, en: enDict.services.aluminum }, href: "/aluminum" },
-      { key: "doors", image: "https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?w=600", label: { ar: arDict.services.doors, en: enDict.services.doors }, href: "/composite" },
+      { key: "aluminum", image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600", label: { ar: arDict.services.aluminum, en: enDict.services.aluminum }, href: "/catalog/aluminum" },
+      { key: "doors", image: "https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?w=600", label: { ar: arDict.services.doors, en: enDict.services.doors }, href: "/catalog/composite" },
       { key: "real_estate", image: "https://images.unsplash.com/photo-1541976590-713941681591?w=600", label: { ar: arDict.services.real_estate, en: enDict.services.real_estate }, href: "/realestate" },
-      { key: "wpc", image: "https://images.unsplash.com/photo-1636320806984-ecc0576ff328?w=600", label: { ar: arDict.services.wpc, en: enDict.services.wpc }, href: "/wpc" }
+      { key: "wpc", image: "https://images.unsplash.com/photo-1636320806984-ecc0576ff328?w=600", label: { ar: arDict.services.wpc, en: enDict.services.wpc }, href: "/catalog/wpc" }
     ]
   },
   quality: {

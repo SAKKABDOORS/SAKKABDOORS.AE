@@ -1,45 +1,10 @@
-import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
-import { getDictionary } from "@/lib/i18n/getDictionary";
-import { isLocale, type Locale } from "@/lib/i18n/config";
-import { notFound } from "next/navigation";
-import { firstProductImageUrl } from "@/lib/types";
-import ProductDetailView from "@/components/catalog/ProductDetailView";
+import { permanentRedirect, notFound } from "next/navigation";
+import { isLocale } from "@/lib/i18n/config";
 
-export async function generateMetadata({
-  params
-}: {
-  params: { locale: string; slug: string };
-}): Promise<Metadata> {
-  const locale = isLocale(params.locale) ? params.locale : "ar";
-  const product = await prisma.product.findUnique({ where: { slug: params.slug }, include: { images: true } });
-  if (!product || product.material !== "WPC") return {};
-
-  const name = locale === "ar" ? product.nameAr : product.nameEn;
-  const description = locale === "ar" ? product.descriptionAr : product.descriptionEn;
-  const image = firstProductImageUrl(product.images);
-  return {
-    title: name,
-    description,
-    alternates: { languages: { ar: `/ar/wpc/${params.slug}`, en: `/en/wpc/${params.slug}` } },
-    openGraph: { title: name, description, images: image ? [image] : undefined }
-  };
-}
-
-export default async function WpcProductPage({
-  params
-}: {
-  params: { locale: string; slug: string };
-}) {
+// /wpc/[slug] moved to /catalog/wpc/[slug] — kept as a permanent (308)
+// redirect so old links/bookmarks/search-engine indexing transfer to the
+// new location.
+export default function WpcSlugRedirect({ params }: { params: { locale: string; slug: string } }) {
   if (!isLocale(params.locale)) notFound();
-  const locale = params.locale as Locale;
-  const dict = await getDictionary(locale);
-
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    include: { images: true, category: true }
-  });
-  if (!product || product.material !== "WPC") notFound();
-
-  return <ProductDetailView product={product} locale={locale} dict={dict} />;
+  permanentRedirect(`/${params.locale}/catalog/wpc/${params.slug}`);
 }

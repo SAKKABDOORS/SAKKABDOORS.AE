@@ -4,7 +4,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 import type { Category, Material } from "@/lib/types";
-import { PRODUCT_LINE_LABELS, type ProductLine } from "@/lib/productLines";
+import { PRODUCT_LINE_LABELS, PRODUCT_LINE_SLUGS, type ProductLine } from "@/lib/productLines";
 
 const MATERIALS = ["WPC", "UPVC", "ALUMINUM", "STEEL"] as const;
 
@@ -14,7 +14,9 @@ export default function ProductFilters({
   dict,
   lockedCategory,
   lockedMaterial,
-  productLines
+  productLines,
+  lineBasePath,
+  currentLine
 }: {
   categories: Category[];
   locale: Locale;
@@ -24,12 +26,22 @@ export default function ProductFilters({
   // otherwise let a visitor navigate away via a `?category=` query param is
   // hidden instead of shown-but-conflicting.
   lockedCategory?: Category;
-  // Same idea, for the dedicated material sections (/wpc, /aluminum,
-  // /composite) — the material is fixed by which section you're on.
+  // Same idea, for the dedicated material sections (/catalog/wpc,
+  // /catalog/aluminum, /catalog/composite) — the material is fixed by
+  // which section you're on.
   lockedMaterial?: Material;
-  // Only Aluminum/WPC have sub-lines (Slim System/Doors, External/Closets)
-  // — omitted (or empty) elsewhere, so no extra dropdown renders.
+  // Only Aluminum/WPC/Composite have sub-lines — omitted (or empty)
+  // elsewhere, so no extra dropdown renders.
   productLines?: ProductLine[];
+  // Set on /catalog/[material] (and its [slug] sub-line branch) — changing
+  // the line select there navigates to a real clean URL like
+  // /catalog/wpc/doors instead of appending ?line= to the current page, so
+  // there's exactly one canonical URL per sub-line rather than two.
+  lineBasePath?: string;
+  // The active line when it's expressed in the URL path rather than a
+  // ?line= query param — without this the select would show "all lines"
+  // even while actually viewing e.g. /catalog/wpc/doors.
+  currentLine?: ProductLine;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -43,6 +55,18 @@ export default function ProductFilters({
       params.delete(key);
     }
     router.push(`${pathname}?${params.toString()}`);
+  }
+
+  function updateLine(value: string) {
+    if (!lineBasePath) {
+      updateParam("line", value);
+      return;
+    }
+    const destination = value ? `${lineBasePath}/${PRODUCT_LINE_SLUGS[value as ProductLine]}` : lineBasePath;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("line"); // now expressed in the path itself, not a query param
+    const qs = params.toString();
+    router.push(qs ? `${destination}?${qs}` : destination);
   }
 
   return (
@@ -88,8 +112,8 @@ export default function ProductFilters({
           <label className="label">{dict.products.filter_line}</label>
           <select
             className="input"
-            defaultValue={searchParams.get("line") ?? ""}
-            onChange={(e) => updateParam("line", e.target.value)}
+            defaultValue={currentLine ?? searchParams.get("line") ?? ""}
+            onChange={(e) => updateLine(e.target.value)}
           >
             <option value="">{dict.products.all_lines}</option>
             {productLines.map((line) => (

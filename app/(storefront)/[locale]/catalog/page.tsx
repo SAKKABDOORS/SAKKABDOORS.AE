@@ -36,18 +36,18 @@ export default async function CatalogChooserPage({ params }: { params: { locale:
   type Card = { href: string; name: string; image: string | undefined };
   const cards: Card[] = [];
   if (wpc) {
-    cards.push({ href: `/${locale}/wpc`, name: locale === "ar" ? wpc.nameAr : wpc.nameEn, image: wpc.heroImage ?? undefined });
+    cards.push({ href: `/${locale}/catalog/wpc`, name: locale === "ar" ? wpc.nameAr : wpc.nameEn, image: wpc.heroImage ?? undefined });
   }
   if (composite) {
     cards.push({
-      href: `/${locale}/composite`,
+      href: `/${locale}/catalog/composite`,
       name: locale === "ar" ? composite.nameAr : composite.nameEn,
       image: composite.heroImage ?? undefined
     });
   }
   if (aluminum) {
     cards.push({
-      href: `/${locale}/aluminum`,
+      href: `/${locale}/catalog/aluminum`,
       name: locale === "ar" ? aluminum.nameAr : aluminum.nameEn,
       image: aluminum.heroImage ?? undefined
     });

@@ -44,14 +44,19 @@ enum MediaType {
   VIDEO
 }
 
-// Sub-line within a material, only meaningful for Aluminum and WPC — null
-// for Composite/Steel. Drives the extra filter tabs on /aluminum and /wpc.
+// Sub-line within a material, null only for Steel (not offered as a
+// catalog line today). Drives the /catalog/[material]/[slug] sub-pages —
+// see lib/productLines.ts for the material->lines and line->URL-slug maps.
 enum ProductLine {
   ALUMINUM_SLIM_SYSTEM
   ALUMINUM_DOORS
-  ALUMINUM_ECOBOND
+  ALUMINUM_ALUCOBOND
   WPC_EXTERNAL
   WPC_CLOSETS
+  WPC_DOORS
+  WPC_INTERIOR_DECOR
+  COMPOSITE_DOORS
+  COMPOSITE_EXTERIOR_DECOR
 }
 
 model Category {

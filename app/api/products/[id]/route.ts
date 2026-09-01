@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminApi";
+import { PRODUCT_LINES } from "@/lib/productLines";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +25,7 @@ const updateSchema = z.object({
   descriptionEn: z.string().min(1).optional(),
   categoryId: z.string().min(1).optional(),
   material: z.enum(["WPC", "UPVC", "ALUMINUM", "STEEL"]).optional(),
-  productLine: z
-    .enum(["ALUMINUM_SLIM_SYSTEM", "ALUMINUM_DOORS", "ALUMINUM_ECOBOND", "WPC_EXTERNAL", "WPC_CLOSETS"])
-    .nullable()
-    .optional(),
+  productLine: z.enum(PRODUCT_LINES).nullable().optional(),
   price: z.number().positive().optional(),
   currency: z.string().min(1).max(10).optional(),
   inStock: z.boolean().optional(),
