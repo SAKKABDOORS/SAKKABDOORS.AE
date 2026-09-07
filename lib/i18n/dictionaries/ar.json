@@ -147,7 +147,9 @@
     "empty": "السلة فارغة.",
     "browse_catalog": "تصفح الكتالوج",
     "remove": "إزالة",
-    "estimated_total": "الإجمالي التقريبي"
+    "estimated_total": "الإجمالي التقريبي",
+    "measurement": "القياس",
+    "measurement_placeholder": "مثال: 90×210 سم (اختياري)"
   },
   "order_form": {
     "title": "أرسل طلبك",

@@ -11,7 +11,7 @@ import OrderForm from "../OrderForm";
 import Reveal from "../motion/Reveal";
 
 export default function CartView({ dict, locale }: { dict: Dictionary; locale: Locale }) {
-  const { items, remove, updateQuantity, clear } = useCart();
+  const { items, remove, updateQuantity, updateMeasurement, clear } = useCart();
   // Tracked separately from `items` so the success message stays visible
   // even after `clear()` empties the cart in the same submit — otherwise
   // this view would flash straight to the "cart is empty" state.
@@ -54,35 +54,50 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
         <div className="space-y-3">
           {items.map((item, i) => (
             <Reveal key={item.productId} delay={Math.min(i * 0.05, 0.25)}>
-              <div className="card flex items-center gap-4 p-4">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-brand-100">
-                  <Image src={item.image ?? "/images/placeholder-door.svg"} alt={item.name} fill className="object-cover" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-ink-900">{item.name}</div>
-                  <div className="text-sm text-ink-800/60">{dict.products.ask_price}</div>
+              <div className="card space-y-3 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-brand-100">
+                    <Image src={item.image ?? "/images/placeholder-door.svg"} alt={item.name} fill className="object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-ink-900">{item.name}</div>
+                    <div className="text-sm text-ink-800/60">{dict.products.ask_price}</div>
+                  </div>
+                  <div>
+                    <label htmlFor={`qty-${item.productId}`} className="sr-only">
+                      {dict.product.quantity}
+                    </label>
+                    <input
+                      id={`qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={item.quantity}
+                      onChange={(e) => updateQuantity(item.productId, Number(e.target.value) || 1)}
+                      className="input w-20 text-center"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => remove(item.productId)}
+                    className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                    <span className="hidden sm:inline">{dict.cart.remove}</span>
+                  </button>
                 </div>
                 <div>
-                  <label htmlFor={`qty-${item.productId}`} className="sr-only">
-                    {dict.product.quantity}
+                  <label htmlFor={`measurement-${item.productId}`} className="sr-only">
+                    {dict.cart.measurement}
                   </label>
                   <input
-                    id={`qty-${item.productId}`}
-                    type="number"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.productId, Number(e.target.value) || 1)}
-                    className="input w-20 text-center"
+                    id={`measurement-${item.productId}`}
+                    type="text"
+                    value={item.measurement ?? ""}
+                    onChange={(e) => updateMeasurement(item.productId, e.target.value)}
+                    placeholder={dict.cart.measurement_placeholder}
+                    className="input w-full text-sm"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => remove(item.productId)}
-                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" strokeWidth={1.75} />
-                  <span className="hidden sm:inline">{dict.cart.remove}</span>
-                </button>
               </div>
             </Reveal>
           ))}
@@ -90,7 +105,7 @@ export default function CartView({ dict, locale }: { dict: Dictionary; locale: L
 
         <OrderForm
           dict={dict}
-          cartItems={items.map((i) => ({ productId: i.productId, name: i.name, quantity: i.quantity }))}
+          cartItems={items.map((i) => ({ productId: i.productId, name: i.name, quantity: i.quantity, measurement: i.measurement }))}
           onSuccess={() => {
             setJustSubmitted(true);
             clear();

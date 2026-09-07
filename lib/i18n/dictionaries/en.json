@@ -147,7 +147,9 @@
     "empty": "Your cart is empty.",
     "browse_catalog": "Browse Catalog",
     "remove": "Remove",
-    "estimated_total": "Estimated Total"
+    "estimated_total": "Estimated Total",
+    "measurement": "Measurement",
+    "measurement_placeholder": "e.g. 90×210 cm (optional)"
   },
   "order_form": {
     "title": "Send Your Order",

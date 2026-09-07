@@ -13,7 +13,7 @@ type OrderPrintData = {
   city: string | null;
   message: string | null;
   status: string;
-  items: { id: string; nameAr: string; quantity: number }[];
+  items: { id: string; nameAr: string; quantity: number; measurement: string | null }[];
 };
 
 // Opened in its own tab from the orders list ("طباعة مباشرة") instead of
@@ -76,6 +76,7 @@ export default function OrderPrintView({ order }: { order: OrderPrintData }) {
               <thead>
                 <tr className="border-b border-brand-700 text-brand-700">
                   <th className="py-1.5 text-start font-bold">المنتج</th>
+                  <th className="py-1.5 text-start font-bold">القياس</th>
                   <th className="py-1.5 text-start font-bold">الكمية</th>
                 </tr>
               </thead>
@@ -83,6 +84,7 @@ export default function OrderPrintView({ order }: { order: OrderPrintData }) {
                 {order.items.map((item) => (
                   <tr key={item.id}>
                     <td className="py-1.5">{item.nameAr}</td>
+                    <td className="py-1.5">{item.measurement ?? "—"}</td>
                     <td className="py-1.5">{item.quantity}</td>
                   </tr>
                 ))}

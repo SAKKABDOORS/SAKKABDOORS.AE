@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Dictionary } from "@/lib/i18n/getDictionary";
 
-type CartLine = { productId: string; name: string; quantity: number };
+type CartLine = { productId: string; name: string; quantity: number; measurement?: string };
 
 export default function OrderForm({
   dict,
@@ -35,9 +35,15 @@ export default function OrderForm({
     const data = new FormData(form);
 
     const items = cartItems
-      ? cartItems.map((line) => ({ productId: line.productId, quantity: line.quantity }))
+      ? cartItems.map((line) => ({ productId: line.productId, quantity: line.quantity, measurement: line.measurement || undefined }))
       : productId
-        ? [{ productId, quantity: Number(data.get("quantity") || 1) }]
+        ? [
+            {
+              productId,
+              quantity: Number(data.get("quantity") || 1),
+              measurement: String(data.get("measurement") || "") || undefined
+            }
+          ]
         : [];
 
     const payload = {
@@ -85,6 +91,7 @@ export default function OrderForm({
             {cartItems.map((line) => (
               <li key={line.productId}>
                 {line.name} × {line.quantity}
+                {line.measurement ? ` — ${dict.cart.measurement}: ${line.measurement}` : ""}
               </li>
             ))}
           </ul>
@@ -109,10 +116,16 @@ export default function OrderForm({
           <input className="input" id="city" name="city" />
         </div>
         {productId && !cartItems && (
-          <div>
-            <label className="label" htmlFor="quantity">{dict.product.quantity}</label>
-            <input className="input" id="quantity" name="quantity" type="number" min={1} defaultValue={1} />
-          </div>
+          <>
+            <div>
+              <label className="label" htmlFor="quantity">{dict.product.quantity}</label>
+              <input className="input" id="quantity" name="quantity" type="number" min={1} defaultValue={1} />
+            </div>
+            <div>
+              <label className="label" htmlFor="measurement">{dict.cart.measurement}</label>
+              <input className="input" id="measurement" name="measurement" placeholder={dict.cart.measurement_placeholder} />
+            </div>
+          </>
         )}
       </div>
 

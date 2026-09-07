@@ -13,7 +13,13 @@ const orderSchema = z.object({
   city: z.string().max(80).optional(),
   message: z.string().max(2000).optional(),
   items: z
-    .array(z.object({ productId: z.string(), quantity: z.number().int().min(1).max(999) }))
+    .array(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().int().min(1).max(999),
+        measurement: z.string().max(120).optional()
+      })
+    )
     .max(50)
     .default([])
 });
@@ -52,7 +58,13 @@ export async function POST(request: NextRequest) {
       email: data.email || undefined,
       city: data.city,
       message: data.message,
-      items: { create: validItems.map((i) => ({ productId: i.productId, quantity: i.quantity })) }
+      items: {
+        create: validItems.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          measurement: i.measurement || undefined
+        }))
+      }
     }
   });
 
@@ -67,7 +79,7 @@ export async function POST(request: NextRequest) {
       message: order.message,
       items: validItems.map((i) => {
         const p = productById.get(i.productId)!;
-        return { name: `${p.nameAr} / ${p.nameEn}`, quantity: i.quantity };
+        return { name: `${p.nameAr} / ${p.nameEn}`, quantity: i.quantity, measurement: i.measurement };
       })
     });
     await prisma.order.update({ where: { id: order.id }, data: { emailedOk: true } });

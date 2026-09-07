@@ -33,7 +33,8 @@ export default async function OrderPrintPage({ params }: { params: { id: string 
         items: order.items.map((item) => ({
           id: item.id,
           nameAr: item.product.nameAr,
-          quantity: item.quantity
+          quantity: item.quantity,
+          measurement: item.measurement
         }))
       }}
     />

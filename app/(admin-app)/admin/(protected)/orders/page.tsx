@@ -51,6 +51,9 @@ export default async function AdminOrdersPage() {
                         {o.items.map((item) => (
                           <li key={item.id}>
                             {item.product.nameAr} × {item.quantity}
+                            {item.measurement && (
+                              <span className="text-ink-800/60"> — القياس: {item.measurement}</span>
+                            )}
                           </li>
                         ))}
                       </ul>

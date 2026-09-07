@@ -16,6 +16,7 @@ import {
   LogOut,
   Palette,
   Shield,
+  UserCheck,
   Users,
   type LucideIcon
 } from "lucide-react";
@@ -27,6 +28,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; key: PageKey }[] = [
   { href: "/admin/categories", label: "الفئات", icon: Layers, key: "categories" },
   { href: "/admin/properties", label: "العقارات", icon: Building2, key: "properties" },
   { href: "/admin/jobs", label: "الوظائف الشاغرة", icon: Briefcase, key: "jobs" },
+  { href: "/admin/job-applications", label: "طلبات التوظيف", icon: UserCheck, key: "jobApplications" },
   { href: "/admin/orders", label: "الطلبات", icon: ClipboardList, key: "orders" },
   { href: "/admin/quotes", label: "عروض الأسعار", icon: FileText, key: "quotes" },
   { href: "/admin/content", label: "محتوى الموقع", icon: Palette, key: "content" },

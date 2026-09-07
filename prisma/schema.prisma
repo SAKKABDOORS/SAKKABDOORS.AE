@@ -142,12 +142,17 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  quantity  Int      @default(1)
+  id          String   @id @default(cuid())
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  product     Product  @relation(fields: [productId], references: [id])
+  productId   String
+  quantity    Int      @default(1)
+  // Free-text door measurement (e.g. "90×210 سم") the customer types in at
+  // the cart/order-now step — doors here are made-to-order, so this is
+  // often needed before the shop can quote or produce. Optional: most
+  // inquiries are still "ask us" without a firm size yet.
+  measurement String?
 
   @@index([orderId])
   @@index([productId])
@@ -194,6 +199,25 @@ model Job {
   descriptionAr String
   descriptionEn String
   createdAt     DateTime @default(now())
+}
+
+// A candidate applying to a Job posting — kept separate from Order (used to
+// be folded into Order.message as one free-text blob, which mixed job
+// applicants into the same admin list/print flow as product orders and
+// quote requests). No email field: the public form only ever collects a
+// phone number.
+model JobApplication {
+  id                 String   @id @default(cuid())
+  jobTitle           String
+  applicantName      String
+  phone              String
+  yearsExperience    String
+  reasonJoining      String
+  previousWorkplaces String?
+  certificates       String?
+  extraMessage       String?
+  emailedOk          Boolean  @default(false)
+  createdAt          DateTime @default(now())
 }
 
 model Admin {

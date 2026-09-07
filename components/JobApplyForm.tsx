@@ -5,10 +5,10 @@ import type { Dictionary } from "@/lib/i18n/getDictionary";
 
 // Separate from OrderForm on purpose — a job application collects different
 // information (experience, motivation, work history, certificates) and
-// deliberately never asks for an email, only a phone number. It still posts
-// to /api/orders so it shows up in /admin/orders like any other inquiry —
-// the extra fields are folded into the free-text "message" column since the
-// Order model has no dedicated job-application columns.
+// deliberately never asks for an email, only a phone number. Posts to its
+// own /api/job-applications endpoint (a JobApplication row, not an Order)
+// so candidates get their own admin list/print/email instead of being mixed
+// in with product orders and quote requests.
 export default function JobApplyForm({
   dict,
   jobTitle,
@@ -27,28 +27,20 @@ export default function JobApplyForm({
     const data = new FormData(form);
 
     const field = (name: string) => String(data.get(name) || "").trim();
-    const extra = field("extraMessage");
-
-    const message = [
-      `${dict.careers.apply_message}: ${jobTitle}`,
-      `${dict.careers.years_experience}: ${field("yearsExperience")}`,
-      `${dict.careers.reason_joining}: ${field("reasonJoining")}`,
-      field("previousWorkplaces") && `${dict.careers.previous_workplaces}: ${field("previousWorkplaces")}`,
-      field("certificates") && `${dict.careers.certificates}: ${field("certificates")}`,
-      extra && `\n${extra}`
-    ]
-      .filter(Boolean)
-      .join("\n");
 
     const payload = {
-      customerName: field("customerName"),
+      jobTitle,
+      applicantName: field("customerName"),
       phone: field("phone"),
-      message,
-      items: []
+      yearsExperience: field("yearsExperience"),
+      reasonJoining: field("reasonJoining"),
+      previousWorkplaces: field("previousWorkplaces") || undefined,
+      certificates: field("certificates") || undefined,
+      extraMessage: field("extraMessage") || undefined
     };
 
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/job-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

@@ -10,14 +10,19 @@ export type CartItem = {
   price: number;
   currency: string;
   quantity: number;
+  // Free-text size the customer types in on the cart page (e.g. "90×210
+  // سم") — doors here are made-to-order, so this often matters before the
+  // shop can quote. Optional, empty by default.
+  measurement?: string;
 };
 
 type CartContextValue = {
   items: CartItem[];
   count: number;
-  add: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  add: (item: Omit<CartItem, "quantity" | "measurement">, quantity?: number) => void;
   remove: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateMeasurement: (productId: string, measurement: string) => void;
   clear: () => void;
 };
 
@@ -77,13 +82,17 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     );
   }, []);
 
+  const updateMeasurement = useCallback((productId: string, measurement: string) => {
+    setItems((prev) => prev.map((i) => (i.productId === productId ? { ...i, measurement } : i)));
+  }, []);
+
   const clear = useCallback(() => setItems([]), []);
 
   const count = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
 
   const value = useMemo(
-    () => ({ items, count, add, remove, updateQuantity, clear }),
-    [items, count, add, remove, updateQuantity, clear]
+    () => ({ items, count, add, remove, updateQuantity, updateMeasurement, clear }),
+    [items, count, add, remove, updateQuantity, updateMeasurement, clear]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
