@@ -13,7 +13,8 @@ const LABELS: Record<SiteSettingKey, string> = {
   cta: "قسم الدعوة لاتخاذ إجراء",
   footer: "الفوتر",
   about_media: "صور وفيديوهات صفحة من نحن",
-  catalogs: "كتالوجات PDF"
+  catalogs: "كتالوجات PDF",
+  quoteTerms: "شروط عرض السعر الافتراضية"
 };
 
 function isSiteSettingKey(key: string): key is SiteSettingKey {

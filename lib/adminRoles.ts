@@ -33,6 +33,8 @@ export const PAGE_KEYS = [
   "properties",
   "jobs",
   "orders",
+  "quotes",
+  "customerTypes",
   "content",
   "ai",
   "chats",
@@ -53,6 +55,8 @@ export const PAGE_KEY_LABELS: Record<PageKey, string> = {
   properties: "العقارات",
   jobs: "الوظائف الشاغرة",
   orders: "الطلبات",
+  quotes: "عروض الأسعار",
+  customerTypes: "أنواع العملاء",
   content: "محتوى الموقع",
   ai: "الذكاء الاصطناعي",
   chats: "مؤخراً",
@@ -65,7 +69,19 @@ export const PAGE_KEY_LABELS: Record<PageKey, string> = {
 // (see /admin/permissions) — matches the original access rules: MANAGER
 // gets everything except site content; EMPLOYEE gets just the catalog.
 export const DEFAULT_ROLE_PAGES: Record<Exclude<AdminRole, "SUPER_ADMIN">, PageKey[]> = {
-  MANAGER: ["dashboard", "products", "categories", "properties", "jobs", "orders", "ai", "chats", "team"],
+  MANAGER: [
+    "dashboard",
+    "products",
+    "categories",
+    "properties",
+    "jobs",
+    "orders",
+    "quotes",
+    "customerTypes",
+    "ai",
+    "chats",
+    "team"
+  ],
   EMPLOYEE: ["products", "categories"]
 };
 

@@ -192,6 +192,21 @@ async function main() {
     }
   }
 
+  // --- Starter customer types for quote line-item discounts (percentages
+  // are placeholders — the admin tunes these from /admin/customer-types) ---
+  const customerTypes = [
+    { nameAr: "وكيل", nameEn: "Agent", discountPercent: 20 },
+    { nameAr: "تاجر", nameEn: "Trader", discountPercent: 15 },
+    { nameAr: "مهندس", nameEn: "Engineer", discountPercent: 10 },
+    { nameAr: "عميل", nameEn: "Client", discountPercent: 5 }
+  ];
+  for (const ct of customerTypes) {
+    const existing = await prisma.customerType.findFirst({ where: { nameAr: ct.nameAr } });
+    if (!existing) {
+      await prisma.customerType.create({ data: ct });
+    }
+  }
+
   // --- Site content CMS defaults (one row per homepage/footer section) ---
   for (const [key, value] of Object.entries(SITE_SETTING_DEFAULTS)) {
     await prisma.siteSetting.upsert({

@@ -14,6 +14,7 @@ import type {
   FooterContent,
   HeroContent,
   QualityContent,
+  QuoteTermsContent,
   ServicesContent,
   SiteSettingKey,
   StatsContent
@@ -28,7 +29,8 @@ type AnyContent =
   | CtaContent
   | FooterContent
   | AboutMediaContent
-  | CatalogsContent;
+  | CatalogsContent
+  | QuoteTermsContent;
 
 function BilingualInput({
   label,
@@ -36,7 +38,8 @@ function BilingualInput({
   en,
   onChangeAr,
   onChangeEn,
-  multiline = false
+  multiline = false,
+  rows = 3
 }: {
   label: string;
   ar: string;
@@ -44,17 +47,18 @@ function BilingualInput({
   onChangeAr: (v: string) => void;
   onChangeEn: (v: string) => void;
   multiline?: boolean;
+  rows?: number;
 }) {
   const Field = multiline ? "textarea" : "input";
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div>
         <label className="label">{label} (عربي)</label>
-        <Field className="input" value={ar} onChange={(e) => onChangeAr(e.target.value)} rows={multiline ? 3 : undefined} />
+        <Field className="input" value={ar} onChange={(e) => onChangeAr(e.target.value)} rows={multiline ? rows : undefined} />
       </div>
       <div>
         <label className="label">{label} (English)</label>
-        <Field className="input" value={en} onChange={(e) => onChangeEn(e.target.value)} rows={multiline ? 3 : undefined} />
+        <Field className="input" value={en} onChange={(e) => onChangeEn(e.target.value)} rows={multiline ? rows : undefined} />
       </div>
     </div>
   );
@@ -102,6 +106,7 @@ export default function SiteSettingEditor({
       {settingKey === "footer" && <FooterEditor value={value as FooterContent} onChange={setValue} />}
       {settingKey === "about_media" && <AboutMediaEditor value={value as AboutMediaContent} onChange={setValue} />}
       {settingKey === "catalogs" && <CatalogsEditor value={value as CatalogsContent} onChange={setValue} />}
+      {settingKey === "quoteTerms" && <QuoteTermsEditor value={value as QuoteTermsContent} onChange={setValue} />}
 
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}
       {saved && <p className="text-sm font-medium text-emerald-600">تم الحفظ بنجاح.</p>}
@@ -515,6 +520,25 @@ const CATALOG_SECTION_LABELS: Record<keyof CatalogsContent, string> = {
   composite: "كتالوج COMPOSITE",
   realestate: "كتالوج العقارات"
 };
+
+function QuoteTermsEditor({ value, onChange }: { value: QuoteTermsContent; onChange: (v: QuoteTermsContent) => void }) {
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-ink-800/60">
+        هاي النص يلي بيتعبى تلقائياً بأي عرض سعر جديد من /admin/quotes — تقدر تعدله لعرض معيّن بلا ما يأثر على هالنص الافتراضي.
+      </p>
+      <BilingualInput
+        label="شروط عرض السعر"
+        ar={value.ar}
+        en={value.en}
+        onChangeAr={(v) => onChange({ ...value, ar: v })}
+        onChangeEn={(v) => onChange({ ...value, en: v })}
+        multiline
+        rows={14}
+      />
+    </div>
+  );
+}
 
 function CatalogsEditor({ value, onChange }: { value: CatalogsContent; onChange: (v: CatalogsContent) => void }) {
   return (

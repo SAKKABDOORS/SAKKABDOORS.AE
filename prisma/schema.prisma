@@ -98,6 +98,7 @@ model Product {
   categoryId    String
   images        ProductImage[]
   orderItems    OrderItem[]
+  quoteItems    QuoteItem[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -134,6 +135,7 @@ model Order {
   status       OrderStatus @default(NEW)
   emailedOk    Boolean     @default(false)
   items        OrderItem[]
+  quotes       Quote[]
   createdAt    DateTime    @default(now())
 
   @@index([status])
@@ -264,4 +266,78 @@ model BlockedVisitor {
 
   @@index([ip])
   @@index([cookieId])
+}
+
+// --- Price quotes -----------------------------------------------------------
+// Admin-managed discount tiers (e.g. وكيل/تاجر/مهندس/عميل), each with its own
+// percentage, selectable per QuoteItem — see /admin/customer-types.
+model CustomerType {
+  id              String      @id @default(cuid())
+  nameAr          String
+  nameEn          String
+  discountPercent Float       @default(0)
+  isActive        Boolean     @default(true)
+  quoteItems      QuoteItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// A formal, printable price offer — separate from Order (an inbound customer
+// request): a Quote is what the admin issues back. Can start from an
+// existing Order (orderId set, prefilled) or from scratch (phone-in
+// customer, orderId null). Every number that ends up on the PDF is snapshotted
+// here/on QuoteItem at save time — editing a CustomerType's percent or a
+// Product's price later must never retroactively change an issued quote.
+// quoteNumber is assigned by app code (see lib/quotes.ts / app/api/admin/quotes/route.ts),
+// not a DB default — sqlite (local dev) can't autoincrement a non-@id field.
+model Quote {
+  id                String      @id @default(cuid())
+  quoteNumber       Int         @unique
+  order             Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderId           String?
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  customerAddress   String?
+  customerNumber    String?
+  addressedTo       String?
+  responsibleName   String?
+  responsiblePhone  String?
+  issueDate         DateTime    @default(now())
+  expiryDate        DateTime?
+  shippingFee       Float       @default(0)
+  discountAmount    Float       @default(0)
+  subtotal          Float
+  grandTotal        Float
+  currency          String      @default("AED")
+  termsAr           String      @db.Text
+  termsEn           String      @db.Text
+  customerNote      String?     @db.Text
+  createdByUsername String?
+  items             QuoteItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([orderId])
+}
+
+model QuoteItem {
+  id              String        @id @default(cuid())
+  quote           Quote         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId         String
+  product         Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId       String?
+  descriptionAr   String
+  descriptionEn   String
+  quantity        Int           @default(1)
+  unitPrice       Float
+  customerType    CustomerType? @relation(fields: [customerTypeId], references: [id], onDelete: SetNull)
+  customerTypeId  String?
+  discountPercent Float         @default(0)
+  lineTotal       Float
+  position        Int           @default(0)
+
+  @@index([quoteId])
+  @@index([productId])
+  @@index([customerTypeId])
 }

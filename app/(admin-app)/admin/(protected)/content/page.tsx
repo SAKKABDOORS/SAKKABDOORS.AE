@@ -16,7 +16,12 @@ const SECTIONS: { key: string; label: string; description: string; href?: string
   { key: "cta", label: "قسم الدعوة لاتخاذ إجراء", description: "قبل الفوتر مباشرة" },
   { key: "footer", label: "الفوتر", description: "الفروع، الهاتف، الإيميل" },
   { key: "about_media", label: "صور وفيديوهات صفحة من نحن", description: "معرض صور/فيديوهات إضافي بأسفل صفحة \"من نحن\"" },
-  { key: "catalogs", label: "كتالوجات PDF", description: "ملف PDF جاهز لكل قسم (WPC، ألمنيوم، COMPOSITE، عقارات) يحمّله الزوار" }
+  { key: "catalogs", label: "كتالوجات PDF", description: "ملف PDF جاهز لكل قسم (WPC، ألمنيوم، COMPOSITE، عقارات) يحمّله الزوار" },
+  {
+    key: "quoteTerms",
+    label: "شروط عرض السعر الافتراضية",
+    description: "النص يلي بيتعبى تلقائياً بأي عرض سعر جديد — قابل للتعديل لكل عرض لحاله بعدين"
+  }
 ];
 
 export default async function AdminContentPage() {

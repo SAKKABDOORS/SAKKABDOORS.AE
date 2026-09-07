@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getOrderStatusInfo } from "@/lib/orderStatus";
 import { requirePageRole } from "@/lib/requirePageRole";
@@ -28,6 +29,7 @@ export default async function AdminOrdersPage() {
                 <th className="p-3 text-start font-semibold">التفاصيل</th>
                 <th className="p-3 text-start font-semibold">الحالة</th>
                 <th className="p-3 text-start font-semibold">إيميل</th>
+                <th className="p-3 text-start font-semibold"><span className="sr-only">إجراءات</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-100">
@@ -67,6 +69,11 @@ export default async function AdminOrdersPage() {
                     </span>
                   </td>
                   <td className="p-3">{o.emailedOk ? "✅" : "⚠️"}</td>
+                  <td className="p-3">
+                    <Link href={`/admin/quotes/new?fromOrder=${o.id}`} className="btn-secondary whitespace-nowrap py-1.5 px-3 text-xs">
+                      إنشاء عرض
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
