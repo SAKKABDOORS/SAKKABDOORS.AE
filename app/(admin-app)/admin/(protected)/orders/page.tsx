@@ -70,9 +70,19 @@ export default async function AdminOrdersPage() {
                   </td>
                   <td className="p-3">{o.emailedOk ? "✅" : "⚠️"}</td>
                   <td className="p-3">
-                    <Link href={`/admin/quotes/new?fromOrder=${o.id}`} className="btn-secondary whitespace-nowrap py-1.5 px-3 text-xs">
-                      إنشاء عرض
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link href={`/admin/quotes/new?fromOrder=${o.id}`} className="btn-secondary whitespace-nowrap py-1.5 px-3 text-xs">
+                        إنشاء عرض
+                      </Link>
+                      <a
+                        href={`/admin/orders/${o.id}/print`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-secondary whitespace-nowrap py-1.5 px-3 text-xs"
+                      >
+                        طباعة مباشرة
+                      </a>
+                    </div>
                   </td>
                 </tr>
               ))}
