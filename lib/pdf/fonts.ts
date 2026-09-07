@@ -19,3 +19,15 @@ export function registerCatalogFonts() {
   });
   registered = true;
 }
+
+// Amiri's shaping (via @react-pdf/fontkit) mis-positions the "يخ" letter
+// pair — every glyph after it collapses onto the same spot instead of
+// advancing (reproduced in isolation, independent of weight/layout/width,
+// so it's a font/shaping bug, not a layout bug). Breaks the connecting
+// stroke with a zero-width joiner, which sidesteps the bad glyph pair while
+// keeping the letters visually joined. Must be applied to every piece of
+// Arabic text rendered through this font (static labels and DB content
+// alike — e.g. "التاريخ" and the client's own terms text both contain it).
+export function fixArabicShaping(text: string): string {
+  return text.replace(/يخ/g, "ي‍خ");
+}
