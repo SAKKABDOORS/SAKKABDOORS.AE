@@ -14,11 +14,12 @@ const LOGO_SRC = { data: readFileSync(path.join(process.cwd(), "public", "images
 const COLORS = {
   brand700: "#365030",
   brand600: "#47663b",
-  brand50: "#f2f5f0",
+  brand50: "#eef2ee",
   sand: "#e4dcc6",
   ink900: "#1b1b18",
   ink800: "#2b2a24",
-  white: "#ffffff"
+  white: "#ffffff",
+  border: "#c7d2c5"
 };
 
 export type QuotePdfItem = {
@@ -55,150 +56,177 @@ export type QuotePdfData = {
   companyBranches: { name: string; phone: string }[];
 };
 
+// Layout modeled directly on the client's real paper invoice template: a
+// pale-green header block with the logo/title top and two label:value
+// columns underneath, a bordered items table, a signature box paired with
+// the "توقيع العميل" label, and "ملاحظات العميل" at the bottom — same visual
+// language, just typed/computed instead of hand-filled.
 const styles = StyleSheet.create({
-  page: { paddingTop: 32, paddingBottom: 50, paddingHorizontal: 32, fontFamily: "Amiri", fontSize: 10 },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
+  page: { paddingTop: 0, paddingBottom: 40, paddingHorizontal: 0, fontFamily: "Amiri", fontSize: 10 },
+  headerBlock: { backgroundColor: COLORS.brand50, paddingHorizontal: 32, paddingTop: 28, paddingBottom: 20 },
+  headerTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   brandMark: { flexDirection: "row", alignItems: "center", gap: 8 },
-  logo: { width: 30, height: 30, borderRadius: 4 },
-  brandName: { fontSize: 14, fontWeight: "bold", color: COLORS.ink900 },
-  quoteTitleBlock: { alignItems: "flex-end" },
-  quoteTitle: { fontSize: 18, fontWeight: "bold", color: COLORS.brand700 },
-  quoteMeta: { fontSize: 9, color: COLORS.ink800, marginTop: 2, textAlign: "right" },
-  section: { marginBottom: 14, padding: 10, backgroundColor: COLORS.brand50, borderRadius: 6 },
-  sectionTitle: { fontSize: 10, fontWeight: "bold", color: COLORS.brand700, marginBottom: 4, textAlign: "right" },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  fieldLine: { fontSize: 9.5, color: COLORS.ink800, textAlign: "right", marginTop: 2 },
-  table: { marginBottom: 12 },
-  tableHeaderRow: { flexDirection: "row", backgroundColor: COLORS.brand700, borderRadius: 4, paddingVertical: 5, paddingHorizontal: 4 },
-  tableRow: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: COLORS.sand, paddingVertical: 5, paddingHorizontal: 4 },
-  colDesc: { flex: 3, textAlign: "right" },
+  logo: { width: 34, height: 34, borderRadius: 6 },
+  brandName: { fontSize: 16, fontWeight: "bold", color: COLORS.ink900 },
+  quoteTitle: { fontSize: 20, fontWeight: "bold", color: COLORS.ink900, textAlign: "right" },
+  fieldsRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
+  fieldsCol: { flexDirection: "column" },
+  fieldLine: { flexDirection: "row", fontSize: 10, color: COLORS.ink900, marginTop: 6 },
+  fieldLabel: { fontWeight: "bold", marginLeft: 4 },
+  fieldColon: { marginHorizontal: 3 },
+  body: { paddingHorizontal: 32, paddingTop: 24 },
+  table: { marginBottom: 12, borderWidth: 1, borderColor: COLORS.border, borderRadius: 2 },
+  tableHeaderRow: { flexDirection: "row", backgroundColor: COLORS.brand700, paddingVertical: 6, paddingHorizontal: 4 },
+  tableRow: { flexDirection: "row", borderTopWidth: 1, borderTopColor: COLORS.border, paddingVertical: 7, paddingHorizontal: 4 },
+  colDesc: { flex: 3, textAlign: "right", paddingRight: 4 },
   colNum: { flex: 1, textAlign: "center" },
   headerCellText: { color: COLORS.white, fontSize: 9, fontWeight: "bold", textAlign: "center" },
   cellText: { fontSize: 9, color: COLORS.ink900 },
-  totalsBlock: { alignItems: "flex-end", marginBottom: 16 },
+  totalsBlock: { alignItems: "flex-end", marginBottom: 22 },
   totalsRow: { flexDirection: "row", justifyContent: "space-between", width: 220, marginTop: 3 },
   totalsLabel: { fontSize: 9.5, color: COLORS.ink800 },
   totalsValue: { fontSize: 9.5, color: COLORS.ink900 },
   grandTotalRow: { flexDirection: "row", justifyContent: "space-between", width: 220, marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: COLORS.brand700 },
   grandTotalLabel: { fontSize: 12, fontWeight: "bold", color: COLORS.brand700 },
   grandTotalValue: { fontSize: 12, fontWeight: "bold", color: COLORS.brand700 },
-  termsBlock: { marginBottom: 14 },
-  termsTitle: { fontSize: 10, fontWeight: "bold", color: COLORS.brand700, marginBottom: 4, textAlign: "right" },
-  termsText: { fontSize: 8.5, color: COLORS.ink800, textAlign: "right", lineHeight: 1.5, marginBottom: 8 },
-  signatureBox: { marginTop: 20, width: 200, height: 60, borderWidth: 1, borderColor: COLORS.ink800, borderRadius: 4, alignItems: "center", justifyContent: "flex-end", padding: 6 },
-  signatureLabel: { fontSize: 9, color: COLORS.ink800 },
-  footer: { position: "absolute", bottom: 20, left: 32, right: 32, textAlign: "center", fontSize: 8, color: COLORS.ink800 }
+  signRow: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 30, gap: 12 },
+  signBoxes: { flexDirection: "column", gap: 4 },
+  signBox: { width: 160, height: 22, borderWidth: 1, borderColor: COLORS.ink800 },
+  signLabel: { fontSize: 10, fontWeight: "bold", color: COLORS.ink900 },
+  noteBlock: { marginTop: 30 },
+  noteLabel: { fontSize: 10, fontWeight: "bold", color: COLORS.ink900, marginBottom: 4, textAlign: "right" },
+  noteText: { fontSize: 9.5, color: COLORS.ink800, textAlign: "right" },
+  termsPage: { paddingTop: 32, paddingBottom: 40, paddingHorizontal: 32, fontFamily: "Amiri", fontSize: 10 },
+  termsPageTitle: { fontSize: 16, fontWeight: "bold", color: COLORS.brand700, textAlign: "right", marginBottom: 16 },
+  termsBlock: { marginBottom: 16 },
+  termsSubtitle: { fontSize: 10, fontWeight: "bold", color: COLORS.brand700, marginBottom: 6, textAlign: "right" },
+  termsText: { fontSize: 8.5, color: COLORS.ink800, textAlign: "right", lineHeight: 1.5 },
+  footer: { position: "absolute", bottom: 18, left: 32, right: 32, textAlign: "center", fontSize: 8, color: COLORS.ink800 }
 });
+
+function FieldLine({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.fieldLine}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={styles.fieldColon}>:</Text>
+      <Text>{value}</Text>
+    </View>
+  );
+}
 
 export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
   const number = formatQuoteNumber(quote.quoteNumber);
+  const branch = quote.companyBranches[0];
 
   return (
     <Document title={`SAKKAB — عرض سعر ${number}`}>
-      <Page size="A4" style={styles.page} wrap>
-        <View style={styles.headerRow}>
-          <View style={styles.quoteTitleBlock}>
-            <Text style={styles.quoteTitle}>عرض سعر</Text>
-            <Text style={styles.quoteMeta}>رقم العرض: {number}</Text>
-            <Text style={styles.quoteMeta}>التاريخ: {quote.issueDate}</Text>
-            {quote.expiryDate && <Text style={styles.quoteMeta}>صالح حتى: {quote.expiryDate}</Text>}
-          </View>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandName}>SAKKAB DOORS</Text>
-            <Image src={LOGO_SRC} style={styles.logo} />
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <View style={[styles.section, { flex: 1, marginRight: 6 }]}>
-            <Text style={styles.sectionTitle}>بيانات الزبون</Text>
-            <Text style={styles.fieldLine}>{quote.customerName}</Text>
-            <Text style={styles.fieldLine}>{quote.customerPhone}</Text>
-            {quote.customerEmail && <Text style={styles.fieldLine}>{quote.customerEmail}</Text>}
-            {quote.customerAddress && <Text style={styles.fieldLine}>{quote.customerAddress}</Text>}
-            {quote.addressedTo && <Text style={styles.fieldLine}>موجّه إلى: {quote.addressedTo}</Text>}
-          </View>
-          <View style={[styles.section, { flex: 1 }]}>
-            <Text style={styles.sectionTitle}>شركة سكاب للأبواب</Text>
-            <Text style={styles.fieldLine}>{quote.companyEmail}</Text>
-            {quote.companyBranches.map((b, i) => (
-              <Text key={i} style={styles.fieldLine}>{b.name}: {b.phone}</Text>
-            ))}
-            {(quote.responsibleName || quote.responsiblePhone) && (
-              <Text style={styles.fieldLine}>
-                المسؤول: {quote.responsibleName} {quote.responsiblePhone ? `- ${quote.responsiblePhone}` : ""}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.table}>
-          <View style={styles.tableHeaderRow}>
-            <Text style={[styles.colDesc, styles.headerCellText]}>الوصف / المنتج</Text>
-            <Text style={[styles.colNum, styles.headerCellText]}>الكمية</Text>
-            <Text style={[styles.colNum, styles.headerCellText]}>السعر</Text>
-            <Text style={[styles.colNum, styles.headerCellText]}>الضريبة</Text>
-            <Text style={[styles.colNum, styles.headerCellText]}>خصم</Text>
-            <Text style={[styles.colNum, styles.headerCellText]}>المجموع</Text>
-          </View>
-          {quote.items.map((item, i) => (
-            <View key={i} style={styles.tableRow} wrap={false}>
-              <Text style={[styles.colDesc, styles.cellText]}>{item.descriptionAr}</Text>
-              <Text style={[styles.colNum, styles.cellText]}>{item.quantity}</Text>
-              <Text style={[styles.colNum, styles.cellText]}>{item.unitPrice.toFixed(2)}</Text>
-              <Text style={[styles.colNum, styles.cellText]}>لا يوجد</Text>
-              <Text style={[styles.colNum, styles.cellText]}>{item.discountPercent > 0 ? `${item.discountPercent}%` : "-"}</Text>
-              <Text style={[styles.colNum, styles.cellText]}>{item.lineTotal.toFixed(2)}</Text>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.headerBlock}>
+          <View style={styles.headerTopRow}>
+            <Text style={styles.quoteTitle}>عرض سعر : {number}</Text>
+            <View style={styles.brandMark}>
+              <Text style={styles.brandName}>SAKKAB DOORS</Text>
+              <Image src={LOGO_SRC} style={styles.logo} />
             </View>
-          ))}
+          </View>
+
+          <View style={styles.fieldsRow}>
+            <View style={styles.fieldsCol}>
+              {branch && <FieldLine label="الفرع" value={branch.name} />}
+              <FieldLine label="الهاتف" value={branch ? branch.phone : ""} />
+              <FieldLine label="العنوان" value={quote.companyEmail} />
+              <FieldLine label="الموقع" value="sakkabdoors.ae" />
+              {(quote.responsibleName || quote.responsiblePhone) && (
+                <FieldLine
+                  label="المسؤول"
+                  value={[quote.responsibleName, quote.responsiblePhone].filter(Boolean).join(" - ")}
+                />
+              )}
+            </View>
+            <View style={styles.fieldsCol}>
+              <FieldLine label="العميل" value={quote.customerName} />
+              <FieldLine label="التاريخ" value={quote.issueDate} />
+              {quote.customerNumber && <FieldLine label="رقم العميل" value={quote.customerNumber} />}
+              <FieldLine label="هاتف العميل" value={quote.customerPhone} />
+              {quote.customerAddress && <FieldLine label="عنوان العميل" value={quote.customerAddress} />}
+              {quote.addressedTo && <FieldLine label="موجّه إلى" value={quote.addressedTo} />}
+              {quote.expiryDate && <FieldLine label="صالح حتى" value={quote.expiryDate} />}
+            </View>
+          </View>
         </View>
 
-        <View style={styles.totalsBlock}>
-          <View style={styles.totalsRow}>
-            <Text style={styles.totalsValue}>{quote.subtotal.toFixed(2)} {quote.currency}</Text>
-            <Text style={styles.totalsLabel}>المجموع الجزئي</Text>
+        <View style={styles.body}>
+          <View style={styles.table}>
+            <View style={styles.tableHeaderRow}>
+              <Text style={[styles.colDesc, styles.headerCellText]}>الوصف / المنتج</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>الكمية</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>السعر</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>الضريبة</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>خصم</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>المجموع</Text>
+            </View>
+            {quote.items.map((item, i) => (
+              <View key={i} style={styles.tableRow} wrap={false}>
+                <Text style={[styles.colDesc, styles.cellText]}>{item.descriptionAr}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.quantity}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.unitPrice.toFixed(2)}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>لا يوجد</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.discountPercent > 0 ? `${item.discountPercent}%` : "-"}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.lineTotal.toFixed(2)}</Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.totalsRow}>
-            <Text style={styles.totalsValue}>{quote.shippingFee.toFixed(2)} {quote.currency}</Text>
-            <Text style={styles.totalsLabel}>رسوم الشحن</Text>
+
+          <View style={styles.totalsBlock}>
+            <View style={styles.totalsRow}>
+              <Text style={styles.totalsValue}>{quote.subtotal.toFixed(2)} {quote.currency}</Text>
+              <Text style={styles.totalsLabel}>المجموع الجزئي</Text>
+            </View>
+            <View style={styles.totalsRow}>
+              <Text style={styles.totalsValue}>{quote.shippingFee.toFixed(2)} {quote.currency}</Text>
+              <Text style={styles.totalsLabel}>رسوم الشحن</Text>
+            </View>
+            <View style={styles.totalsRow}>
+              <Text style={styles.totalsValue}>-{quote.discountAmount.toFixed(2)} {quote.currency}</Text>
+              <Text style={styles.totalsLabel}>خصم إضافي</Text>
+            </View>
+            <View style={styles.grandTotalRow}>
+              <Text style={styles.grandTotalValue}>{quote.grandTotal.toFixed(2)} {quote.currency}</Text>
+              <Text style={styles.grandTotalLabel}>الإجمالي</Text>
+            </View>
           </View>
-          <View style={styles.totalsRow}>
-            <Text style={styles.totalsValue}>-{quote.discountAmount.toFixed(2)} {quote.currency}</Text>
-            <Text style={styles.totalsLabel}>خصم إضافي</Text>
+
+          <View style={styles.signRow}>
+            <View style={styles.signBoxes}>
+              <View style={styles.signBox} />
+              <View style={styles.signBox} />
+            </View>
+            <Text style={styles.signLabel}>توقيع العميل</Text>
           </View>
-          <View style={styles.grandTotalRow}>
-            <Text style={styles.grandTotalValue}>{quote.grandTotal.toFixed(2)} {quote.currency}</Text>
-            <Text style={styles.grandTotalLabel}>الإجمالي</Text>
-          </View>
+
+          {quote.customerNote && (
+            <View style={styles.noteBlock}>
+              <Text style={styles.noteLabel}>ملاحظات العميل</Text>
+              <Text style={styles.noteText}>{quote.customerNote}</Text>
+            </View>
+          )}
         </View>
 
-        {/* Known limitation, confirmed harmless: react-pdf/fontkit's font
-            subsetting corrupts the invisible ToUnicode (copy/search) text
-            layer once a document uses enough unique Amiri glyphs — verified
-            with an isolated test that the actual rendered/printed glyphs
-            stay correct throughout, only "select text" / PDF search on the
-            later terms is affected. No known fix short of patching the
-            library; not worth blocking on for a document meant to be read
-            and signed rather than copy-pasted from. */}
+        <Text style={styles.footer} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
+      </Page>
+
+      {/* Terms get their own dedicated page rather than flowing after the
+          quote — the client asked for the two kept visually separate. */}
+      <Page size="A4" style={styles.termsPage}>
+        <Text style={styles.termsPageTitle}>شروط العرض</Text>
         <View style={styles.termsBlock}>
-          <Text style={styles.termsTitle}>شروط العرض</Text>
+          <Text style={styles.termsSubtitle}>بالعربي</Text>
           <Text style={styles.termsText}>{quote.termsAr}</Text>
+        </View>
+        <View style={styles.termsBlock}>
+          <Text style={styles.termsSubtitle}>In English</Text>
           <Text style={styles.termsText}>{quote.termsEn}</Text>
         </View>
-
-        {quote.customerNote && (
-          <View style={styles.termsBlock}>
-            <Text style={styles.termsTitle}>ملاحظة للعميل</Text>
-            <Text style={styles.termsText}>{quote.customerNote}</Text>
-          </View>
-        )}
-
-        <View style={{ alignItems: "flex-end" }}>
-          <View style={styles.signatureBox}>
-            <Text style={styles.signatureLabel}>توقيع العميل</Text>
-          </View>
-        </View>
-
         <Text style={styles.footer} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
       </Page>
     </Document>
