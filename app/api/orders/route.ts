@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
   try {
     await sendNewOrderEmail({
       orderId: order.id,
+      createdAt: order.createdAt,
       customerName: order.customerName,
       phone: order.phone,
       email: order.email,
