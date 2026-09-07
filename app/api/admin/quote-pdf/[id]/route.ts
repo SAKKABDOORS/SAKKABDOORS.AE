@@ -5,8 +5,15 @@ import { getSiteSetting } from "@/lib/siteContent";
 import { renderQuotePdf, type QuotePdfData } from "@/lib/pdf/QuoteDocument";
 import { formatQuoteNumber } from "@/lib/quotes";
 
+// Deliberately NOT toLocaleDateString("ar-AE", ...) — that locale embeds
+// invisible RTL directional marks (U+200F) around the digit groups, which
+// browsers/email clients render fine but react-pdf's glyph shaper doesn't
+// understand, scrambling the date into garbage like "072026/09/" instead of
+// "07/09/2026". Built as a plain string so no such marks are ever present.
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("ar-AE", { year: "numeric", month: "2-digit", day: "2-digit" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${date.getFullYear()}`;
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
