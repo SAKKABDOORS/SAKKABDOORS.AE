@@ -239,9 +239,8 @@ export const SITE_SETTING_DEFAULTS: {
       "5- في حال عدم جهوزية العميل لن يتم التركيب لكي لا تتضرر الأبواب. وفي حال إصرار العميل على التركيب شركة سكاب لن تتحمل مسؤولية تضرر الأبواب و يجب على العميل والمهندس المسؤول توضيع خط لإخلاء مسؤولية شركة سكاب\n\n" +
       "6- الضمان يشمل البضاعة خلال الفترة المحددة والتي هي خمس سنوات من تاريخ التركيب وتاريخ الدفعة الأخيرة، والكفالة لاتشمل الأضرار المتعمدة وسوء الاستخدام\n\n" +
       "7- يتكفل العميل بتكاليف الأضرار من سوء الاستخدام وتكاليف النقل والإصلاح\n\n" +
-      "8- جميع أبواب الديبلو بي سي إنتاج و صناعة إماراتية بمواصفات خليجية\n\n" +
-      "9- الدفعة الأولى 50% من قيمة العقد عند التوقيع. الدفعة الثانية 50% من قيمة العقد قبل التركيب ب 15 يوم\n\n" +
-      "10- بعد توقيع العقد، سيبدأ إنتاج البضاعة ولا يجوز استرداد الدفعة الأولى أو إلغاء أي من الأبواب المعتمدة",
+      "8- الدفعة الأولى 80% من قيمة العقد عند التوقيع. الدفعة الثانية 20% من قيمة العقد قبل التركيب ب 15 يوم\n\n" +
+      "9- بعد توقيع العقد، سيبدأ إنتاج البضاعة ولا يجوز استرداد الدفعة الأولى أو إلغاء أي من الأبواب المعتمدة",
     en:
       "1- The duration of supply and installation is 40 days from the date the site is ready and the first payment is paid\n\n" +
       "2- The width of the two sides of the doors should be at least 10 cm and otherwise the frame is cut on the insole. The lower door threshold must be installed after installing the door, or the door is installed on the insole door and the threshold door\n\n" +
@@ -250,9 +249,8 @@ export const SITE_SETTING_DEFAULTS: {
       "5- If the site is not ready, the installation will not be done so that the doors are not damaged. If the customer insists on installation, SAKKAB will not be responsible for the doors damaged, and the customer and the engineer must sign a written letter disclaiming SAKKAB company's responsibility\n\n" +
       "6- The warranty includes the goods during the specified period, which is five years from the date of installation and the date of the last payment. The warranty does not cover intentional damage and misuse\n\n" +
       "7- The customer bears the costs of damage from misuse, transportation and repair costs\n\n" +
-      "8- All WPC doors are Emirati production and manufacture, with Emirati specifications\n\n" +
-      "9- The first payment at signing (50% of the contract value). The second payment is 15 days before installation (50% of the contract value)\n\n" +
-      "10- After signing the contract, manufacturing will begin. The down payment cannot be refunded or any of the doors cancelled"
+      "8- The first payment at signing (80% of the contract value). The second payment is 15 days before installation (20% of the contract value)\n\n" +
+      "9- After signing the contract, manufacturing will begin. The down payment cannot be refunded or any of the doors cancelled"
   }
 };
 

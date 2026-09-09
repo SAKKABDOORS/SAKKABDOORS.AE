@@ -115,7 +115,10 @@ const styles = StyleSheet.create({
   termsPageTitle: { fontSize: 16, fontWeight: "bold", color: COLORS.brand700, textAlign: "right", marginBottom: 16 },
   termsBlock: { marginBottom: 16 },
   termsSubtitle: { fontSize: 10, fontWeight: "bold", color: COLORS.brand700, marginBottom: 6, textAlign: "right" },
-  termsText: { fontSize: 8.5, color: COLORS.ink800, textAlign: "right", lineHeight: 1.5 },
+  termRow: { flexDirection: "row", marginBottom: 8 },
+  termNumber: { fontSize: 8.5, fontWeight: "bold", color: COLORS.brand700 },
+  termContentAr: { flex: 1, fontSize: 8.5, color: COLORS.ink800, textAlign: "right", lineHeight: 1.5, marginRight: 4 },
+  termContentEn: { flex: 1, fontSize: 8.5, color: COLORS.ink800, textAlign: "left", lineHeight: 1.5, marginLeft: 4 },
   footer: { position: "absolute", bottom: 18, left: 32, right: 32, textAlign: "center", fontSize: 8, color: COLORS.ink800 }
 });
 
@@ -132,6 +135,51 @@ function FieldLine({ label, value }: { label: string; value: string }) {
       <Text style={styles.fieldColon}>:</Text>
       <Text style={styles.fieldLabel}>{ar(label)}</Text>
     </View>
+  );
+}
+
+// The terms text is stored as one free-text block (admin-editable as a
+// plain textarea in /admin/content) with each clause starting "N- ...".
+// Rendering that as a single wrapped <Text> puts the "N-" wherever it
+// naturally falls in the wrapped line, not at the paragraph's logical
+// start — for Arabic that's the right edge, so the number visually
+// stranded on the left. Splitting into rows and rendering the number as
+// its own element (positioned via the same JSX-order trick as everywhere
+// else in this file) fixes both languages at once: Arabic puts the number
+// on the right (content first, number last), English leaves it naturally
+// on the left (number first, content last) — no need to touch how the
+// admin edits the text.
+type ParsedTerm = { number: string; content: string };
+
+function parseTerms(text: string): ParsedTerm[] {
+  return text
+    .split(/\n\n+/)
+    .map((raw) => raw.trim())
+    .filter(Boolean)
+    .map((raw, i) => {
+      const match = raw.match(/^(\d+)-\s*([\s\S]*)$/);
+      return match ? { number: match[1], content: match[2] } : { number: String(i + 1), content: raw };
+    });
+}
+
+function TermsList({ text, rtl }: { text: string; rtl: boolean }) {
+  const terms = parseTerms(text);
+  return (
+    <>
+      {terms.map((term, i) =>
+        rtl ? (
+          <View key={i} style={styles.termRow}>
+            <Text style={styles.termContentAr}>{ar(term.content)}</Text>
+            <Text style={styles.termNumber}>{`${term.number}-`}</Text>
+          </View>
+        ) : (
+          <View key={i} style={styles.termRow}>
+            <Text style={styles.termNumber}>{`${term.number}-`}</Text>
+            <Text style={styles.termContentEn}>{term.content}</Text>
+          </View>
+        )
+      )}
+    </>
   );
 }
 
@@ -207,14 +255,18 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
               <Text style={styles.totalsValue}>{quote.subtotal.toFixed(2)} {quote.currency}</Text>
               <Text style={styles.totalsLabel}>{ar("المجموع الجزئي")}</Text>
             </View>
-            <View style={styles.totalsRow}>
-              <Text style={styles.totalsValue}>{quote.shippingFee.toFixed(2)} {quote.currency}</Text>
-              <Text style={styles.totalsLabel}>{ar("رسوم الشحن")}</Text>
-            </View>
-            <View style={styles.totalsRow}>
-              <Text style={styles.totalsValue}>-{quote.discountAmount.toFixed(2)} {quote.currency}</Text>
-              <Text style={styles.totalsLabel}>{ar("خصم إضافي")}</Text>
-            </View>
+            {quote.shippingFee > 0 && (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsValue}>{quote.shippingFee.toFixed(2)} {quote.currency}</Text>
+                <Text style={styles.totalsLabel}>{ar("رسوم الشحن")}</Text>
+              </View>
+            )}
+            {quote.discountAmount > 0 && (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsValue}>-{quote.discountAmount.toFixed(2)} {quote.currency}</Text>
+                <Text style={styles.totalsLabel}>{ar("خصم إضافي")}</Text>
+              </View>
+            )}
             <View style={styles.grandTotalRow}>
               <Text style={styles.grandTotalValue}>{quote.grandTotal.toFixed(2)} {quote.currency}</Text>
               <Text style={styles.grandTotalLabel}>{ar("الإجمالي")}</Text>
@@ -246,11 +298,11 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
         <Text style={styles.termsPageTitle}>{ar("شروط العرض")}</Text>
         <View style={styles.termsBlock}>
           <Text style={styles.termsSubtitle}>{ar("بالعربي")}</Text>
-          <Text style={styles.termsText}>{ar(quote.termsAr)}</Text>
+          <TermsList text={quote.termsAr} rtl />
         </View>
         <View style={styles.termsBlock}>
           <Text style={styles.termsSubtitle}>In English</Text>
-          <Text style={styles.termsText}>{quote.termsEn}</Text>
+          <TermsList text={quote.termsEn} rtl={false} />
         </View>
         <Text style={styles.footer} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
       </Page>
