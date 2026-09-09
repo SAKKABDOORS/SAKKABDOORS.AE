@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AIChatWidget from "@/components/AIChatWidget";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PageTransition from "@/components/motion/PageTransition";
 import CartProvider from "@/components/cart/CartProvider";
 import { anton, cairo, inter } from "@/lib/fonts";
@@ -90,6 +91,7 @@ export default async function StorefrontLocaleLayout({
   return (
     <html lang={locale} dir={dir} className={`${inter.variable} ${cairo.variable} ${anton.variable}`}>
       <body>
+        <GoogleAnalytics />
         <CartProvider>
           <div className="flex min-h-screen flex-col">
             <Header dict={dict} locale={locale} logoUrl={brandingContent.logoUrl} />
