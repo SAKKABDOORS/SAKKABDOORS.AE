@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4
   },
   tableRow: { flexDirection: "row", borderTopWidth: 1, borderTopColor: COLORS.border, paddingVertical: 7, paddingHorizontal: 4 },
-  colDesc: { flex: 3, textAlign: "right", paddingRight: 4 },
+  colDesc: { flex: 3, textAlign: "right", paddingLeft: 4 },
   colNum: { flex: 1, textAlign: "center" },
   headerCellText: { color: COLORS.brand700, fontSize: 9, fontWeight: "bold", textAlign: "center" },
   cellText: { fontSize: 9, color: COLORS.ink900 },
@@ -119,12 +119,18 @@ const styles = StyleSheet.create({
   footer: { position: "absolute", bottom: 18, left: 32, right: 32, textAlign: "center", fontSize: 8, color: COLORS.ink800 }
 });
 
+// react-pdf's flex layout doesn't auto-flip for RTL the way a browser does
+// with <html dir="rtl"> — flexDirection:"row" always places the first JSX
+// child on the LEFT. So every row of "separate pieces that should read
+// right-to-left" has to be authored in the REVERSE of natural reading
+// order: value, then the colon, then the label last (so the label — read
+// first in Arabic — ends up on the right).
 function FieldLine({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.fieldLine}>
-      <Text style={styles.fieldLabel}>{ar(label)}</Text>
-      <Text style={styles.fieldColon}>:</Text>
       <Text>{ar(value)}</Text>
+      <Text style={styles.fieldColon}>:</Text>
+      <Text style={styles.fieldLabel}>{ar(label)}</Text>
     </View>
   );
 }
@@ -138,11 +144,11 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerBlock}>
           <View style={styles.headerTopRow}>
-            <Text style={styles.quoteTitle}>{ar(`عرض سعر : ${number}`)}</Text>
             <View style={styles.brandMark}>
-              <Text style={styles.brandName}>SAKKAB DOORS</Text>
               <Image src={LOGO_SRC} style={styles.logo} />
+              <Text style={styles.brandName}>SAKKAB DOORS</Text>
             </View>
+            <Text style={styles.quoteTitle}>{ar(`عرض سعر : ${number}`)}</Text>
           </View>
 
           <View style={styles.fieldsRow}>
@@ -172,22 +178,26 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
 
         <View style={styles.body}>
           <View style={styles.table}>
+            {/* Columns authored right-to-left in JSX (see the FieldLine
+                comment above) so "الوصف / المنتج" — the first thing read in
+                Arabic — ends up on the right and "المجموع" trails off to
+                the left, matching a normal Arabic invoice table. */}
             <View style={styles.tableHeaderRow}>
-              <Text style={[styles.colDesc, styles.headerCellText]}>{ar("الوصف / المنتج")}</Text>
-              <Text style={[styles.colNum, styles.headerCellText]}>{ar("الكمية")}</Text>
-              <Text style={[styles.colNum, styles.headerCellText]}>{ar("السعر")}</Text>
-              <Text style={[styles.colNum, styles.headerCellText]}>{ar("الضريبة")}</Text>
-              <Text style={[styles.colNum, styles.headerCellText]}>{ar("خصم")}</Text>
               <Text style={[styles.colNum, styles.headerCellText]}>{ar("المجموع")}</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>{ar("خصم")}</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>{ar("الضريبة")}</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>{ar("السعر")}</Text>
+              <Text style={[styles.colNum, styles.headerCellText]}>{ar("الكمية")}</Text>
+              <Text style={[styles.colDesc, styles.headerCellText]}>{ar("الوصف / المنتج")}</Text>
             </View>
             {quote.items.map((item, i) => (
               <View key={i} style={styles.tableRow} wrap={false}>
-                <Text style={[styles.colDesc, styles.cellText]}>{ar(item.descriptionAr)}</Text>
-                <Text style={[styles.colNum, styles.cellText]}>{item.quantity}</Text>
-                <Text style={[styles.colNum, styles.cellText]}>{item.unitPrice.toFixed(2)}</Text>
-                <Text style={[styles.colNum, styles.cellText]}>{ar("لا يوجد")}</Text>
-                <Text style={[styles.colNum, styles.cellText]}>{item.discountPercent > 0 ? `${item.discountPercent}%` : "-"}</Text>
                 <Text style={[styles.colNum, styles.cellText]}>{item.lineTotal.toFixed(2)}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.discountPercent > 0 ? `${item.discountPercent}%` : "-"}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{ar("لا يوجد")}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.unitPrice.toFixed(2)}</Text>
+                <Text style={[styles.colNum, styles.cellText]}>{item.quantity}</Text>
+                <Text style={[styles.colDesc, styles.cellText]}>{ar(item.descriptionAr)}</Text>
               </View>
             ))}
           </View>
