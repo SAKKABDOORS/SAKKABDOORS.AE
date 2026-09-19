@@ -49,8 +49,8 @@ export default function SystemLoginPage() {
         </div>
 
         <div>
-          <label className="label" htmlFor="email">الإيميل</label>
-          <input className="input" id="email" name="email" type="email" required autoFocus dir="ltr" />
+          <label className="label" htmlFor="email">اسم المستخدم</label>
+          <input className="input" id="email" name="email" type="text" required autoFocus dir="ltr" />
         </div>
         <div>
           <label className="label" htmlFor="password">كلمة المرور</label>
