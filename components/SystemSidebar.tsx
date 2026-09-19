@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, Users, Layers, type LucideIcon } from "lucide-react";
 import { homeForSystemRole, type SystemRoleValue, type SystemPageKey } from "@/lib/systemRoles";
 
 // Mirrors components/AdminSidebar.tsx exactly, for the fully separate
 // system.sakkabdoors.ae app. NAV only lists modules that actually have a
 // page built yet — extended as each phase in the plan ships its route.
 const NAV: { href: string; label: string; icon: LucideIcon; key: SystemPageKey }[] = [
-  { href: "/", label: "لوحة التحكم", icon: LayoutDashboard, key: "dashboard" }
+  { href: "/", label: "لوحة التحكم", icon: LayoutDashboard, key: "dashboard" },
+  { href: "/customers", label: "العملاء", icon: Users, key: "customers" },
+  { href: "/customer-types", label: "أنواع العملاء", icon: Layers, key: "customerTypes" }
 ];
 
 export default function SystemSidebar({

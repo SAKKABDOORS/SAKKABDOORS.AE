@@ -4,7 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CustomerType } from "@prisma/client";
 
-export default function CustomerTypeForm({ customerType }: { customerType?: CustomerType }) {
+export default function CustomerTypeForm({
+  customerType,
+  apiBase = "/api/admin/customer-types",
+  redirectTo = "/admin/customer-types"
+}: {
+  customerType?: CustomerType;
+  apiBase?: string;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,7 +31,7 @@ export default function CustomerTypeForm({ customerType }: { customerType?: Cust
       isActive: form.get("isActive") === "on"
     };
 
-    const url = customerType ? `/api/admin/customer-types/${customerType.id}` : "/api/admin/customer-types";
+    const url = customerType ? `${apiBase}/${customerType.id}` : apiBase;
     const method = customerType ? "PATCH" : "POST";
 
     const res = await fetch(url, {
@@ -39,7 +47,7 @@ export default function CustomerTypeForm({ customerType }: { customerType?: Cust
       return;
     }
 
-    router.push("/admin/customer-types");
+    router.push(redirectTo);
     router.refresh();
   }
 

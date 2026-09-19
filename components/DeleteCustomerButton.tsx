@@ -3,20 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeleteCustomerTypeButton({
-  customerTypeId,
-  apiBase = "/api/admin/customer-types"
-}: {
-  customerTypeId: string;
-  apiBase?: string;
-}) {
+export default function DeleteCustomerButton({ customerId }: { customerId: string }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
     setLoading(true);
-    await fetch(`${apiBase}/${customerTypeId}`, { method: "DELETE" });
+    await fetch(`/api/system/customers/${customerId}`, { method: "DELETE" });
     setLoading(false);
     router.refresh();
   }
