@@ -322,6 +322,7 @@ model Customer {
   customerTypeId String?
   customerType   CustomerType? @relation(fields: [customerTypeId], references: [id], onDelete: SetNull)
   quotes         Quote[]
+  invoices       Invoice[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -363,6 +364,7 @@ model Quote {
   customerNote      String?     @db.Text
   createdByUsername String?
   items             QuoteItem[]
+  invoices          Invoice[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -409,4 +411,62 @@ model SystemUser {
   name         String
   role         SystemRole @default(STAFF)
   createdAt    DateTime   @default(now())
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+}
+
+// A formal invoice, usually created from an accepted Quote ("convert to
+// invoice") but can also stand alone. Like Quote, every number that prints
+// on the invoice is snapshotted at creation time (items as JSON, matching
+// QuoteItem's own shape) — editing the source Quote/Customer/Product later
+// must never retroactively change an already-issued invoice. paidAmount/
+// status are the only fields that change afterward, driven by Payment rows.
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber Int           @unique
+  quote         Quote?        @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  quoteId       String?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId    String?
+  customerName  String
+  customerPhone String
+  items         Json
+  subtotal      Float
+  totalAmount   Float
+  paidAmount    Float         @default(0)
+  status        InvoiceStatus @default(UNPAID)
+  note          String?
+  payments      Payment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([quoteId])
+  @@index([customerId])
+}
+
+enum PaymentType {
+  INCOME
+  EXPENSE
+}
+
+// A single money movement — invoice payments (INCOME) today; employee
+// wages/vouchers/deductions (EXPENSE) join in once the Employees phase adds
+// Payment.employeeId. `category` stays a free string rather than an enum so
+// new kinds don't need a schema change later.
+model Payment {
+  id        String      @id @default(cuid())
+  type      PaymentType
+  category  String
+  amount    Float
+  method    String?
+  note      String?
+  invoice   Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  invoiceId String?
+  createdAt DateTime    @default(now())
+
+  @@index([invoiceId])
 }

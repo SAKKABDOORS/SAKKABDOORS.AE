@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteQuoteButton from "@/components/DeleteQuoteButton";
+import ConvertToInvoiceButton from "@/components/ConvertToInvoiceButton";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import { formatQuoteNumber } from "@/lib/quotes";
 
@@ -54,6 +55,7 @@ export default async function SystemQuotesPage() {
                     <Link href={`/quotes/${q.id}/edit`} className="btn-secondary py-1.5 px-3 text-xs">
                       تعديل
                     </Link>
+                    <ConvertToInvoiceButton quoteId={q.id} />
                     <DeleteQuoteButton quoteId={q.id} apiBase="/api/system/quotes" />
                   </div>
                 </td>
