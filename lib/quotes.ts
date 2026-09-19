@@ -16,6 +16,7 @@ export const quoteItemInputSchema = z.object({
 
 export const quoteInputSchema = z.object({
   orderId: z.string().min(1).nullable().optional(),
+  customerId: z.string().min(1).nullable().optional(),
   customerName: z.string().min(1),
   customerPhone: z.string().min(1),
   customerEmail: z.string().email().nullable().optional().or(z.literal("")),

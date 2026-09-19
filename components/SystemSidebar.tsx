@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Users, Layers, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, Users, Layers, FileText, type LucideIcon } from "lucide-react";
 import { homeForSystemRole, type SystemRoleValue, type SystemPageKey } from "@/lib/systemRoles";
 
 // Mirrors components/AdminSidebar.tsx exactly, for the fully separate
@@ -10,6 +10,7 @@ import { homeForSystemRole, type SystemRoleValue, type SystemPageKey } from "@/l
 // page built yet — extended as each phase in the plan ships its route.
 const NAV: { href: string; label: string; icon: LucideIcon; key: SystemPageKey }[] = [
   { href: "/", label: "لوحة التحكم", icon: LayoutDashboard, key: "dashboard" },
+  { href: "/quotes", label: "عروض الأسعار", icon: FileText, key: "quotes" },
   { href: "/customers", label: "العملاء", icon: Users, key: "customers" },
   { href: "/customer-types", label: "أنواع العملاء", icon: Layers, key: "customerTypes" }
 ];

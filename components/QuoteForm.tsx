@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CustomerType, Product, Quote, QuoteItem } from "@prisma/client";
+import type { Customer, CustomerType, Product, Quote, QuoteItem } from "@prisma/client";
 import QuoteItemsTable, { emptyItem } from "@/components/admin/QuoteItemsTable";
 import QuoteTotalsSummary from "@/components/admin/QuoteTotalsSummary";
 import { quoteInputSchema, type QuoteItemInput } from "@/lib/quotes";
@@ -22,15 +22,28 @@ function toDateInputValue(date: Date | string): string {
 export default function QuoteForm({
   quote,
   orderPrefill,
-  defaultTerms
+  defaultTerms,
+  apiBase = "/api/admin/quotes",
+  customerTypesApiBase = "/api/admin/customer-types",
+  redirectTo = "/admin/quotes",
+  // Only the system app has a real Customer directory to link against —
+  // the admin panel's QuoteForm keeps working exactly as before with this
+  // left off.
+  enableCustomerLink = false
 }: {
   quote?: Quote & { items: QuoteItem[] };
   orderPrefill?: QuoteOrderPrefill;
   defaultTerms: { ar: string; en: string };
+  apiBase?: string;
+  customerTypesApiBase?: string;
+  redirectTo?: string;
+  enableCustomerLink?: boolean;
 }) {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [customerTypes, setCustomerTypes] = useState<CustomerType[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customerId, setCustomerId] = useState(quote?.customerId ?? "");
 
   const [customerName, setCustomerName] = useState(quote?.customerName ?? orderPrefill?.customerName ?? "");
   const [customerPhone, setCustomerPhone] = useState(quote?.customerPhone ?? orderPrefill?.customerPhone ?? "");
@@ -78,11 +91,29 @@ export default function QuoteForm({
       .then((r) => r.json())
       .then(setProducts)
       .catch(() => setError("تعذر تحميل المنتجات"));
-    fetch("/api/admin/customer-types")
+    fetch(customerTypesApiBase)
       .then((r) => r.json())
       .then((all: CustomerType[]) => setCustomerTypes(all.filter((c) => c.isActive)))
       .catch(() => setError("تعذر تحميل أنواع العملاء"));
+    if (enableCustomerLink) {
+      fetch("/api/system/customers")
+        .then((r) => r.json())
+        .then(setCustomers)
+        .catch(() => setError("تعذر تحميل العملاء"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handlePickCustomer(id: string) {
+    setCustomerId(id);
+    const c = customers.find((x) => x.id === id);
+    if (c) {
+      setCustomerName(c.nameAr);
+      setCustomerPhone(c.phone);
+      if (c.email) setCustomerEmail(c.email);
+      if (c.address) setCustomerAddress(c.address);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -91,6 +122,7 @@ export default function QuoteForm({
 
     const payload = quoteInputSchema.safeParse({
       orderId: quote?.orderId ?? orderPrefill?.orderId ?? null,
+      customerId: customerId || null,
       customerName,
       customerPhone,
       customerEmail: customerEmail || null,
@@ -116,7 +148,7 @@ export default function QuoteForm({
       return;
     }
 
-    const url = quote ? `/api/admin/quotes/${quote.id}` : "/api/admin/quotes";
+    const url = quote ? `${apiBase}/${quote.id}` : apiBase;
     const method = quote ? "PATCH" : "POST";
 
     const res = await fetch(url, {
@@ -132,7 +164,7 @@ export default function QuoteForm({
       return;
     }
 
-    router.push("/admin/quotes");
+    router.push(redirectTo);
     router.refresh();
   }
 
@@ -140,6 +172,17 @@ export default function QuoteForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="card space-y-4 p-6">
         <h2 className="font-bold text-ink-900">بيانات الزبون</h2>
+        {enableCustomerLink && (
+          <div>
+            <label className="label">اختيار عميل موجود (اختياري)</label>
+            <select className="input" value={customerId} onChange={(e) => handlePickCustomer(e.target.value)}>
+              <option value="">— بدون، إدخال يدوي —</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>{c.nameAr} — {c.phone}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">اسم الزبون</label>

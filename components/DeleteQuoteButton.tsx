@@ -3,14 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeleteQuoteButton({ quoteId }: { quoteId: string }) {
+export default function DeleteQuoteButton({
+  quoteId,
+  apiBase = "/api/admin/quotes"
+}: {
+  quoteId: string;
+  apiBase?: string;
+}) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
     setLoading(true);
-    await fetch(`/api/admin/quotes/${quoteId}`, { method: "DELETE" });
+    await fetch(`${apiBase}/${quoteId}`, { method: "DELETE" });
     setLoading(false);
     router.refresh();
   }
