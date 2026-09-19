@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -29,5 +30,13 @@ export async function POST() {
     create: { email: normalizedEmail, passwordHash, name: "DARKSHAM", role: "OWNER" }
   });
 
-  return NextResponse.json({ ok: true, email: user.email });
+  return NextResponse.json({
+    ok: true,
+    email: user.email,
+    // TEMP diagnostic — a one-way checksum, never the value itself, just to
+    // confirm the env var the server actually read matches what was sent.
+    // Remove once the login mismatch is root-caused.
+    debugPasswordLength: password.length,
+    debugPasswordSha256: createHash("sha256").update(password).digest("hex")
+  });
 }
