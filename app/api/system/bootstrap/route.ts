@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +11,9 @@ import { prisma } from "@/lib/prisma";
 // so it can be left in place permanently without being an open
 // account-creation endpoint: the only thing it can ever do is sync the one
 // OWNER row to whatever SYSTEM_OWNER_EMAIL/PASSWORD currently hold.
+// Note: a literal "$" in SYSTEM_OWNER_PASSWORD gets silently truncated
+// somewhere in Vercel's own env-var storage (confirmed empirically, not a
+// shell-quoting issue on our end) — avoid that character in this value.
 export async function POST() {
   const email = process.env.SYSTEM_OWNER_EMAIL;
   const password = process.env.SYSTEM_OWNER_PASSWORD;
@@ -30,13 +32,5 @@ export async function POST() {
     create: { email: normalizedEmail, passwordHash, name: "DARKSHAM", role: "OWNER" }
   });
 
-  return NextResponse.json({
-    ok: true,
-    email: user.email,
-    // TEMP diagnostic — a one-way checksum, never the value itself, just to
-    // confirm the env var the server actually read matches what was sent.
-    // Remove once the login mismatch is root-caused.
-    debugPasswordLength: password.length,
-    debugPasswordSha256: createHash("sha256").update(password).digest("hex")
-  });
+  return NextResponse.json({ ok: true, email: user.email });
 }
