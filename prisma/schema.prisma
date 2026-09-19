@@ -365,3 +365,23 @@ model QuoteItem {
   @@index([productId])
   @@index([customerTypeId])
 }
+
+// --- Internal system (system.sakkabdoors.ae) -------------------------------
+// Fully separate login from Admin/AdminRole above — an "employee" here
+// (factory/sales staff) has no reason to ever touch /admin, and vice versa.
+// OWNER is the only role that can create/edit other SystemUsers (mirrors how
+// AdminRole.SUPER_ADMIN is the only role that manages /admin/team).
+enum SystemRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+model SystemUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         SystemRole @default(STAFF)
+  createdAt    DateTime   @default(now())
+}
