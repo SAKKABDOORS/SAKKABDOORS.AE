@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
+import PayAllSalariesButton from "@/components/PayAllSalariesButton";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 
 export default async function SystemEmployeesPage() {
@@ -12,7 +13,10 @@ export default async function SystemEmployeesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink-900">الموظفين</h1>
-        <Link href="/employees/new" className="btn-primary">إضافة موظف</Link>
+        <div className="flex gap-2">
+          <PayAllSalariesButton />
+          <Link href="/employees/new" className="btn-primary">إضافة موظف</Link>
+        </div>
       </div>
 
       <div className="card overflow-x-auto">
