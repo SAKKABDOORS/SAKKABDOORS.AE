@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -20,7 +21,7 @@ const voucherSchema = z.object({ amount: z.number().positive(), reason: z.string
 // category:"voucher") so it shows up in the ledger — see the schema
 // comment on EmployeeVoucher for why these aren't FK-linked.
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const employee = await prisma.employee.findUnique({ where: { id: params.id } });
@@ -48,5 +49,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
   });
 
+  await logAudit(session!.email, "create", "EmployeeVoucher", voucher.id, `سند قبض ${parsed.data.amount.toFixed(2)} — ${employee.nameAr} — ${parsed.data.reason}`);
   return NextResponse.json(voucher, { status: 201 });
 }

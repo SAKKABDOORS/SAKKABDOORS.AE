@@ -20,6 +20,21 @@ export type OverdueInvoice = {
   dueDate: Date;
 };
 
+export type LowStockProduct = {
+  nameAr: string;
+  stockQuantity: number;
+  lowStockThreshold: number;
+};
+
+export type ExpiringQuote = {
+  quoteNumber: string;
+  customerName: string;
+  customerPhone: string;
+  grandTotal: number;
+  currency: string;
+  expiryDate: Date;
+};
+
 export type NewJobApplicationEmailInput = {
   applicationId: string;
   createdAt: Date;
@@ -241,31 +256,19 @@ export function buildNewJobApplicationEmailHtml(application: NewJobApplicationEm
   return buildEmailShell({ title: "طلب توظيف جديد", shortId, rows, bodyHtml });
 }
 
-/**
- * One consolidated alert for every invoice that just crossed its due date
- * unpaid — sent to ORDER_NOTIFY_EMAIL (the same internal address orders and
- * job applications go to) by the daily Vercel Cron job
- * (app/api/system/cron/overdue-invoices/route.ts) rather than per-invoice,
- * so a slow day doesn't produce a flood of separate emails.
- */
-export async function sendOverdueInvoicesAlert(invoices: OverdueInvoice[]) {
-  const to = process.env.ORDER_NOTIFY_EMAIL;
-  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
-  if (!to) {
-    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
-  }
-
-  const transport = getTransport();
-  const subject = `تنبيه: ${invoices.length} فاتورة متأخرة الدفع`;
-
-  const html = `
+// Shared shell for the internal "digest" alerts below (overdue invoices,
+// low stock, expiring quotes) — one table of rows under a titled header,
+// all sent to ORDER_NOTIFY_EMAIL by their respective daily Vercel Cron
+// jobs rather than per-record, so a busy day doesn't flood the inbox.
+function buildAlertTableEmail(opts: { title: string; columns: string[]; rows: string[][] }) {
+  return `
   <div dir="rtl" style="background:#f5f3ee; padding:24px 12px; font-family:Tahoma, Arial, sans-serif;">
     <table role="presentation" width="100%" style="max-width:600px; margin:0 auto; background:#ffffff; border-collapse:collapse;" cellpadding="0" cellspacing="0">
       <tr>
         <td style="padding:24px 28px; border-bottom:2px solid ${BRAND};">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="font-size:18px; font-weight:bold; color:${BRAND};">فواتير متأخرة الدفع</td>
+              <td style="font-size:18px; font-weight:bold; color:${BRAND};">${opts.title}</td>
               <td align="left" style="white-space:nowrap;">
                 <img src="${LOGO_URL}" width="28" height="28" alt="" style="vertical-align:middle; border-radius:6px;" />
                 <span style="font-size:15px; font-weight:bold; color:${BRAND}; vertical-align:middle;">SAKKAB DOORS — النظام الداخلي</span>
@@ -278,19 +281,13 @@ export async function sendOverdueInvoicesAlert(invoices: OverdueInvoice[]) {
         <td style="padding:20px 28px 28px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
             <tr style="border-bottom:1px solid ${BRAND};">
-              <th align="right" style="padding:6px 0; color:${BRAND};">الفاتورة</th>
-              <th align="right" style="padding:6px 0; color:${BRAND};">الزبون</th>
-              <th align="right" style="padding:6px 0; color:${BRAND};">المتبقي</th>
-              <th align="right" style="padding:6px 0; color:${BRAND};">تاريخ الاستحقاق</th>
+              ${opts.columns.map((col) => `<th align="right" style="padding:6px 0; color:${BRAND};">${escapeHtml(col)}</th>`).join("")}
             </tr>
-            ${invoices
+            ${opts.rows
               .map(
-                (inv, i) => `
+                (cells, i) => `
               <tr style="${i > 0 ? `border-top:1px solid ${BRAND_LIGHT};` : ""}">
-                <td style="padding:6px 0; color:${INK};">#${escapeHtml(inv.invoiceNumber)}</td>
-                <td style="padding:6px 0; color:${INK};">${escapeHtml(inv.customerName)} — ${escapeHtml(inv.customerPhone)}</td>
-                <td style="padding:6px 0; color:${INK};">${inv.remaining.toFixed(2)} ${inv.currency}</td>
-                <td style="padding:6px 0; color:${INK};">${inv.dueDate.toLocaleDateString("ar-AE")}</td>
+                ${cells.map((cell) => `<td style="padding:6px 0; color:${INK};">${cell}</td>`).join("")}
               </tr>`
               )
               .join("")}
@@ -300,8 +297,115 @@ export async function sendOverdueInvoicesAlert(invoices: OverdueInvoice[]) {
     </table>
   </div>
   `;
+}
+
+/**
+ * One consolidated alert for every invoice that just crossed its due date
+ * unpaid — run daily by app/api/system/cron/overdue-invoices/route.ts.
+ */
+export async function sendOverdueInvoicesAlert(invoices: OverdueInvoice[]) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `تنبيه: ${invoices.length} فاتورة متأخرة الدفع`;
+  const html = buildAlertTableEmail({
+    title: "فواتير متأخرة الدفع",
+    columns: ["الفاتورة", "الزبون", "المتبقي", "تاريخ الاستحقاق"],
+    rows: invoices.map((inv) => [
+      `#${escapeHtml(inv.invoiceNumber)}`,
+      `${escapeHtml(inv.customerName)} — ${escapeHtml(inv.customerPhone)}`,
+      `${inv.remaining.toFixed(2)} ${inv.currency}`,
+      inv.dueDate.toLocaleDateString("ar-AE")
+    ])
+  });
 
   await transport.sendMail({ from, to, subject, html });
+}
+
+/**
+ * One consolidated alert for every product whose stock just dropped to or
+ * below its per-product threshold — run daily by
+ * app/api/system/cron/low-stock/route.ts.
+ */
+export async function sendLowStockAlert(products: LowStockProduct[]) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `تنبيه: ${products.length} منتج وصل لحد المخزون المنخفض`;
+  const html = buildAlertTableEmail({
+    title: "مخزون منخفض",
+    columns: ["المنتج", "الكمية الحالية", "الحد الأدنى"],
+    rows: products.map((p) => [escapeHtml(p.nameAr), String(p.stockQuantity), String(p.lowStockThreshold)])
+  });
+
+  await transport.sendMail({ from, to, subject, html });
+}
+
+/**
+ * One consolidated reminder for every quote expiring within 3 days (or
+ * already past its expiry) that was never converted to an invoice — run
+ * daily by app/api/system/cron/quote-expiry/route.ts.
+ */
+export async function sendQuoteExpiryAlert(quotes: ExpiringQuote[]) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `تذكير: ${quotes.length} عرض سعر قارب على الانتهاء`;
+  const html = buildAlertTableEmail({
+    title: "عروض أسعار قاربت على الانتهاء",
+    columns: ["العرض", "الزبون", "القيمة", "تاريخ الانتهاء"],
+    rows: quotes.map((q) => [
+      `#${escapeHtml(q.quoteNumber)}`,
+      `${escapeHtml(q.customerName)} — ${escapeHtml(q.customerPhone)}`,
+      `${q.grandTotal.toFixed(2)} ${q.currency}`,
+      q.expiryDate.toLocaleDateString("ar-AE")
+    ])
+  });
+
+  await transport.sendMail({ from, to, subject, html });
+}
+
+/**
+ * Weekly data-safety export — a JSON snapshot of the core business tables
+ * attached to an internal email, run by
+ * app/api/system/cron/backup/route.ts. Not a substitute for Neon's own
+ * database backups, just an extra, independently-held copy of the data
+ * that actually matters day-to-day.
+ */
+export async function sendBackupEmail(filename: string, jsonContent: string) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `نسخة احتياطية أسبوعية — ${new Date().toLocaleDateString("ar-AE")}`;
+  const html = buildAlertTableEmail({
+    title: "نسخة احتياطية أسبوعية",
+    columns: ["الملاحظة"],
+    rows: [["نسخة بصيغة JSON من بيانات العملاء، عروض الأسعار، الفواتير، المدفوعات، والموظفين — مرفقة بهذا الإيميل."]]
+  });
+
+  await transport.sendMail({
+    from,
+    to,
+    subject,
+    html,
+    attachments: [{ filename, content: jsonContent, contentType: "application/json" }]
+  });
 }
 
 function escapeHtml(input: string) {

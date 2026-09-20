@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -17,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 const deductionSchema = z.object({ amount: z.number().positive(), reason: z.string().min(1).max(300) });
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const employee = await prisma.employee.findUnique({ where: { id: params.id } });
@@ -35,5 +36,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     data: { employeeId: employee.id, amount: parsed.data.amount, reason: parsed.data.reason }
   });
 
+  await logAudit(session!.email, "create", "EmployeeDeduction", deduction.id, `خصم ${parsed.data.amount.toFixed(2)} — ${employee.nameAr} — ${parsed.data.reason}`);
   return NextResponse.json(deduction, { status: 201 });
 }

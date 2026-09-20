@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -43,5 +44,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
   });
 
+  await logAudit(session!.email, "create", "EmployeeEvaluation", evaluation.id, `تقييم موظف: ${employee.nameAr} — ${parsed.data.score}/5`);
   return NextResponse.json(evaluation, { status: 201 });
 }

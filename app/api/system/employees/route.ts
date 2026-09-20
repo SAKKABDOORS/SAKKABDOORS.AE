@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET() {
   const { response } = await requireSystemUser();
@@ -23,7 +24,7 @@ const employeeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -36,5 +37,6 @@ export async function POST(request: NextRequest) {
   const employee = await prisma.employee.create({
     data: { ...rest, hireDate: hireDate ? new Date(hireDate) : null }
   });
+  await logAudit(session!.email, "create", "Employee", employee.id, `إضافة موظف: ${employee.nameAr}`);
   return NextResponse.json(employee, { status: 201 });
 }

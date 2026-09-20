@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeInvoiceStatus } from "@/lib/invoices";
+import { logAudit } from "@/lib/auditLog";
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const payment = await prisma.payment.findUnique({ where: { id: params.id } });
@@ -13,6 +14,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
   }
 
   await prisma.payment.delete({ where: { id: params.id } });
+  await logAudit(session!.email, "delete", "Payment", payment.id, `حذف ${payment.type === "INCOME" ? "دخل" : "مصروف"} ${payment.amount.toFixed(2)} — ${payment.category}`);
 
   // Deleting a payment that was recorded against an invoice must roll that
   // invoice's paidAmount/status back — same recompute-from-actual-sum

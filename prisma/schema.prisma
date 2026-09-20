@@ -105,6 +105,14 @@ model Product {
   // customers see until that's wired up as its own, separate decision.
   stockQuantity      Int                  @default(0)
   inventoryMovements InventoryMovement[]
+  // Low-stock email alert (lib/mailer.ts's sendLowStockAlert, run daily by
+  // the Vercel Cron job in vercel.json — same one-shot-until-resolved
+  // pattern as Invoice.overdueNotifiedAt): fires once when stockQuantity
+  // drops to/below lowStockThreshold, then stays quiet until a warehouse
+  // movement (app/api/system/warehouse/[productId]/movements/route.ts)
+  // brings the stock back above the threshold, which clears the flag.
+  lowStockThreshold  Int                  @default(5)
+  lowStockNotifiedAt DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -371,6 +379,12 @@ model Quote {
   createdByUsername String?
   items             QuoteItem[]
   invoices          Invoice[]
+  // Quote-expiry email reminder (lib/mailer.ts's sendQuoteExpiryAlert, run
+  // daily by the Vercel Cron job in vercel.json): fires once when
+  // expiryDate is within 3 days (or already past) and the quote hasn't
+  // been converted to an Invoice yet — a nudge to follow up with the
+  // customer before the offer goes stale.
+  expiryNotifiedAt  DateTime?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -559,6 +573,24 @@ model EmployeeDeduction {
   createdAt  DateTime @default(now())
 
   @@index([employeeId])
+}
+
+// One row per create/update/delete made through system.sakkabdoors.ae —
+// written by lib/auditLog.ts, called from the mutating API routes. OWNER-only
+// visibility (/system/audit-log), for accountability once more than one
+// SystemUser is added. actorEmail/actorName are copied at write time rather
+// than a live FK, so the trail still reads correctly after a user is removed.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorEmail String
+  action     String // create | update | delete
+  entityType String // "Quote" | "Invoice" | "Payment" | ...
+  entityId   String
+  summary    String
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
 }
 
 // One stock movement for a Product's warehouse quantity — IN (restock),

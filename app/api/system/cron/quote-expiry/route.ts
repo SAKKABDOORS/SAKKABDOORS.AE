@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkOverdueInvoices } from "@/lib/cronTasks";
+import { checkQuoteExpiry } from "@/lib/cronTasks";
 
 export const dynamic = "force-dynamic";
 
 // Callable standalone for manual testing — the scheduled Vercel Cron job in
 // vercel.json actually hits /api/system/cron/daily-alerts, which runs this
-// same check (via lib/cronTasks.ts) alongside the low-stock and
-// quote-expiry checks under one cron-job slot.
+// same check (via lib/cronTasks.ts) alongside the overdue-invoices and
+// low-stock checks under one cron-job slot.
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (secret) {
@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const notified = await checkOverdueInvoices();
+    const notified = await checkQuoteExpiry();
     return NextResponse.json({ notified });
   } catch (err) {
-    console.error("Failed to send overdue invoices alert:", err);
+    console.error("Failed to send quote-expiry alert:", err);
     return NextResponse.json({ error: "email_failed" }, { status: 500 });
   }
 }

@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/system/cron/overdue-invoices",
+      "path": "/api/system/cron/daily-alerts",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/system/cron/backup",
+      "schedule": "0 7 * * 0"
     }
   ]
 }

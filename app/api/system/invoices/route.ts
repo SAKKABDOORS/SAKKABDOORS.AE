@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET() {
   const { response } = await requireSystemUser();
@@ -23,7 +24,7 @@ const createSchema = z.object({ quoteId: z.string().min(1) });
 // number is snapshotted at this moment: editing the source Quote afterward
 // must never change an already-issued invoice.
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -62,5 +63,6 @@ export async function POST(request: NextRequest) {
     }
   });
 
+  await logAudit(session!.email, "create", "Invoice", invoice.id, `إضافة فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json(invoice, { status: 201 });
 }

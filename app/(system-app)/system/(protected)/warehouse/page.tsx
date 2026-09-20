@@ -17,7 +17,7 @@ export default async function SystemWarehousePage({ searchParams }: { searchPara
 
   const products = await prisma.product.findMany({
     where: q ? { nameAr: { contains: q, mode: "insensitive" } } : undefined,
-    select: { id: true, nameAr: true, material: true, stockQuantity: true, inStock: true },
+    select: { id: true, nameAr: true, material: true, stockQuantity: true, inStock: true, lowStockThreshold: true },
     orderBy: { nameAr: "asc" }
   });
 
@@ -57,6 +57,9 @@ export default async function SystemWarehousePage({ searchParams }: { searchPara
                   <span className={p.stockQuantity > 0 ? "font-semibold text-emerald-700" : "font-semibold text-red-700"}>
                     {p.stockQuantity}
                   </span>
+                  {p.stockQuantity <= p.lowStockThreshold && (
+                    <span className="ms-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">منخفض</span>
+                  )}
                 </td>
                 <td className="p-3">
                   {p.inStock ? (

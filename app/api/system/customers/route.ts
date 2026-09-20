@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET() {
   const { response } = await requireSystemUser();
@@ -24,7 +25,7 @@ const customerSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -37,5 +38,6 @@ export async function POST(request: NextRequest) {
   const customer = await prisma.customer.create({
     data: { ...rest, customerTypeId: customerTypeId || undefined }
   });
+  await logAudit(session!.email, "create", "Customer", customer.id, `إضافة عميل: ${customer.nameAr}`);
   return NextResponse.json(customer, { status: 201 });
 }

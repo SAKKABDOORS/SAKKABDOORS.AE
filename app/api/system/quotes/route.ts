@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeLineTotal, computeQuoteTotals, quoteInputSchema } from "@/lib/quotes";
+import { logAudit } from "@/lib/auditLog";
 
 // Same Quote/QuoteItem tables /admin/quotes already manages — see the Phase
 // 3 plan: this is a second, system-auth-gated surface onto the shared data,
@@ -61,5 +62,6 @@ export async function POST(request: NextRequest) {
     include: { items: true }
   });
 
+  await logAudit(session!.email, "create", "Quote", quote.id, `إضافة عرض سعر #${quote.quoteNumber}: ${quote.customerName}`);
   return NextResponse.json(quote, { status: 201 });
 }

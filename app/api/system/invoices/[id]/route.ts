@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -22,7 +23,7 @@ const updateSchema = z.object({ dueDate: z.string().nullable() });
 // Only field editable after creation besides payments — a due date, set
 // manually per invoice (see the schema comment on Invoice.dueDate).
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -41,15 +42,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       overdueNotifiedAt: null
     }
   });
+  await logAudit(session!.email, "update", "Invoice", invoice.id, `تعديل تاريخ استحقاق فاتورة #${invoice.invoiceNumber}`);
   return NextResponse.json(invoice);
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   // Payment.invoiceId is onDelete: SetNull — past payment records survive,
   // just detached from the deleted invoice.
-  await prisma.invoice.delete({ where: { id: params.id } });
+  const invoice = await prisma.invoice.delete({ where: { id: params.id } });
+  await logAudit(session!.email, "delete", "Invoice", invoice.id, `حذف فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import InventoryMovementForm from "@/components/InventoryMovementForm";
+import LowStockThresholdForm from "@/components/LowStockThresholdForm";
 
 const TYPE_LABELS: Record<string, string> = { IN: "إدخال", OUT: "إخراج", ADJUSTMENT: "تصحيح" };
 
@@ -22,7 +23,15 @@ export default async function SystemWarehouseProductPage({ params }: { params: {
         <p className="text-sm">
           <span className="font-bold text-brand-700">الكمية الحالية بالمخزن:</span>{" "}
           <span className="text-lg font-bold text-brand-700">{product.stockQuantity}</span>
+          {product.stockQuantity <= product.lowStockThreshold && (
+            <span className="ms-2 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">مخزون منخفض</span>
+          )}
         </p>
+      </div>
+
+      <div className="card space-y-4 p-6">
+        <h2 className="font-bold text-ink-900">تنبيه انخفاض المخزون</h2>
+        <LowStockThresholdForm productId={product.id} threshold={product.lowStockThreshold} />
       </div>
 
       <div className="card space-y-4 p-6">

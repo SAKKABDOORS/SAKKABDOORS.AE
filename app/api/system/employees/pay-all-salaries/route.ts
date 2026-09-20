@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 // Pays every active employee's full monthlyWage in one go (skips anyone
 // with 0, since paying nothing isn't a real payment) — one Payment(EXPENSE,
 // category:"salary") row per employee, same as the single "دفع الراتب"
 // action on the employee detail page.
 export async function POST() {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const employees = await prisma.employee.findMany({
@@ -30,5 +31,6 @@ export async function POST() {
   });
 
   const totalAmount = employees.reduce((sum, e) => sum + e.monthlyWage, 0);
+  await logAudit(session!.email, "create", "Payment", "bulk", `دفع رواتب جماعي: ${employees.length} موظف، إجمالي ${totalAmount.toFixed(2)}`);
   return NextResponse.json({ paidCount: employees.length, totalAmount });
 }

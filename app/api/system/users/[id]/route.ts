@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 const passwordSchema = z.object({ password: z.string().min(8, "٨ أحرف على الأقل") });
 
@@ -26,6 +27,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   }
 
   await prisma.systemUser.delete({ where: { id: params.id } }).catch(() => null);
+  await logAudit(session!.email, "delete", "SystemUser", params.id, `حذف مستخدم من النظام`);
   return NextResponse.json({ ok: true });
 }
 
@@ -46,5 +48,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
   await prisma.systemUser.update({ where: { id: targetId }, data: { passwordHash } }).catch(() => null);
+  await logAudit(session!.email, "update", "SystemUser", targetId, isSelf ? "تغيير كلمة المرور الخاصة" : "إعادة تعيين كلمة مرور مستخدم");
   return NextResponse.json({ ok: true });
 }

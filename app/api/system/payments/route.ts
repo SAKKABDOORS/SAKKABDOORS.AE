@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 // Unified income/expense ledger — invoice payments land here too (created
 // via /api/system/invoices/[id]/payments), this route only handles the
@@ -29,7 +30,7 @@ const manualPaymentSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -48,5 +49,7 @@ export async function POST(request: NextRequest) {
     }
   });
 
+  const typeLabel = parsed.data.type === "INCOME" ? "دخل" : "مصروف";
+  await logAudit(session!.email, "create", "Payment", payment.id, `تسجيل ${typeLabel} يدوي ${parsed.data.amount.toFixed(2)} — ${parsed.data.category}`);
   return NextResponse.json(payment, { status: 201 });
 }

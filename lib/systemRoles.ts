@@ -34,7 +34,8 @@ export const SYSTEM_PAGE_KEYS = [
   "deductions",
   "evaluations",
   "warehouse",
-  "users"
+  "users",
+  "auditLog"
 ] as const;
 export type SystemPageKey = (typeof SYSTEM_PAGE_KEYS)[number];
 
@@ -55,7 +56,8 @@ export const SYSTEM_PAGE_KEY_LABELS: Record<SystemPageKey, string> = {
   deductions: "الخصومات",
   evaluations: "تقييم الموظفين",
   warehouse: "المخزن",
-  users: "المستخدمين"
+  users: "المستخدمين",
+  auditLog: "سجل التدقيق"
 };
 
 // Default visibility until an OWNER configures it otherwise (no

@@ -51,6 +51,9 @@ export default async function SystemCustomersPage({ searchParams }: { searchPara
                 <td className="p-3 text-ink-800/70">{c.customerType?.nameAr ?? "—"}</td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
+                    <a href={`/api/system/customer-statement-pdf/${c.id}`} download className="btn-secondary py-1.5 px-3 text-xs">
+                      كشف حساب
+                    </a>
                     <Link href={`/customers/${c.id}/edit`} className="btn-secondary py-1.5 px-3 text-xs">
                       تعديل
                     </Link>

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 // OWNER is deliberately not an assignable option here — it's DARKSHAM's own
 // account (created once via /api/system/bootstrap), not invited from this
@@ -29,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser(["OWNER"]);
+  const { session, response } = await requireSystemUser(["OWNER"]);
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -65,5 +66,6 @@ export async function POST(request: NextRequest) {
     select: { id: true, email: true, name: true, role: true, employeeId: true, createdAt: true }
   });
 
+  await logAudit(session!.email, "create", "SystemUser", user.id, `إضافة مستخدم للنظام: ${user.email} (${user.role})`);
   return NextResponse.json(user, { status: 201 });
 }

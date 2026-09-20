@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeInvoiceStatus } from "@/lib/invoices";
+import { logAudit } from "@/lib/auditLog";
 
 const paymentSchema = z.object({
   amount: z.number().positive(),
@@ -15,7 +16,7 @@ const paymentSchema = z.object({
 // new amount) — keeps the invoice consistent even if a payment is later
 // edited/removed directly in the ledger (Phase 5).
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -28,6 +29,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (!invoice) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
+
+  await logAudit(
+    session!.email,
+    "create",
+    "Payment",
+    invoice.id,
+    `تسجيل دفعة ${parsed.data.amount.toFixed(2)} على فاتورة #${invoice.invoiceNumber}`
+  );
 
   await prisma.payment.create({
     data: {

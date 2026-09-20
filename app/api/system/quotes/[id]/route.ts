@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeLineTotal, computeQuoteTotals, quoteInputSchema } from "@/lib/quotes";
+import { logAudit } from "@/lib/auditLog";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -42,13 +43,15 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     include: { items: true }
   });
 
+  await logAudit(session!.email, "update", "Quote", quote.id, `تعديل عرض سعر #${quote.quoteNumber}: ${quote.customerName}`);
   return NextResponse.json(quote);
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
-  await prisma.quote.delete({ where: { id: params.id } });
+  const quote = await prisma.quote.delete({ where: { id: params.id } });
+  await logAudit(session!.email, "delete", "Quote", quote.id, `حذف عرض سعر #${quote.quoteNumber}: ${quote.customerName}`);
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 // Same CustomerType table /admin/customer-types already manages — this is
 // just a second, system-auth-gated surface onto it (see the Phase 1 plan:
@@ -23,7 +24,7 @@ const customerTypeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireSystemUser(["OWNER", "MANAGER"]);
+  const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -33,5 +34,6 @@ export async function POST(request: NextRequest) {
   }
 
   const customerType = await prisma.customerType.create({ data: parsed.data });
+  await logAudit(session!.email, "create", "CustomerType", customerType.id, `إضافة نوع عميل: ${customerType.nameAr}`);
   return NextResponse.json(customerType, { status: 201 });
 }

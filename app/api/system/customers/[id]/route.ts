@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
+import { logAudit } from "@/lib/auditLog";
 
 const updateSchema = z.object({
   nameAr: z.string().min(1).optional(),
@@ -13,7 +14,7 @@ const updateSchema = z.object({
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   const json = await request.json().catch(() => null);
@@ -27,15 +28,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     where: { id: params.id },
     data: { ...rest, customerTypeId: customerTypeId === "" ? null : customerTypeId }
   });
+  await logAudit(session!.email, "update", "Customer", customer.id, `تعديل عميل: ${customer.nameAr}`);
   return NextResponse.json(customer);
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const { response } = await requireSystemUser();
+  const { session, response } = await requireSystemUser();
   if (response) return response;
 
   // Quote.customerId is onDelete: SetNull — a quote already tied to this
   // customer keeps its own snapshotted customerName/etc regardless.
-  await prisma.customer.delete({ where: { id: params.id } });
+  const customer = await prisma.customer.delete({ where: { id: params.id } });
+  await logAudit(session!.email, "delete", "Customer", customer.id, `حذف عميل: ${customer.nameAr}`);
   return NextResponse.json({ ok: true });
 }
