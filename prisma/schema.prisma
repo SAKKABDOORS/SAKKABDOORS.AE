@@ -410,6 +410,8 @@ model SystemUser {
   passwordHash String
   name         String
   role         SystemRole @default(STAFF)
+  employee     Employee?  @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  employeeId   String?    @unique
   createdAt    DateTime   @default(now())
 }
 
@@ -453,20 +455,41 @@ enum PaymentType {
   EXPENSE
 }
 
-// A single money movement — invoice payments (INCOME) today; employee
-// wages/vouchers/deductions (EXPENSE) join in once the Employees phase adds
-// Payment.employeeId. `category` stays a free string rather than an enum so
-// new kinds don't need a schema change later.
+// A single money movement — invoice payments (INCOME), and now employee
+// wages/vouchers/deductions (EXPENSE) via employeeId. `category` stays a
+// free string rather than an enum so new kinds don't need a schema change.
 model Payment {
-  id        String      @id @default(cuid())
-  type      PaymentType
-  category  String
-  amount    Float
-  method    String?
-  note      String?
-  invoice   Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  invoiceId String?
-  createdAt DateTime    @default(now())
+  id         String      @id @default(cuid())
+  type       PaymentType
+  category   String
+  amount     Float
+  method     String?
+  note       String?
+  invoice    Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  invoiceId  String?
+  employee   Employee?   @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  employeeId String?
+  createdAt  DateTime    @default(now())
 
   @@index([invoiceId])
+  @@index([employeeId])
+}
+
+// The HR roster — separate from SystemUser (a login account) since not
+// every employee needs/gets a system login; SystemUser.employeeId links the
+// two only when self-service access is set up (Phase 8).
+model Employee {
+  id          String     @id @default(cuid())
+  nameAr      String
+  nameEn      String?
+  phone       String
+  email       String?
+  position    String?
+  monthlyWage Float      @default(0)
+  hireDate    DateTime?
+  isActive    Boolean    @default(true)
+  systemUser  SystemUser?
+  payments    Payment[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }

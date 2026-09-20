@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Users, Layers, FileText, Receipt, Wallet, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, Users, Layers, FileText, Receipt, Wallet, UserCog, type LucideIcon } from "lucide-react";
 import { homeForSystemRole, type SystemRoleValue, type SystemPageKey } from "@/lib/systemRoles";
 
 // Mirrors components/AdminSidebar.tsx exactly, for the fully separate
@@ -14,7 +14,8 @@ const NAV: { href: string; label: string; icon: LucideIcon; key: SystemPageKey }
   { href: "/invoices", label: "الفواتير", icon: Receipt, key: "invoices" },
   { href: "/payments", label: "المدفوعات", icon: Wallet, key: "payments" },
   { href: "/customers", label: "العملاء", icon: Users, key: "customers" },
-  { href: "/customer-types", label: "أنواع العملاء", icon: Layers, key: "customerTypes" }
+  { href: "/customer-types", label: "أنواع العملاء", icon: Layers, key: "customerTypes" },
+  { href: "/employees", label: "الموظفين", icon: UserCog, key: "employees" }
 ];
 
 export default function SystemSidebar({
