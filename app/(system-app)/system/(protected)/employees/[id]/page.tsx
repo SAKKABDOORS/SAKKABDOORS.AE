@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import EmployeePaySalaryForm from "@/components/EmployeePaySalaryForm";
 import EmployeeAmountReasonForm from "@/components/EmployeeAmountReasonForm";
+import EmployeeEvaluationForm from "@/components/EmployeeEvaluationForm";
 import DeleteRecordButton from "@/components/DeleteRecordButton";
+
+const SCORE_LABELS: Record<number, string> = { 5: "ممتاز", 4: "جيد جداً", 3: "جيد", 2: "مقبول", 1: "ضعيف" };
 
 export default async function SystemEmployeeDetailPage({ params }: { params: { id: string } }) {
   await requireSystemRole("employees");
@@ -14,7 +17,8 @@ export default async function SystemEmployeeDetailPage({ params }: { params: { i
     include: {
       vouchers: { orderBy: { createdAt: "desc" } },
       deductions: { orderBy: { createdAt: "desc" } },
-      payments: { orderBy: { createdAt: "desc" } }
+      payments: { orderBy: { createdAt: "desc" } },
+      evaluations: { orderBy: { createdAt: "desc" } }
     }
   });
   if (!employee) notFound();
@@ -90,6 +94,29 @@ export default async function SystemEmployeeDetailPage({ params }: { params: { i
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-red-700">{d.amount.toFixed(2)} AED</span>
                   <DeleteRecordButton apiBase="/api/system/deductions" id={d.id} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="card space-y-4 p-6">
+        <h2 className="font-bold text-ink-900">تقييم الموظف</h2>
+        <EmployeeEvaluationForm employeeId={employee.id} />
+        {employee.evaluations.length === 0 ? (
+          <p className="text-sm text-ink-800/60">لا يوجد تقييمات بعد</p>
+        ) : (
+          <ul className="divide-y divide-brand-100 text-sm">
+            {employee.evaluations.map((ev) => (
+              <li key={ev.id} className="flex items-center justify-between py-2">
+                <span>
+                  {new Date(ev.createdAt).toLocaleDateString("ar-AE")} — {SCORE_LABELS[ev.score] ?? ev.score}
+                  {ev.notes ? ` — ${ev.notes}` : ""}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-brand-700">{ev.score}/5</span>
+                  <DeleteRecordButton apiBase="/api/system/evaluations" id={ev.id} />
                 </div>
               </li>
             ))}

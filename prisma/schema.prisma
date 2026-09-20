@@ -410,7 +410,15 @@ model SystemUser {
   passwordHash String
   name         String
   role         SystemRole @default(STAFF)
+  // Not @unique — a genuinely-unique FK added now to this already-populated
+  // table would fail db push's data-loss check the same way it did in the
+  // Employees phase. "One login per employee" is enforced in the API layer
+  // (app/api/system/users/route.ts) instead of at the DB level.
+  employee     Employee?  @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  employeeId   String?
   createdAt    DateTime   @default(now())
+
+  @@index([employeeId])
 }
 
 enum InvoiceStatus {
@@ -473,29 +481,40 @@ model Payment {
   @@index([employeeId])
 }
 
-// The HR roster — separate from SystemUser (a login account) since not
-// every employee needs/gets a system login; SystemUser.employeeId links the
-// two only when self-service access is set up (Phase 8).
-// SystemUser<->Employee self-service linking (create a login for this
-// employee) is deferred to the Evaluations & employee accounts phase —
-// adding a @unique FK to SystemUser now would flag as data-loss-risky
-// since that table already has rows (see the schema history for the same
-// pattern with Quote.quoteNumber/BlockedVisitor.cookieId).
+// The HR roster — separate from SystemUser (a login account), since not
+// every employee needs/gets a system login. SystemUser.employeeId links the
+// two only when self-service access is set up; not every Employee has one,
+// and (since that FK isn't @unique — see SystemUser's comment) this is a
+// list rather than a single optional relation.
 model Employee {
-  id          String              @id @default(cuid())
+  id          String               @id @default(cuid())
   nameAr      String
   nameEn      String?
   phone       String
   email       String?
   position    String?
-  monthlyWage Float               @default(0)
+  monthlyWage Float                @default(0)
   hireDate    DateTime?
-  isActive    Boolean             @default(true)
+  isActive    Boolean              @default(true)
   payments    Payment[]
   vouchers    EmployeeVoucher[]
   deductions  EmployeeDeduction[]
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  evaluations EmployeeEvaluation[]
+  systemUsers SystemUser[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model EmployeeEvaluation {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  score       Int
+  notes       String?
+  evaluatedBy String?
+  createdAt   DateTime @default(now())
+
+  @@index([employeeId])
 }
 
 // سند قبض — an ad-hoc payment to the employee (advance/bonus/reimbursement).
