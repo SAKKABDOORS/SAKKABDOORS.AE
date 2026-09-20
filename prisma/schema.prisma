@@ -410,8 +410,6 @@ model SystemUser {
   passwordHash String
   name         String
   role         SystemRole @default(STAFF)
-  employee     Employee?  @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-  employeeId   String?    @unique
   createdAt    DateTime   @default(now())
 }
 
@@ -478,6 +476,11 @@ model Payment {
 // The HR roster — separate from SystemUser (a login account) since not
 // every employee needs/gets a system login; SystemUser.employeeId links the
 // two only when self-service access is set up (Phase 8).
+// SystemUser<->Employee self-service linking (create a login for this
+// employee) is deferred to the Evaluations & employee accounts phase —
+// adding a @unique FK to SystemUser now would flag as data-loss-risky
+// since that table already has rows (see the schema history for the same
+// pattern with Quote.quoteNumber/BlockedVisitor.cookieId).
 model Employee {
   id          String     @id @default(cuid())
   nameAr      String
@@ -488,7 +491,6 @@ model Employee {
   monthlyWage Float      @default(0)
   hireDate    DateTime?
   isActive    Boolean    @default(true)
-  systemUser  SystemUser?
   payments    Payment[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
