@@ -79,7 +79,9 @@ export default async function SystemInvoicesPage({ searchParams }: { searchParam
                 </td>
               </tr>
             )}
-            {invoices.map((inv) => (
+            {invoices.map((inv) => {
+              const isOverdue = inv.dueDate && inv.dueDate < new Date() && inv.status !== "PAID";
+              return (
               <tr key={inv.id}>
                 <td className="p-3 font-mono text-ink-900">#{formatInvoiceNumber(inv.invoiceNumber)}</td>
                 <td className="p-3 font-medium text-ink-900">{inv.customerName}</td>
@@ -89,6 +91,9 @@ export default async function SystemInvoicesPage({ searchParams }: { searchParam
                   <span className={`rounded-full px-2 py-1 text-xs font-semibold ${STATUS_BADGE_CLASS[inv.status]}`}>
                     {INVOICE_STATUS_LABELS[inv.status as keyof typeof INVOICE_STATUS_LABELS]}
                   </span>
+                  {isOverdue && (
+                    <span className="ms-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">متأخرة</span>
+                  )}
                 </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
@@ -101,7 +106,8 @@ export default async function SystemInvoicesPage({ searchParams }: { searchParam
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

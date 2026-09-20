@@ -11,6 +11,15 @@ export type NewOrderEmailInput = {
   items: { name: string; quantity: number; measurement?: string | null }[];
 };
 
+export type OverdueInvoice = {
+  invoiceNumber: string;
+  customerName: string;
+  customerPhone: string;
+  remaining: number;
+  currency: string;
+  dueDate: Date;
+};
+
 export type NewJobApplicationEmailInput = {
   applicationId: string;
   createdAt: Date;
@@ -230,6 +239,69 @@ export function buildNewJobApplicationEmailHtml(application: NewJobApplicationEm
     `<tr><td style="padding:0 0 20px;"></td></tr>`;
 
   return buildEmailShell({ title: "طلب توظيف جديد", shortId, rows, bodyHtml });
+}
+
+/**
+ * One consolidated alert for every invoice that just crossed its due date
+ * unpaid — sent to ORDER_NOTIFY_EMAIL (the same internal address orders and
+ * job applications go to) by the daily Vercel Cron job
+ * (app/api/system/cron/overdue-invoices/route.ts) rather than per-invoice,
+ * so a slow day doesn't produce a flood of separate emails.
+ */
+export async function sendOverdueInvoicesAlert(invoices: OverdueInvoice[]) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `تنبيه: ${invoices.length} فاتورة متأخرة الدفع`;
+
+  const html = `
+  <div dir="rtl" style="background:#f5f3ee; padding:24px 12px; font-family:Tahoma, Arial, sans-serif;">
+    <table role="presentation" width="100%" style="max-width:600px; margin:0 auto; background:#ffffff; border-collapse:collapse;" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:24px 28px; border-bottom:2px solid ${BRAND};">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:18px; font-weight:bold; color:${BRAND};">فواتير متأخرة الدفع</td>
+              <td align="left" style="white-space:nowrap;">
+                <img src="${LOGO_URL}" width="28" height="28" alt="" style="vertical-align:middle; border-radius:6px;" />
+                <span style="font-size:15px; font-weight:bold; color:${BRAND}; vertical-align:middle;">SAKKAB DOORS — النظام الداخلي</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px 28px 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
+            <tr style="border-bottom:1px solid ${BRAND};">
+              <th align="right" style="padding:6px 0; color:${BRAND};">الفاتورة</th>
+              <th align="right" style="padding:6px 0; color:${BRAND};">الزبون</th>
+              <th align="right" style="padding:6px 0; color:${BRAND};">المتبقي</th>
+              <th align="right" style="padding:6px 0; color:${BRAND};">تاريخ الاستحقاق</th>
+            </tr>
+            ${invoices
+              .map(
+                (inv, i) => `
+              <tr style="${i > 0 ? `border-top:1px solid ${BRAND_LIGHT};` : ""}">
+                <td style="padding:6px 0; color:${INK};">#${escapeHtml(inv.invoiceNumber)}</td>
+                <td style="padding:6px 0; color:${INK};">${escapeHtml(inv.customerName)} — ${escapeHtml(inv.customerPhone)}</td>
+                <td style="padding:6px 0; color:${INK};">${inv.remaining.toFixed(2)} ${inv.currency}</td>
+                <td style="padding:6px 0; color:${INK};">${inv.dueDate.toLocaleDateString("ar-AE")}</td>
+              </tr>`
+              )
+              .join("")}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+  `;
+
+  await transport.sendMail({ from, to, subject, html });
 }
 
 function escapeHtml(input: string) {

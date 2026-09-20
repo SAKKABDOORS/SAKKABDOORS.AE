@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import { formatInvoiceNumber, invoiceItemSchema, INVOICE_STATUS_LABELS } from "@/lib/invoices";
 import InvoicePaymentForm from "@/components/InvoicePaymentForm";
+import InvoiceDueDateForm from "@/components/InvoiceDueDateForm";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 
 export default async function SystemInvoiceDetailPage({ params }: { params: { id: string } }) {
@@ -16,6 +17,7 @@ export default async function SystemInvoiceDetailPage({ params }: { params: { id
 
   const items = invoiceItemSchema.array().parse(invoice.items);
   const remaining = Math.round((invoice.totalAmount - invoice.paidAmount) * 100) / 100;
+  const isOverdue = invoice.dueDate && invoice.dueDate < new Date() && invoice.status !== "PAID";
 
   return (
     <div className="space-y-6">
@@ -32,7 +34,17 @@ export default async function SystemInvoiceDetailPage({ params }: { params: { id
       <div className="card space-y-2 p-6">
         <p className="text-sm"><span className="font-bold text-brand-700">الزبون:</span> {invoice.customerName}</p>
         <p className="text-sm"><span className="font-bold text-brand-700">الهاتف:</span> {invoice.customerPhone}</p>
-        <p className="text-sm"><span className="font-bold text-brand-700">الحالة:</span> {INVOICE_STATUS_LABELS[invoice.status as keyof typeof INVOICE_STATUS_LABELS]}</p>
+        <p className="text-sm">
+          <span className="font-bold text-brand-700">الحالة:</span> {INVOICE_STATUS_LABELS[invoice.status as keyof typeof INVOICE_STATUS_LABELS]}
+          {isOverdue && (
+            <span className="ms-2 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">متأخرة الدفع</span>
+          )}
+        </p>
+      </div>
+
+      <div className="card space-y-4 p-6">
+        <h2 className="font-bold text-ink-900">تاريخ الاستحقاق</h2>
+        <InvoiceDueDateForm invoiceId={invoice.id} dueDate={invoice.dueDate} />
       </div>
 
       <div className="card overflow-x-auto p-6">

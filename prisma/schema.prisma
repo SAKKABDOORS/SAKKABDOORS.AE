@@ -454,6 +454,13 @@ model Invoice {
   paidAmount    Float         @default(0)
   status        InvoiceStatus @default(UNPAID)
   note          String?
+  // Set manually per invoice (no default) — the "متأخرة الدفع" alert
+  // (lib/mailer.ts's sendOverdueInvoicesAlert, run daily by the Vercel Cron
+  // job in vercel.json) only fires once dueDate has passed AND the invoice
+  // isn't PAID yet. overdueNotifiedAt marks that the one-time alert already
+  // went out, so it isn't re-sent every day the invoice stays overdue.
+  dueDate           DateTime?
+  overdueNotifiedAt DateTime?
   payments      Payment[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
