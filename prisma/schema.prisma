@@ -99,6 +99,12 @@ model Product {
   images        ProductImage[]
   orderItems    OrderItem[]
   quoteItems    QuoteItem[]
+  // Internal warehouse tracking (system.sakkabdoors.ae) — deliberately
+  // separate from `inStock` above, which stays the manually-toggled
+  // storefront badge exactly as before; nothing here changes what
+  // customers see until that's wired up as its own, separate decision.
+  stockQuantity      Int                  @default(0)
+  inventoryMovements InventoryMovement[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -546,4 +552,20 @@ model EmployeeDeduction {
   createdAt  DateTime @default(now())
 
   @@index([employeeId])
+}
+
+// One stock movement for a Product's warehouse quantity — IN (restock),
+// OUT (sold/used), or ADJUSTMENT (manual correction, quantity is the new
+// absolute value rather than a delta). `type` stays a free string rather
+// than an enum, matching Payment.category's reasoning.
+model InventoryMovement {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      String
+  quantity  Int
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 }
