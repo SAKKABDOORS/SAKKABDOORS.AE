@@ -50,6 +50,9 @@ export default async function SystemEmployeesPage() {
                 </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
+                    <Link href={`/employees/${e.id}`} className="btn-secondary py-1.5 px-3 text-xs">
+                      عرض
+                    </Link>
                     <Link href={`/employees/${e.id}/edit`} className="btn-secondary py-1.5 px-3 text-xs">
                       تعديل
                     </Link>

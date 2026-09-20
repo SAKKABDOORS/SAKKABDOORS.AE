@@ -482,16 +482,49 @@ model Payment {
 // since that table already has rows (see the schema history for the same
 // pattern with Quote.quoteNumber/BlockedVisitor.cookieId).
 model Employee {
-  id          String     @id @default(cuid())
+  id          String              @id @default(cuid())
   nameAr      String
   nameEn      String?
   phone       String
   email       String?
   position    String?
-  monthlyWage Float      @default(0)
+  monthlyWage Float               @default(0)
   hireDate    DateTime?
-  isActive    Boolean    @default(true)
+  isActive    Boolean             @default(true)
   payments    Payment[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  vouchers    EmployeeVoucher[]
+  deductions  EmployeeDeduction[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+// سند قبض — an ad-hoc payment to the employee (advance/bonus/reimbursement).
+// Also creates a matching Payment(EXPENSE, category:"voucher") for the
+// ledger — deliberately NOT linked via a dedicated FK (would need a new
+// @unique column on the already-populated Payment table, which db push
+// flags as data-loss-risky the same way SystemUser.employeeId did) —
+// Payment.employeeId + category is enough to find them together.
+model EmployeeVoucher {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  amount     Float
+  reason     String
+  createdAt  DateTime @default(now())
+
+  @@index([employeeId])
+}
+
+// A reduction against what the employee is owed (e.g. misuse/damage cost,
+// per the client's own warranty terms) — a record for HR/payroll purposes,
+// not itself a money movement, so it doesn't create a Payment row.
+model EmployeeDeduction {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  amount     Float
+  reason     String
+  createdAt  DateTime @default(now())
+
+  @@index([employeeId])
 }
