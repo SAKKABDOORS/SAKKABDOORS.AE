@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
+import SystemSearchBar from "@/components/SystemSearchBar";
 
 const MATERIAL_LABELS_AR: Record<string, string> = {
   WPC: "WPC",
@@ -9,10 +10,13 @@ const MATERIAL_LABELS_AR: Record<string, string> = {
   STEEL: "حديد"
 };
 
-export default async function SystemWarehousePage() {
+export default async function SystemWarehousePage({ searchParams }: { searchParams: { q?: string } }) {
   await requireSystemRole("warehouse");
 
+  const q = searchParams.q?.trim();
+
   const products = await prisma.product.findMany({
+    where: q ? { nameAr: { contains: q, mode: "insensitive" } } : undefined,
     select: { id: true, nameAr: true, material: true, stockQuantity: true, inStock: true },
     orderBy: { nameAr: "asc" }
   });
@@ -23,6 +27,8 @@ export default async function SystemWarehousePage() {
       <p className="mb-4 text-sm text-ink-800/60">
         نفس المنتجات الموجودة بكتالوج الموقع الرئيسي — الكمية هون داخلية فقط، ما بتأثر على شارة "متوفر" بالموقع.
       </p>
+
+      <SystemSearchBar action="/warehouse" q={q} placeholder="اسم المنتج" />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -39,7 +45,7 @@ export default async function SystemWarehousePage() {
             {products.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-6 text-center text-ink-800/60">
-                  لا يوجد منتجات بعد
+                  {q ? "ما في نتائج مطابقة للبحث" : "لا يوجد منتجات بعد"}
                 </td>
               </tr>
             )}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import { formatInvoiceNumber, INVOICE_STATUS_LABELS } from "@/lib/invoices";
+import SystemSearchBar from "@/components/SystemSearchBar";
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
   UNPAID: "bg-red-50 text-red-700",
@@ -9,10 +10,29 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
   PAID: "bg-emerald-50 text-emerald-700"
 };
 
-export default async function SystemInvoicesPage() {
+export default async function SystemInvoicesPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requireSystemRole("invoices");
 
-  const invoices = await prisma.invoice.findMany({ orderBy: { invoiceNumber: "desc" } });
+  const q = searchParams.q?.trim();
+  const status = searchParams.status;
+  const asNumber = q ? Number(q.replace(/^#|^0+/, "")) : NaN;
+  const validStatus = status && ["UNPAID", "PARTIALLY_PAID", "PAID"].includes(status) ? status : undefined;
+
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      ...(validStatus ? { status: validStatus as never } : {}),
+      ...(q
+        ? {
+            OR: [
+              { customerName: { contains: q, mode: "insensitive" } },
+              { customerPhone: { contains: q } },
+              ...(Number.isFinite(asNumber) && asNumber > 0 ? [{ invoiceNumber: asNumber }] : [])
+            ]
+          }
+        : {})
+    },
+    orderBy: { invoiceNumber: "desc" }
+  });
 
   return (
     <div>
@@ -20,6 +40,24 @@ export default async function SystemInvoicesPage() {
       <p className="mb-4 text-sm text-ink-800/60">
         الفواتير تُنشأ من عرض سعر موافَق عليه — افتح عرض السعر واضغط "تحويل لفاتورة".
       </p>
+
+      <SystemSearchBar
+        action="/invoices"
+        q={q}
+        hasFilter={Boolean(q || validStatus)}
+        placeholder="اسم الزبون، الهاتف، أو رقم الفاتورة"
+        extra={
+          <div>
+            <label className="label">الحالة</label>
+            <select className="input" name="status" defaultValue={validStatus ?? ""}>
+              <option value="">الكل</option>
+              <option value="UNPAID">{INVOICE_STATUS_LABELS.UNPAID}</option>
+              <option value="PARTIALLY_PAID">{INVOICE_STATUS_LABELS.PARTIALLY_PAID}</option>
+              <option value="PAID">{INVOICE_STATUS_LABELS.PAID}</option>
+            </select>
+          </div>
+        }
+      />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -37,7 +75,7 @@ export default async function SystemInvoicesPage() {
             {invoices.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-6 text-center text-ink-800/60">
-                  لا يوجد فواتير بعد
+                  {q || validStatus ? "ما في نتائج مطابقة" : "لا يوجد فواتير بعد"}
                 </td>
               </tr>
             )}

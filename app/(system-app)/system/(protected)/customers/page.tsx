@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteCustomerButton from "@/components/DeleteCustomerButton";
+import SystemSearchBar from "@/components/SystemSearchBar";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 
-export default async function SystemCustomersPage() {
+export default async function SystemCustomersPage({ searchParams }: { searchParams: { q?: string } }) {
   await requireSystemRole("customers");
 
+  const q = searchParams.q?.trim();
+
   const customers = await prisma.customer.findMany({
+    where: q
+      ? { OR: [{ nameAr: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }] }
+      : undefined,
     orderBy: { createdAt: "desc" },
     include: { customerType: true }
   });
@@ -17,6 +23,8 @@ export default async function SystemCustomersPage() {
         <h1 className="text-2xl font-bold text-ink-900">العملاء</h1>
         <Link href="/customers/new" className="btn-primary">إضافة عميل</Link>
       </div>
+
+      <SystemSearchBar action="/customers" q={q} placeholder="الاسم أو رقم الهاتف" />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -32,7 +40,7 @@ export default async function SystemCustomersPage() {
             {customers.length === 0 && (
               <tr>
                 <td colSpan={4} className="p-6 text-center text-ink-800/60">
-                  لا يوجد عملاء بعد
+                  {q ? "ما في نتائج مطابقة للبحث" : "لا يوجد عملاء بعد"}
                 </td>
               </tr>
             )}

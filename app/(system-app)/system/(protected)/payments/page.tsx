@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import ManualPaymentForm from "@/components/ManualPaymentForm";
 import DeletePaymentButton from "@/components/DeletePaymentButton";
+import SystemSearchBar from "@/components/SystemSearchBar";
 
 const CATEGORY_LABELS: Record<string, string> = {
   invoice: "فاتورة",
@@ -10,16 +11,29 @@ const CATEGORY_LABELS: Record<string, string> = {
   deduction: "خصم"
 };
 
-export default async function SystemPaymentsPage() {
+export default async function SystemPaymentsPage({ searchParams }: { searchParams: { q?: string; type?: string } }) {
   await requireSystemRole("payments");
 
-  const payments = await prisma.payment.findMany({
+  const q = searchParams.q?.trim().toLowerCase();
+  const type = searchParams.type;
+  const validType = type === "INCOME" || type === "EXPENSE" ? type : undefined;
+
+  const allPayments = await prisma.payment.findMany({
     orderBy: { createdAt: "desc" },
     include: { invoice: { select: { invoiceNumber: true, customerName: true } } }
   });
 
-  const totalIncome = payments.filter((p) => p.type === "INCOME").reduce((sum, p) => sum + p.amount, 0);
-  const totalExpense = payments.filter((p) => p.type === "EXPENSE").reduce((sum, p) => sum + p.amount, 0);
+  // Totals always reflect everything, regardless of the search/filter below
+  // — a search shouldn't make "إجمالي الدخل" look wrong.
+  const totalIncome = allPayments.filter((p) => p.type === "INCOME").reduce((sum, p) => sum + p.amount, 0);
+  const totalExpense = allPayments.filter((p) => p.type === "EXPENSE").reduce((sum, p) => sum + p.amount, 0);
+
+  const payments = allPayments.filter((p) => {
+    if (validType && p.type !== validType) return false;
+    if (!q) return true;
+    const haystack = [p.category, p.method, p.note, p.invoice?.customerName].filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(q);
+  });
 
   return (
     <div className="space-y-6">
@@ -42,6 +56,23 @@ export default async function SystemPaymentsPage() {
 
       <ManualPaymentForm />
 
+      <SystemSearchBar
+        action="/payments"
+        q={searchParams.q}
+        hasFilter={Boolean(searchParams.q || validType)}
+        placeholder="التصنيف، الملاحظة، أو اسم العميل"
+        extra={
+          <div>
+            <label className="label">النوع</label>
+            <select className="input" name="type" defaultValue={validType ?? ""}>
+              <option value="">الكل</option>
+              <option value="INCOME">دخل</option>
+              <option value="EXPENSE">مصروف</option>
+            </select>
+          </div>
+        }
+      />
+
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-brand-100 bg-brand-50">
@@ -59,7 +90,7 @@ export default async function SystemPaymentsPage() {
             {payments.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-6 text-center text-ink-800/60">
-                  لا يوجد حركات مسجلة بعد
+                  {q || validType ? "ما في نتائج مطابقة" : "لا يوجد حركات مسجلة بعد"}
                 </td>
               </tr>
             )}

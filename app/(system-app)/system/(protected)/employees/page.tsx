@@ -2,12 +2,26 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
 import PayAllSalariesButton from "@/components/PayAllSalariesButton";
+import SystemSearchBar from "@/components/SystemSearchBar";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 
-export default async function SystemEmployeesPage() {
+export default async function SystemEmployeesPage({ searchParams }: { searchParams: { q?: string } }) {
   await requireSystemRole("employees");
 
-  const employees = await prisma.employee.findMany({ orderBy: { createdAt: "desc" } });
+  const q = searchParams.q?.trim();
+
+  const employees = await prisma.employee.findMany({
+    where: q
+      ? {
+          OR: [
+            { nameAr: { contains: q, mode: "insensitive" } },
+            { phone: { contains: q } },
+            { position: { contains: q, mode: "insensitive" } }
+          ]
+        }
+      : undefined,
+    orderBy: { createdAt: "desc" }
+  });
 
   return (
     <div>
@@ -18,6 +32,8 @@ export default async function SystemEmployeesPage() {
           <Link href="/employees/new" className="btn-primary">إضافة موظف</Link>
         </div>
       </div>
+
+      <SystemSearchBar action="/employees" q={q} placeholder="الاسم، الهاتف، أو الوظيفة" />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -35,7 +51,7 @@ export default async function SystemEmployeesPage() {
             {employees.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-6 text-center text-ink-800/60">
-                  لا يوجد موظفين بعد
+                  {q ? "ما في نتائج مطابقة للبحث" : "لا يوجد موظفين بعد"}
                 </td>
               </tr>
             )}

@@ -2,13 +2,28 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteQuoteButton from "@/components/DeleteQuoteButton";
 import ConvertToInvoiceButton from "@/components/ConvertToInvoiceButton";
+import SystemSearchBar from "@/components/SystemSearchBar";
 import { requireSystemRole } from "@/lib/requireSystemRole";
 import { formatQuoteNumber } from "@/lib/quotes";
 
-export default async function SystemQuotesPage() {
+export default async function SystemQuotesPage({ searchParams }: { searchParams: { q?: string } }) {
   await requireSystemRole("quotes");
 
-  const quotes = await prisma.quote.findMany({ orderBy: { quoteNumber: "desc" } });
+  const q = searchParams.q?.trim();
+  const asNumber = q ? Number(q.replace(/^#|^0+/, "")) : NaN;
+
+  const quotes = await prisma.quote.findMany({
+    where: q
+      ? {
+          OR: [
+            { customerName: { contains: q, mode: "insensitive" } },
+            { customerPhone: { contains: q } },
+            ...(Number.isFinite(asNumber) && asNumber > 0 ? [{ quoteNumber: asNumber }] : [])
+          ]
+        }
+      : undefined,
+    orderBy: { quoteNumber: "desc" }
+  });
 
   return (
     <div>
@@ -21,6 +36,8 @@ export default async function SystemQuotesPage() {
         </div>
         <Link href="/quotes/new" className="btn-primary">عرض سعر جديد</Link>
       </div>
+
+      <SystemSearchBar action="/quotes" q={q} placeholder="اسم الزبون، الهاتف، أو رقم العرض" />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -37,7 +54,7 @@ export default async function SystemQuotesPage() {
             {quotes.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-6 text-center text-ink-800/60">
-                  لا يوجد عروض أسعار بعد
+                  {q ? "ما في نتائج مطابقة للبحث" : "لا يوجد عروض أسعار بعد"}
                 </td>
               </tr>
             )}
