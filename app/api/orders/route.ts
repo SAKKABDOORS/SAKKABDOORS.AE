@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendNewOrderEmail } from "@/lib/mailer";
+import { sendWhatsAppMessage, buildNewOrderWhatsAppText } from "@/lib/whatsapp";
 
 const orderSchema = z.object({
   customerName: z.string().min(2).max(120),
@@ -68,25 +69,36 @@ export async function POST(request: NextRequest) {
     }
   });
 
+  const emailPayload = {
+    orderId: order.id,
+    createdAt: order.createdAt,
+    customerName: order.customerName,
+    phone: order.phone,
+    email: order.email,
+    city: order.city,
+    message: order.message,
+    items: validItems.map((i) => {
+      const p = productById.get(i.productId)!;
+      return { name: `${p.nameAr} / ${p.nameEn}`, quantity: i.quantity, measurement: i.measurement };
+    })
+  };
+
   try {
-    await sendNewOrderEmail({
-      orderId: order.id,
-      createdAt: order.createdAt,
-      customerName: order.customerName,
-      phone: order.phone,
-      email: order.email,
-      city: order.city,
-      message: order.message,
-      items: validItems.map((i) => {
-        const p = productById.get(i.productId)!;
-        return { name: `${p.nameAr} / ${p.nameEn}`, quantity: i.quantity, measurement: i.measurement };
-      })
-    });
+    await sendNewOrderEmail(emailPayload);
     await prisma.order.update({ where: { id: order.id }, data: { emailedOk: true } });
   } catch (err) {
     // Don't fail the customer-facing request just because email delivery
     // failed — the order is safely stored and visible in /admin/orders.
     console.error("Failed to send order notification email:", err);
+  }
+
+  // Same best-effort treatment as the email above — a WhatsApp delivery
+  // failure (or CallMeBot not configured yet) must never fail the
+  // customer-facing request.
+  try {
+    await sendWhatsAppMessage(buildNewOrderWhatsAppText(emailPayload));
+  } catch (err) {
+    console.error("Failed to send order WhatsApp notification:", err);
   }
 
   return NextResponse.json({ id: order.id }, { status: 201 });
