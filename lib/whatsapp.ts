@@ -26,28 +26,34 @@ export function buildNewOrderWhatsAppText(order: NewOrderEmailInput): string {
   return lines.join("\n");
 }
 
-// Sends a WhatsApp message to the shop's own number via CallMeBot
-// (api.callmebot.com) — a free personal-notification service: no Meta
-// Business account, no phone verification flow on our side. Set up once by
-// messaging CallMeBot's own WhatsApp number to get an API key, then set
-// CALLMEBOT_PHONE (the number that key was issued for, international
-// format, no "+") and CALLMEBOT_APIKEY in the environment. Best-effort only
-// — callers should never let a failure here block the request that
-// triggered it (mirrors how email notification failures are handled).
+// Sends a WhatsApp message to the shop's own number via Green API
+// (green-api.com) — a free-tier WhatsApp gateway: the shop's own number is
+// linked once (scanning a QR code, like WhatsApp Web) rather than needing a
+// Meta Business account. Set GREEN_API_INSTANCE_ID + GREEN_API_TOKEN (from
+// the instance's dashboard) and GREEN_API_NOTIFY_PHONE (the number that
+// receives the alert, international format, no "+") in the environment.
+// Best-effort only — callers should never let a failure here block the
+// request that triggered it (mirrors how email notification failures are
+// handled). Requires the linked phone to stay online/connected, unlike
+// CallMeBot — see buildWhatsAppLink above for the unrelated storefront
+// click-to-chat button, which doesn't depend on either of these.
 export async function sendWhatsAppMessage(text: string) {
-  const phone = process.env.CALLMEBOT_PHONE;
-  const apikey = process.env.CALLMEBOT_APIKEY;
-  if (!phone || !apikey) {
-    throw new Error("CALLMEBOT_PHONE or CALLMEBOT_APIKEY is not set in the environment");
+  const instanceId = process.env.GREEN_API_INSTANCE_ID;
+  const token = process.env.GREEN_API_TOKEN;
+  const phone = process.env.GREEN_API_NOTIFY_PHONE;
+  if (!instanceId || !token || !phone) {
+    throw new Error("GREEN_API_INSTANCE_ID, GREEN_API_TOKEN, or GREEN_API_NOTIFY_PHONE is not set in the environment");
   }
 
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(apikey)}`;
-  const res = await fetch(url, { method: "GET" });
-  const body = await res.text();
-  // CallMeBot always replies 200 with an HTML status page — a failure (bad
-  // apikey, phone not registered, rate limit) shows up in the body text
-  // rather than the HTTP status, so it has to be checked explicitly.
-  if (!res.ok || !/message queued|message sent/i.test(body)) {
-    throw new Error(`CallMeBot request failed: ${body.slice(0, 200)}`);
+  const url = `https://api.green-api.com/waInstance${instanceId}/sendMessage/${token}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chatId: `${phone}@c.us`, message: text })
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Green API request failed (${res.status}): ${body.slice(0, 200)}`);
   }
 }
