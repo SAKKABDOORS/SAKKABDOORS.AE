@@ -36,7 +36,12 @@ export default async function SystemInvoicesPage({ searchParams }: { searchParam
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink-900">الفواتير</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink-900">الفواتير</h1>
+        <a href="/api/system/invoices/export" download className="btn-secondary py-1.5 px-3 text-xs">
+          تصدير Excel
+        </a>
+      </div>
       <p className="mb-4 text-sm text-ink-800/60">
         الفواتير تُنشأ من عرض سعر موافَق عليه — افتح عرض السعر واضغط "تحويل لفاتورة".
       </p>

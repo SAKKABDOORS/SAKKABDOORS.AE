@@ -37,7 +37,12 @@ export default async function SystemPaymentsPage({ searchParams }: { searchParam
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-ink-900">المدفوعات</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink-900">المدفوعات</h1>
+        <a href="/api/system/payments/export" download className="btn-secondary py-1.5 px-3 text-xs">
+          تصدير Excel
+        </a>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card p-4">

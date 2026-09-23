@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { deductStockForItems } from "@/lib/inventory";
+import { formatInvoiceNumber } from "@/lib/invoices";
 
 export async function GET() {
   const { response } = await requireSystemUser();
@@ -51,6 +53,7 @@ export async function POST(request: NextRequest) {
       customerName: quote.customerName,
       customerPhone: quote.customerPhone,
       items: quote.items.map((i) => ({
+        productId: i.productId,
         descriptionAr: i.descriptionAr,
         descriptionEn: i.descriptionEn,
         quantity: i.quantity,
@@ -62,6 +65,14 @@ export async function POST(request: NextRequest) {
       totalAmount: quote.grandTotal
     }
   });
+
+  // A converted quote is a confirmed sale — deduct the sold quantities from
+  // warehouse stock automatically (items with no catalog product behind
+  // them, i.e. free-text lines, are skipped — see lib/inventory.ts).
+  await deductStockForItems(
+    quote.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+    `بيع — فاتورة #${formatInvoiceNumber(invoiceNumber)}`
+  );
 
   await logAudit(session!.email, "create", "Invoice", invoice.id, `إضافة فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json(invoice, { status: 201 });

@@ -233,7 +233,6 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
             <View style={styles.tableHeaderRow}>
               <Text style={[styles.colNum, styles.headerCellText]}>{ar("المجموع")}</Text>
               <Text style={[styles.colNum, styles.headerCellText]}>{ar("خصم")}</Text>
-              <Text style={[styles.colNum, styles.headerCellText]}>{ar("الضريبة")}</Text>
               <Text style={[styles.colNum, styles.headerCellText]}>{ar("السعر")}</Text>
               <Text style={[styles.colNum, styles.headerCellText]}>{ar("الكمية")}</Text>
               <Text style={[styles.colDesc, styles.headerCellText]}>{ar("الوصف / المنتج")}</Text>
@@ -242,7 +241,6 @@ export function QuoteDocument({ quote }: { quote: QuotePdfData }) {
               <View key={i} style={styles.tableRow} wrap={false}>
                 <Text style={[styles.colNum, styles.cellText]}>{item.lineTotal.toFixed(2)}</Text>
                 <Text style={[styles.colNum, styles.cellText]}>{item.discountPercent > 0 ? `${item.discountPercent}%` : "-"}</Text>
-                <Text style={[styles.colNum, styles.cellText]}>{ar("لا يوجد")}</Text>
                 <Text style={[styles.colNum, styles.cellText]}>{item.unitPrice.toFixed(2)}</Text>
                 <Text style={[styles.colNum, styles.cellText]}>{item.quantity}</Text>
                 <Text style={[styles.colDesc, styles.cellText]}>{ar(item.descriptionAr)}</Text>

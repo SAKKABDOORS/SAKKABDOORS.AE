@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { restoreStockForItems } from "@/lib/inventory";
+import { invoiceItemSchema, formatInvoiceNumber } from "@/lib/invoices";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -50,9 +52,23 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
   const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
   if (response) return response;
 
+  const existing = await prisma.invoice.findUnique({ where: { id: params.id } });
+  if (!existing) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
   // Payment.invoiceId is onDelete: SetNull — past payment records survive,
   // just detached from the deleted invoice.
   const invoice = await prisma.invoice.delete({ where: { id: params.id } });
+
+  // The sale never happened after all — restore the stock deducted when
+  // this invoice was created (see app/api/system/invoices/route.ts).
+  const items = invoiceItemSchema.array().parse(existing.items);
+  await restoreStockForItems(
+    items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+    `حذف فاتورة #${formatInvoiceNumber(existing.invoiceNumber)}`
+  );
+
   await logAudit(session!.email, "delete", "Invoice", invoice.id, `حذف فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json({ ok: true });
 }

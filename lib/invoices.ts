@@ -2,6 +2,11 @@
 import { z } from "zod";
 
 export const invoiceItemSchema = z.object({
+  // Carried over from the source QuoteItem so warehouse stock can be
+  // deducted/restored automatically (see app/api/system/invoices/route.ts
+  // and .../[id]/route.ts) — null for free-text lines with no catalog
+  // product behind them.
+  productId: z.string().nullable().optional(),
   descriptionAr: z.string().min(1),
   descriptionEn: z.string().min(1),
   quantity: z.number().positive(),
