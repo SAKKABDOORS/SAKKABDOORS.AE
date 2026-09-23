@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getOrderStatusInfo } from "@/lib/orderStatus";
 import { requirePageRole } from "@/lib/requirePageRole";
+import DeleteOrderButton from "@/components/DeleteOrderButton";
 
 export default async function AdminOrdersPage() {
   await requirePageRole("orders");
@@ -85,6 +86,7 @@ export default async function AdminOrdersPage() {
                       >
                         طباعة مباشرة
                       </a>
+                      <DeleteOrderButton orderId={o.id} />
                     </div>
                   </td>
                 </tr>
