@@ -28,7 +28,7 @@ export default async function AdminOrdersPage() {
                 <th className="p-3 text-start font-semibold">المنتجات</th>
                 <th className="p-3 text-start font-semibold">التفاصيل</th>
                 <th className="p-3 text-start font-semibold">الحالة</th>
-                <th className="p-3 text-start font-semibold">إيميل</th>
+                <th className="p-3 text-start font-semibold">واتساب</th>
                 <th className="p-3 text-start font-semibold"><span className="sr-only">إجراءات</span></th>
               </tr>
             </thead>

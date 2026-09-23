@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { sendNewOrderEmail } from "@/lib/mailer";
 import { sendWhatsAppMessage, buildNewOrderWhatsAppText } from "@/lib/whatsapp";
 
 const orderSchema = z.object({
@@ -26,11 +25,15 @@ const orderSchema = z.object({
 });
 
 // Creates an order/inquiry (one product from a detail page, several from the
-// cart, or none for a general contact-page inquiry) AND auto-sends it by
-// email to process.env.ORDER_NOTIFY_EMAIL. The DB write always happens
-// first so no order is ever lost even if the email fails; email failure is
-// reported back on the order record (emailedOk) instead of failing the
-// whole request.
+// cart, or none for a general contact-page inquiry) AND auto-sends it to
+// WhatsApp (lib/whatsapp.ts) — instant per-order printing (Brother
+// print-by-email to ORDER_NOTIFY_EMAIL) was intentionally removed in favor
+// of WhatsApp plus a weekly printed digest (app/api/system/cron/
+// weekly-report/route.ts), so paper only comes out once a week now. The DB
+// write always happens first so no order is ever lost even if the
+// WhatsApp send fails; that failure is reported back on the order record
+// (emailedOk — repurposed to mean "WhatsApp notified", not "emailed",
+// see /admin/orders) instead of failing the whole request.
 export async function POST(request: NextRequest) {
   const json = await request.json().catch(() => null);
   const parsed = orderSchema.safeParse(json);
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  const emailPayload = {
+  const notifyPayload = {
     orderId: order.id,
     createdAt: order.createdAt,
     customerName: order.customerName,
@@ -83,20 +86,12 @@ export async function POST(request: NextRequest) {
     })
   };
 
+  // Best-effort — a WhatsApp delivery failure (or Green API not configured)
+  // must never fail the customer-facing request. The order is always
+  // safely stored and visible in /admin/orders either way.
   try {
-    await sendNewOrderEmail(emailPayload);
+    await sendWhatsAppMessage(buildNewOrderWhatsAppText(notifyPayload));
     await prisma.order.update({ where: { id: order.id }, data: { emailedOk: true } });
-  } catch (err) {
-    // Don't fail the customer-facing request just because email delivery
-    // failed — the order is safely stored and visible in /admin/orders.
-    console.error("Failed to send order notification email:", err);
-  }
-
-  // Same best-effort treatment as the email above — a WhatsApp delivery
-  // failure (or CallMeBot not configured yet) must never fail the
-  // customer-facing request.
-  try {
-    await sendWhatsAppMessage(buildNewOrderWhatsAppText(emailPayload));
   } catch (err) {
     console.error("Failed to send order WhatsApp notification:", err);
   }

@@ -5,7 +5,7 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/system/cron/backup",
+      "path": "/api/system/cron/weekly-tasks",
       "schedule": "0 7 * * 0"
     }
   ]

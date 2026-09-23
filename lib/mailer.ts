@@ -35,6 +35,19 @@ export type ExpiringQuote = {
   expiryDate: Date;
 };
 
+export type WeeklyReportOrder = {
+  createdAt: Date;
+  customerName: string;
+  phone: string;
+  itemsSummary: string;
+};
+
+export type WeeklyReportProduct = {
+  nameAr: string;
+  stockQuantity: number;
+  lowStockThreshold: number;
+};
+
 export type NewJobApplicationEmailInput = {
   applicationId: string;
   createdAt: Date;
@@ -128,87 +141,12 @@ function buildEmailShell(opts: { title: string; shortId: string; rows: [string, 
 }
 
 /**
- * Sends a new-order notification automatically to the store inbox
- * (ORDER_NOTIFY_EMAIL — currently a Brother "print by email" address, so
- * this HTML doubles as the order's printed copy). Called right after an
- * order/inquiry is written to the database in app/api/orders/route.ts.
- */
-export async function sendNewOrderEmail(order: NewOrderEmailInput) {
-  const to = process.env.ORDER_NOTIFY_EMAIL;
-  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
-  if (!to) {
-    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
-  }
-
-  const transport = getTransport();
-  const shortId = order.orderId.slice(-6).toUpperCase();
-  const subject = `طلب جديد #${shortId} — ${order.customerName}`;
-  const html = buildNewOrderEmailHtml(order);
-
-  await transport.sendMail({ from, to, subject, html });
-}
-
-// Split out from sendNewOrderEmail() so the markup can be rendered/previewed
-// without an SMTP connection.
-export function buildNewOrderEmailHtml(order: NewOrderEmailInput) {
-  const shortId = order.orderId.slice(-6).toUpperCase();
-
-  const rows: [string, string][] = [
-    ["التاريخ", order.createdAt.toLocaleString("ar-AE")],
-    ["اسم العميل", order.customerName],
-    ["الهاتف", order.phone],
-    ...(order.email ? ([["الإيميل", order.email]] as [string, string][]) : []),
-    ...(order.city ? ([["المدينة", order.city]] as [string, string][]) : [])
-  ];
-
-  const bodyHtml = `
-      ${
-        order.message
-          ? `<tr>
-              <td style="padding:16px 28px 0;">
-                <div style="font-size:14px; font-weight:bold; color:${BRAND}; margin-bottom:4px;">الرسالة</div>
-                <div style="font-size:14px; color:${INK}; white-space:pre-line;">${escapeHtml(order.message)}</div>
-              </td>
-            </tr>`
-          : ""
-      }
-      <tr>
-        <td style="padding:20px 28px 28px;">
-          <div style="font-size:14px; font-weight:bold; color:${BRAND}; margin-bottom:8px;">المنتجات المطلوبة</div>
-          ${
-            order.items.length
-              ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
-                  <tr style="border-bottom:1px solid ${BRAND};">
-                    <th align="right" style="padding:6px 0; color:${BRAND};">المنتج</th>
-                    <th align="right" style="padding:6px 0; color:${BRAND};">القياس</th>
-                    <th align="right" style="padding:6px 0; color:${BRAND};">الكمية</th>
-                  </tr>
-                  ${order.items
-                    .map(
-                      (item, i) => `
-                    <tr style="${i > 0 ? `border-top:1px solid ${BRAND_LIGHT};` : ""}">
-                      <td style="padding:6px 0; color:${INK};">${escapeHtml(item.name)}</td>
-                      <td style="padding:6px 0; color:${INK};">${item.measurement ? escapeHtml(item.measurement) : "—"}</td>
-                      <td style="padding:6px 0; color:${INK};">${item.quantity}</td>
-                    </tr>`
-                    )
-                    .join("")}
-                </table>`
-              : `<div style="font-size:14px; color:${INK_MUTED};">استفسار عام (بدون منتج محدد)</div>`
-          }
-        </td>
-      </tr>`;
-
-  return buildEmailShell({ title: "طلب جديد", shortId, rows, bodyHtml });
-}
-
-/**
  * Sends a new-job-application notification automatically to the store inbox
- * (ORDER_NOTIFY_EMAIL, the same Brother print-by-email address) — kept as
- * its own email (distinct title/fields, no items table) rather than reusing
- * sendNewOrderEmail(), since a candidate applying for a job isn't a product
- * order and used to look confusing crammed into that template. Called from
- * app/api/job-applications/route.ts right after the application is saved.
+ * (ORDER_NOTIFY_EMAIL, the same Brother print-by-email address). Called
+ * from app/api/job-applications/route.ts right after the application is
+ * saved. Unlike new orders (app/api/orders/route.ts), this one still
+ * prints instantly — only order notifications moved to WhatsApp + a weekly
+ * digest (app/api/system/cron/weekly-report/route.ts).
  */
 export async function sendNewJobApplicationEmail(application: NewJobApplicationEmailInput) {
   const to = process.env.ORDER_NOTIFY_EMAIL;
@@ -372,6 +310,108 @@ export async function sendQuoteExpiryAlert(quotes: ExpiringQuote[]) {
       `${q.grandTotal.toFixed(2)} ${q.currency}`,
       q.expiryDate.toLocaleDateString("ar-AE")
     ])
+  });
+
+  await transport.sendMail({ from, to, subject, html });
+}
+
+// Same shell as buildAlertTableEmail, but for the weekly printed report
+// (app/api/system/cron/weekly-report/route.ts), which needs more than one
+// table (inventory, then the week's orders) under one header instead of
+// a single flat list.
+function buildMultiSectionEmail(opts: { title: string; sections: { heading: string; columns: string[]; rows: string[][] }[] }) {
+  return `
+  <div dir="rtl" style="background:#f5f3ee; padding:24px 12px; font-family:Tahoma, Arial, sans-serif;">
+    <table role="presentation" width="100%" style="max-width:600px; margin:0 auto; background:#ffffff; border-collapse:collapse;" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:24px 28px; border-bottom:2px solid ${BRAND};">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:18px; font-weight:bold; color:${BRAND};">${opts.title}</td>
+              <td align="left" style="white-space:nowrap;">
+                <img src="${LOGO_URL}" width="28" height="28" alt="" style="vertical-align:middle; border-radius:6px;" />
+                <span style="font-size:15px; font-weight:bold; color:${BRAND}; vertical-align:middle;">SAKKAB DOORS — النظام الداخلي</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      ${opts.sections
+        .map(
+          (section) => `
+      <tr>
+        <td style="padding:20px 28px 4px;">
+          <div style="font-size:15px; font-weight:bold; color:${BRAND};">${escapeHtml(section.heading)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 28px 24px;">
+          ${
+            section.rows.length === 0
+              ? `<div style="font-size:14px; color:${INK_MUTED};">لا يوجد بيانات لهذا القسم</div>`
+              : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
+                  <tr style="border-bottom:1px solid ${BRAND};">
+                    ${section.columns.map((col) => `<th align="right" style="padding:6px 0; color:${BRAND};">${escapeHtml(col)}</th>`).join("")}
+                  </tr>
+                  ${section.rows
+                    .map(
+                      (cells, i) => `
+                  <tr style="${i > 0 ? `border-top:1px solid ${BRAND_LIGHT};` : ""}">
+                    ${cells.map((cell) => `<td style="padding:6px 0; color:${INK};">${cell}</td>`).join("")}
+                  </tr>`
+                    )
+                    .join("")}
+                </table>`
+          }
+        </td>
+      </tr>`
+        )
+        .join("")}
+    </table>
+  </div>
+  `;
+}
+
+/**
+ * The weekly printed report (same Brother print-by-email address as
+ * everything else) that replaced instant per-order printing: current
+ * warehouse stock (low-stock items flagged) plus every website order/
+ * inquiry received in the past 7 days — run weekly by
+ * app/api/system/cron/weekly-report/route.ts.
+ */
+export async function sendWeeklyReport(products: WeeklyReportProduct[], orders: WeeklyReportOrder[]) {
+  const to = process.env.ORDER_NOTIFY_EMAIL;
+  const from = process.env.ORDER_FROM_EMAIL ?? process.env.SMTP_USER;
+  if (!to) {
+    throw new Error("ORDER_NOTIFY_EMAIL is not set in the environment");
+  }
+
+  const transport = getTransport();
+  const subject = `التقرير الأسبوعي — ${new Date().toLocaleDateString("ar-AE")}`;
+  const html = buildMultiSectionEmail({
+    title: "التقرير الأسبوعي",
+    sections: [
+      {
+        heading: `المخزون (${products.length} منتج)`,
+        columns: ["المنتج", "الكمية"],
+        rows: products.map((p) => [
+          escapeHtml(p.nameAr),
+          p.stockQuantity <= p.lowStockThreshold
+            ? `<span style="color:#b91c1c; font-weight:bold;">${p.stockQuantity}</span>`
+            : String(p.stockQuantity)
+        ])
+      },
+      {
+        heading: `طلبات هذا الأسبوع (${orders.length})`,
+        columns: ["التاريخ", "الزبون", "الهاتف", "الطلب"],
+        rows: orders.map((o) => [
+          o.createdAt.toLocaleDateString("ar-AE"),
+          escapeHtml(o.customerName),
+          escapeHtml(o.phone),
+          escapeHtml(o.itemsSummary)
+        ])
+      }
+    ]
   });
 
   await transport.sendMail({ from, to, subject, html });

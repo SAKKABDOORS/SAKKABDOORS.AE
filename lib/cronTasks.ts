@@ -1,16 +1,23 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { sendOverdueInvoicesAlert, sendLowStockAlert, sendQuoteExpiryAlert } from "@/lib/mailer";
+import {
+  sendOverdueInvoicesAlert,
+  sendLowStockAlert,
+  sendQuoteExpiryAlert,
+  sendWeeklyReport,
+  sendBackupEmail
+} from "@/lib/mailer";
 import { formatInvoiceNumber } from "@/lib/invoices";
 import { formatQuoteNumber } from "@/lib/quotes";
 
 const QUOTE_EXPIRY_WINDOW_DAYS = 3;
+const WEEKLY_REPORT_WINDOW_DAYS = 7;
 
-// Each function below is one daily-cron check — split out from the route
-// handlers so /api/system/cron/daily-alerts can run all three under one
-// scheduled Vercel Cron job (staying within the plan's cron-job count
-// limit) while each also stays individually callable/testable via its own
-// route under app/api/system/cron/*.
+// Each function below is one cron check — split out from the route handlers
+// so /api/system/cron/daily-alerts and /api/system/cron/weekly-tasks can
+// each run several under one scheduled Vercel Cron job (staying within the
+// plan's cron-job count limit) while every check also stays individually
+// callable/testable via its own route under app/api/system/cron/*.
 
 export async function checkOverdueInvoices(): Promise<number> {
   const overdue = await prisma.invoice.findMany({
@@ -79,4 +86,63 @@ export async function checkQuoteExpiry(): Promise<number> {
     data: { expiryNotifiedAt: new Date() }
   });
   return expiring.length;
+}
+
+export async function runWeeklyReport(): Promise<{ productCount: number; orderCount: number }> {
+  const windowStart = new Date(Date.now() - WEEKLY_REPORT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+
+  const [products, orders] = await Promise.all([
+    prisma.product.findMany({
+      select: { nameAr: true, stockQuantity: true, lowStockThreshold: true },
+      orderBy: { nameAr: "asc" }
+    }),
+    prisma.order.findMany({
+      where: { createdAt: { gte: windowStart } },
+      include: { items: { include: { product: true } } },
+      orderBy: { createdAt: "asc" }
+    })
+  ]);
+
+  await sendWeeklyReport(
+    products,
+    orders.map((o) => ({
+      createdAt: o.createdAt,
+      customerName: o.customerName,
+      phone: o.phone,
+      itemsSummary:
+        o.items.length === 0
+          ? "استفسار عام"
+          : o.items.map((i) => `${i.product.nameAr} × ${i.quantity}`).join("، ")
+    }))
+  );
+
+  return { productCount: products.length, orderCount: orders.length };
+}
+
+export async function runBackupExport(): Promise<{
+  customers: number;
+  quotes: number;
+  invoices: number;
+  payments: number;
+  employees: number;
+}> {
+  const [customers, quotes, invoices, payments, employees] = await Promise.all([
+    prisma.customer.findMany(),
+    prisma.quote.findMany({ include: { items: true } }),
+    prisma.invoice.findMany(),
+    prisma.payment.findMany(),
+    prisma.employee.findMany()
+  ]);
+
+  const snapshot = { exportedAt: new Date().toISOString(), customers, quotes, invoices, payments, employees };
+  const filename = `sakkab-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  await sendBackupEmail(filename, JSON.stringify(snapshot, null, 2));
+
+  return {
+    customers: customers.length,
+    quotes: quotes.length,
+    invoices: invoices.length,
+    payments: payments.length,
+    employees: employees.length
+  };
 }
