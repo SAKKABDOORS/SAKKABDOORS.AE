@@ -15,7 +15,12 @@ export default async function JournalEntriesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink-900">القيود اليومية</h1>
-        <Link href="/entries/new" className="btn-primary">إضافة قيد</Link>
+        <div className="flex gap-2">
+          <a href="/api/accounting/entries/export" download className="btn-secondary py-1.5 px-3 text-xs">
+            تصدير Excel
+          </a>
+          <Link href="/entries/new" className="btn-primary">إضافة قيد</Link>
+        </div>
       </div>
 
       <div className="card overflow-x-auto">

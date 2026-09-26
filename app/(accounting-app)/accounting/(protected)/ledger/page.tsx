@@ -26,7 +26,14 @@ export default async function GeneralLedgerPage({ searchParams }: { searchParams
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink-900">دفتر الأستاذ</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink-900">دفتر الأستاذ</h1>
+        {selectedAccount && (
+          <a href={`/api/accounting/ledger/export?accountId=${selectedAccount.id}`} download className="btn-secondary py-1.5 px-3 text-xs">
+            تصدير Excel
+          </a>
+        )}
+      </div>
 
       <form method="GET" className="mb-4 flex flex-wrap items-end gap-3">
         <div className="min-w-[240px]">

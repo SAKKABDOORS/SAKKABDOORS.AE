@@ -12,7 +12,12 @@ export default async function TrialBalancePage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink-900">ميزان المراجعة</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink-900">ميزان المراجعة</h1>
+        <a href="/api/accounting/trial-balance/export" download className="btn-secondary py-1.5 px-3 text-xs">
+          تصدير Excel
+        </a>
+      </div>
 
       {!balanced && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">

@@ -57,7 +57,12 @@ export default async function BalanceSheetPage({ searchParams }: { searchParams:
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink-900">الميزانية العمومية</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink-900">الميزانية العمومية</h1>
+        <a href={`/api/accounting/balance-sheet/export?asOf=${toDateInputValue(asOf)}`} download className="btn-secondary py-1.5 px-3 text-xs">
+          تصدير Excel
+        </a>
+      </div>
 
       <form method="GET" className="mb-4 flex flex-wrap items-end gap-3">
         <div>
