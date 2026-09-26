@@ -3,8 +3,9 @@ import { defaultLocale, locales } from "./lib/i18n/config";
 
 const SYSTEM_HOST_PREFIX = "system.";
 const ADMIN_HOST_PREFIX = "admin.";
+const ACCOUNTING_HOST_PREFIX = "account.";
 
-// Handles four things:
+// Handles five things:
 // 1) system.sakkabdoors.ae serves ONLY the internal system app (quotes,
 //    invoices, employees, etc. — app/(system-app)/system/...). Route groups
 //    don't change the URL, so every path on this host is rewritten to carry
@@ -14,9 +15,13 @@ const ADMIN_HOST_PREFIX = "admin.";
 //    admin/...) the same way — sakkabdoors.ae/admin was retired in favor
 //    of this subdomain (see the 404 block below), matching how /system
 //    never existed on the main domain either.
-// 3) Locale prefixing for the public site: "/" -> "/ar" (default) so every
+// 3) account.sakkabdoors.ae serves ONLY the formal accounting module
+//    (app/(accounting-app)/accounting/...) the same way again — OWNER-only,
+//    reuses the same SystemUser login as system.sakkabdoors.ae (see
+//    lib/systemAuth.ts) but requires its own sign-in step per host.
+// 4) Locale prefixing for the public site: "/" -> "/ar" (default) so every
 //    public page lives under /ar/... or /en/....
-// 4) Leaves /api untouched everywhere (locale-agnostic).
+// 5) Leaves /api untouched everywhere (locale-agnostic).
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get("host") || "";
@@ -52,6 +57,21 @@ export function middleware(request: NextRequest) {
   // /admin only ever exists behind the admin.* host above — block it on
   // the main domain so there's exactly one real URL for the admin panel.
   if (pathname.startsWith("/admin")) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  if (hostname.startsWith(ACCOUNTING_HOST_PREFIX)) {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.next();
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.startsWith("/accounting") ? pathname : `/accounting${pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // /accounting only ever exists behind the account.* host above — block it
+  // on the main domain so there's exactly one real URL for it.
+  if (pathname.startsWith("/accounting")) {
     return new NextResponse(null, { status: 404 });
   }
 

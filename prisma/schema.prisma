@@ -608,3 +608,100 @@ model InventoryMovement {
 
   @@index([productId])
 }
+
+// --- Formal accounting (account.sakkabdoors.ae) ----------------------------
+// Fully separate from the flat income/expense Payment ledger above, which
+// stays exactly as-is. OWNER-only — see lib/systemRoles.ts's
+// DEFAULT_SYSTEM_ROLE_PAGES (MANAGER/STAFF don't get the "accounting" page
+// key). Reuses the same SystemUser login as system.sakkabdoors.ae.
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+// Chart of accounts. code follows standard SMB numbering (1000s assets,
+// 2000s liabilities, 3000s equity, 4000s income, 5000s expense). Hierarchy
+// via a self-relation is schema-ready but the v1 UI renders a flat indented
+// list, not a tree widget — cheap to add now, painful to retrofit once real
+// journal lines exist against a flat table.
+model Account {
+  id              String                   @id @default(cuid())
+  code            String                   @unique
+  nameAr          String
+  nameEn          String?
+  type            AccountType
+  parent          Account?                 @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId        String?
+  children        Account[]                @relation("AccountHierarchy")
+  // Marks rows created by the starter-chart-of-accounts seed action
+  // (app/api/accounting/accounts/seed-starter/route.ts) — informational only.
+  isSystemDefault Boolean                  @default(false)
+  isActive        Boolean                  @default(true)
+  lines           JournalEntryLine[]
+  mappings        CategoryAccountMapping[]
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([parentId])
+  @@index([type])
+}
+
+// entryNumber assigned by app code (lib/journalEntries.ts), mirrors
+// Quote.quoteNumber/Invoice.invoiceNumber — sqlite (local dev) can't
+// autoincrement a non-@id field. sourceType/sourceId trace an auto-posted
+// entry back to the Invoice/Payment that created it (lib/autoPosting.ts) —
+// null for a manually-entered one — so deleting that source can find and
+// remove the matching entry the same way lib/inventory.ts reverses a
+// warehouse deduction when an invoice is deleted.
+model JournalEntry {
+  id             String             @id @default(cuid())
+  entryNumber    Int                @unique
+  date           DateTime
+  description    String
+  reference      String?
+  createdByEmail String
+  sourceType     String? // "Invoice" | "Payment" | null (manual)
+  sourceId       String?
+  lines          JournalEntryLine[]
+  createdAt      DateTime           @default(now())
+
+  @@index([date])
+  @@index([sourceType, sourceId])
+}
+
+// Exactly one of debit/credit is > 0 per line; sum(debit) == sum(credit)
+// across an entry's lines is the double-entry invariant — enforced in the
+// API layer (lib/journalEntries.ts), not the DB, same reasoning as
+// SystemUser's "one login per employee" comment: no native cross-row CHECK
+// in Postgres for this, and Zod + explicit checks is the established
+// pattern here.
+model JournalEntryLine {
+  id             String       @id @default(cuid())
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  journalEntryId String
+  account        Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  accountId      String
+  debit          Float        @default(0)
+  credit         Float        @default(0)
+  note           String?
+  position       Int          @default(0)
+
+  @@index([journalEntryId])
+  @@index([accountId])
+}
+
+// Maps a Payment.category string (free-text, no enum — see Payment's own
+// comment) to the account auto-posting should use, so lib/autoPosting.ts
+// never has to guess. Any category with no row here falls back to the
+// seeded Suspense account (code 3999) instead of a wrong guess — see the
+// schema comment on the starter chart of accounts in lib/accounts.ts.
+model CategoryAccountMapping {
+  id        String   @id @default(cuid())
+  category  String   @unique
+  account   Account  @relation(fields: [accountId], references: [id])
+  accountId String
+  createdAt DateTime @default(now())
+}
