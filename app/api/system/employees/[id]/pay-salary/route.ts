@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { postStandalonePayment } from "@/lib/autoPosting";
 
 const paySchema = z.object({ amount: z.number().positive().optional(), note: z.string().max(500).optional() });
 
@@ -34,6 +35,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       employeeId: employee.id
     }
   });
+
+  // Best-effort — see lib/autoPosting.ts.
+  try {
+    await postStandalonePayment(payment);
+  } catch (err) {
+    console.error("Failed to auto-post salary payment to accounting ledger:", err);
+  }
 
   await logAudit(session!.email, "create", "Payment", payment.id, `دفع راتب ${amount.toFixed(2)} — ${employee.nameAr}`);
   return NextResponse.json(payment, { status: 201 });

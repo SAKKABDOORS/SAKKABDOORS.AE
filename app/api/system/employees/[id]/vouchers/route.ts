@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { postStandalonePayment } from "@/lib/autoPosting";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const { response } = await requireSystemUser();
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     data: { employeeId: employee.id, amount: parsed.data.amount, reason: parsed.data.reason }
   });
 
-  await prisma.payment.create({
+  const payment = await prisma.payment.create({
     data: {
       type: "EXPENSE",
       category: "voucher",
@@ -48,6 +49,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       employeeId: employee.id
     }
   });
+
+  // Best-effort — see lib/autoPosting.ts.
+  try {
+    await postStandalonePayment(payment);
+  } catch (err) {
+    console.error("Failed to auto-post voucher payment to accounting ledger:", err);
+  }
 
   await logAudit(session!.email, "create", "EmployeeVoucher", voucher.id, `سند قبض ${parsed.data.amount.toFixed(2)} — ${employee.nameAr} — ${parsed.data.reason}`);
   return NextResponse.json(voucher, { status: 201 });

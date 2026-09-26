@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
 import { deductStockForItems } from "@/lib/inventory";
+import { postInvoiceCreated } from "@/lib/autoPosting";
 import { formatInvoiceNumber } from "@/lib/invoices";
 
 export async function GET() {
@@ -73,6 +74,15 @@ export async function POST(request: NextRequest) {
     quote.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
     `بيع — فاتورة #${formatInvoiceNumber(invoiceNumber)}`
   );
+
+  // Best-effort — see lib/autoPosting.ts. Never blocks the invoice itself;
+  // requires the starter chart of accounts (or equivalent account codes)
+  // to already exist, otherwise this quietly does nothing.
+  try {
+    await postInvoiceCreated(invoice);
+  } catch (err) {
+    console.error("Failed to auto-post invoice to accounting ledger:", err);
+  }
 
   await logAudit(session!.email, "create", "Invoice", invoice.id, `إضافة فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json(invoice, { status: 201 });

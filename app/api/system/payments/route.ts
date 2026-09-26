@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { postStandalonePayment } from "@/lib/autoPosting";
 
 // Unified income/expense ledger — invoice payments land here too (created
 // via /api/system/invoices/[id]/payments), this route only handles the
@@ -48,6 +49,13 @@ export async function POST(request: NextRequest) {
       note: parsed.data.note || null
     }
   });
+
+  // Best-effort — see lib/autoPosting.ts.
+  try {
+    await postStandalonePayment(payment);
+  } catch (err) {
+    console.error("Failed to auto-post manual payment to accounting ledger:", err);
+  }
 
   const typeLabel = parsed.data.type === "INCOME" ? "دخل" : "مصروف";
   await logAudit(session!.email, "create", "Payment", payment.id, `تسجيل ${typeLabel} يدوي ${parsed.data.amount.toFixed(2)} — ${parsed.data.category}`);

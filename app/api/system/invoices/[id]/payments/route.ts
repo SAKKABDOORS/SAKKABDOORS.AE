@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeInvoiceStatus } from "@/lib/invoices";
 import { logAudit } from "@/lib/auditLog";
+import { postInvoicePayment } from "@/lib/autoPosting";
 
 const paymentSchema = z.object({
   amount: z.number().positive(),
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     `تسجيل دفعة ${parsed.data.amount.toFixed(2)} على فاتورة #${invoice.invoiceNumber}`
   );
 
-  await prisma.payment.create({
+  const payment = await prisma.payment.create({
     data: {
       type: "INCOME",
       category: "invoice",
@@ -48,6 +49,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       invoiceId: invoice.id
     }
   });
+
+  // Best-effort — see lib/autoPosting.ts.
+  try {
+    await postInvoicePayment(payment, invoice);
+  } catch (err) {
+    console.error("Failed to auto-post invoice payment to accounting ledger:", err);
+  }
 
   const { _sum } = await prisma.payment.aggregate({
     where: { invoiceId: invoice.id },

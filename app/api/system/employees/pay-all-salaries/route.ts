@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
+import { postStandalonePayment } from "@/lib/autoPosting";
 
 // Pays every active employee's full monthlyWage in one go (skips anyone
 // with 0, since paying nothing isn't a real payment) — one Payment(EXPENSE,
@@ -31,6 +32,22 @@ export async function POST() {
   });
 
   const totalAmount = employees.reduce((sum, e) => sum + e.monthlyWage, 0);
+
+  // Best-effort, one combined entry for the whole batch rather than one per
+  // employee (createMany doesn't return individual row ids to post
+  // separately against) — see lib/autoPosting.ts.
+  try {
+    await postStandalonePayment({
+      id: `bulk-${Date.now()}`,
+      type: "EXPENSE",
+      category: "salary",
+      amount: totalAmount,
+      note: `دفع رواتب جماعي — ${employees.length} موظف`
+    });
+  } catch (err) {
+    console.error("Failed to auto-post bulk salary payment to accounting ledger:", err);
+  }
+
   await logAudit(session!.email, "create", "Payment", "bulk", `دفع رواتب جماعي: ${employees.length} موظف، إجمالي ${totalAmount.toFixed(2)}`);
   return NextResponse.json({ paidCount: employees.length, totalAmount });
 }

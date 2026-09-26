@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { logAudit } from "@/lib/auditLog";
 import { restoreStockForItems } from "@/lib/inventory";
+import { reverseForSource } from "@/lib/autoPosting";
 import { invoiceItemSchema, formatInvoiceNumber } from "@/lib/invoices";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
@@ -68,6 +69,15 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
     items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
     `حذف فاتورة #${formatInvoiceNumber(existing.invoiceNumber)}`
   );
+
+  // Best-effort — see lib/autoPosting.ts. Only removes this invoice's own
+  // auto-posted entry (AR/Sales Revenue); journal entries auto-posted for
+  // its payments survive untouched, same as the payments themselves do.
+  try {
+    await reverseForSource("Invoice", invoice.id);
+  } catch (err) {
+    console.error("Failed to reverse accounting entry for deleted invoice:", err);
+  }
 
   await logAudit(session!.email, "delete", "Invoice", invoice.id, `حذف فاتورة #${invoice.invoiceNumber}: ${invoice.customerName}`);
   return NextResponse.json({ ok: true });

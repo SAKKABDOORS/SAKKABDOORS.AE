@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSystemUser } from "@/lib/systemApi";
 import { computeInvoiceStatus } from "@/lib/invoices";
 import { logAudit } from "@/lib/auditLog";
+import { reverseForSource } from "@/lib/autoPosting";
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   const { session, response } = await requireSystemUser(["OWNER", "MANAGER"]);
@@ -14,6 +15,14 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
   }
 
   await prisma.payment.delete({ where: { id: params.id } });
+
+  // Best-effort — see lib/autoPosting.ts.
+  try {
+    await reverseForSource("Payment", payment.id);
+  } catch (err) {
+    console.error("Failed to reverse accounting entry for deleted payment:", err);
+  }
+
   await logAudit(session!.email, "delete", "Payment", payment.id, `حذف ${payment.type === "INCOME" ? "دخل" : "مصروف"} ${payment.amount.toFixed(2)} — ${payment.category}`);
 
   // Deleting a payment that was recorded against an invoice must roll that
