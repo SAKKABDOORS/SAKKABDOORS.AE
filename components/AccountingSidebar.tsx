@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, BookOpen, ScrollText, Settings, BookMarked, Scale, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, BookOpen, ScrollText, Settings, BookMarked, Scale, Landmark, TrendingUp, type LucideIcon } from "lucide-react";
 
 // Mirrors components/SystemSidebar.tsx, but for the OWNER-only,
 // single-purpose account.sakkabdoors.ae app — no role-based filtering
@@ -15,6 +15,8 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/entries", label: "القيود اليومية", icon: ScrollText },
   { href: "/ledger", label: "دفتر الأستاذ", icon: BookMarked },
   { href: "/trial-balance", label: "ميزان المراجعة", icon: Scale },
+  { href: "/balance-sheet", label: "الميزانية العمومية", icon: Landmark },
+  { href: "/income-statement", label: "قائمة الدخل", icon: TrendingUp },
   { href: "/settings", label: "إعدادات الترحيل", icon: Settings }
 ];
 
